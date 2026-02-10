@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shakha Feedback</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .emojis span {
+      font-size: 32px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    button {
+      padding: 12px;
+      width: 100%;
+      border-radius: 10px;
+      border: none;
+      background: #111;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card" id="app">
+  <h3>Ramakrishna Parivaar Shakha - L SPA</h3>
+  <p>Today's Shakha Feedback</p>
+  <button onclick="start()">Start</button>
+</div>
+
+<script>
+  const sessions = ["Shareerik", "Bauddik", "Achar Paddhati"];
+  let step = -1;
+
+  function start() {
+    step = 0;
+    showSession();
+  }
+
+  function showSession() {
+    if (step >= sessions.length) {
+      document.getElementById("app").innerHTML = `
+        <h2>🙏 Dhanyavaad!</h2>
+        <p>Feedback recorded</p>
+        <button onclick="start()">Next Person</button>
+      `;
+      return;
+    }
+
+    document.getElementById("app").innerHTML = `
+      <h2>${sessions[step]}</h2>
+      <p>How was this session?</p>
+      <div class="emojis">
+        <span onclick="rate()">😞</span>
+        <span onclick="rate()">😐</span>
+        <span onclick="rate()">🙂</span>
+        <span onclick="rate()">😄</span>
+        <span onclick="rate()">🤩</span>
+      </div>
+    `;
+  }
+
+  function rate() {
+    step++;
+    showSession();
+  }
+</script>
+
+</body>
+</html>
