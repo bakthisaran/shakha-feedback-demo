@@ -19,3 +19,41 @@
     }
   </style>
 </head>
+<body>
+
+<h2>Admin Dashboard</h2>
+<p>Ramakrishna Parivaar Shakha - L SPA</p>
+
+<div class="card">
+  <canvas id="avgChart"></canvas>
+</div>
+
+<script>
+  const raw = JSON.parse(localStorage.getItem("shakhaFeedback") || "[]");
+  const sessions = ["Shareerik", "Bauddik", "Achar Paddhati"];
+
+  const averages = sessions.map(s => {
+    const vals = raw.map(r => r.ratings[s]).filter(Boolean);
+    if (vals.length === 0) return 0;
+    return (vals.reduce((a,b)=>a+b,0) / vals.length).toFixed(2);
+  });
+
+  new Chart(document.getElementById("avgChart"), {
+    type: "bar",
+    data: {
+      labels: sessions,
+      datasets: [{
+        label: "Average Rating",
+        data: averages
+      }]
+    },
+    options: {
+      scales: {
+        y: { min: 0, max: 5 }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
