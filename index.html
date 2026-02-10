@@ -50,14 +50,17 @@
 <script>
   const sessions = ["Shareerik", "Bauddik", "Achar Paddhati"];
   let step = -1;
+  let feedback = {};
 
   function start() {
     step = 0;
+    feedback = {};
     showSession();
   }
 
   function showSession() {
     if (step >= sessions.length) {
+      saveFeedback();
       document.getElementById("app").innerHTML = `
         <h2>🙏 Dhanyavaad!</h2>
         <p>Feedback recorded</p>
@@ -70,18 +73,29 @@
       <h2>${sessions[step]}</h2>
       <p>How was this session?</p>
       <div class="emojis">
-        <span onclick="rate()">😞</span>
-        <span onclick="rate()">😐</span>
-        <span onclick="rate()">🙂</span>
-        <span onclick="rate()">😄</span>
-        <span onclick="rate()">🤩</span>
+        <span onclick="rate(1)">😞</span>
+        <span onclick="rate(2)">😐</span>
+        <span onclick="rate(3)">🙂</span>
+        <span onclick="rate(4)">😄</span>
+        <span onclick="rate(5)">🤩</span>
       </div>
     `;
   }
 
-  function rate() {
+  function rate(value) {
+    feedback[sessions[step]] = value;
     step++;
     showSession();
+  }
+
+  function saveFeedback() {
+    const data = JSON.parse(localStorage.getItem("shakhaFeedback") || "[]");
+    data.push({
+      date: new Date().toISOString().split("T")[0],
+      shakha: "Ramakrishna Parivaar Shakha - L SPA",
+      ratings: feedback
+    });
+    localStorage.setItem("shakhaFeedback", JSON.stringify(data));
   }
 </script>
 
