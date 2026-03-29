@@ -1,134 +1,189 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Shakha Feedback</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shakha Feedback</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
+<style>
+body {
+  font-family: Arial;
+  background: #f5f5f5;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  margin:0;
+}
 
-    .card {
-      background: white;
-      padding: 24px;
-      border-radius: 16px;
-      width: 90%;
-      max-width: 360px;
-      text-align: center;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
+.card {
+  background:white;
+  padding:24px;
+  border-radius:16px;
+  width:90%;
+  max-width:360px;
+  text-align:center;
+  box-shadow:0 10px 20px rgba(0,0,0,0.1);
+}
 
-    .emojis span {
-      font-size: 32px;
-      margin: 10px;
-      cursor: pointer;
-    }
+.emojis span {
+  font-size:32px;
+  margin:10px;
+  cursor:pointer;
+}
 
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
+input, textarea, select {
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
 
-    button {
-      padding: 12px;
-      width: 100%;
-      border-radius: 10px;
-      border: none;
-      background: #111;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
+button {
+  padding:12px;
+  width:100%;
+  border-radius:10px;
+  border:none;
+  background:#111;
+  color:white;
+}
+</style>
 </head>
 
 <body>
 
-<div class="card" id="app">
-  <h3>Ramakrishna Parivaar Shakha - L SPA</h3>
-  <p>Today's Shakha Feedback</p>
-   <p>v1.2</p>
-  <button onclick="start()">Start</button>
-</div>
+<div class="card" id="app"></div>
 
 <script>
-  const sessions = ["Shareerik", "Bauddik", "Achar Paddhati"];
-  let step = -1;
-  let feedback = {};
+const SHAKHA_NAME = "Ramakrishna Parivaar Shakha - L SPA";
+const SHAKHA_DATE = "27 Mar 2026"; // 👈 change manually
 
-  function start() {
-    step = 0;
-    feedback = {};
-    showSession();
+const sessions = ["Shareerik", "Bauddik", "Achar Paddhati"];
+
+let step = -1;
+let feedback = {};
+let comments = {};
+let gana = "";
+
+startScreen();
+
+function header(title){
+  return `
+    <h3>${SHAKHA_NAME}</h3>
+    <p>${SHAKHA_DATE}</p>
+    <h2>${title}</h2>
+  `;
+}
+
+function startScreen(){
+  document.getElementById("app").innerHTML = '
+    ${header("Shakha Feedback")}
+    <button onclick="chooseGana()">Start</button>
+  <bR>Will take just a few seconds of your time, we Promise!
+  ';
+}
+
+function chooseGana(){
+  document.getElementById("app").innerHTML = '
+    ${header("Select Gana")}
+    <select id="gana">
+      <option value="">Select</option>
+      <option>Kishore</option>
+      <option>Kishori</option>
+      <option>Yuva</option>
+    </select>
+    <button onclick="start()">Continue</button>
+  ';
+}
+
+function start(){
+  gana = document.getElementById("gana").value;
+  if(!gana){
+    alert("Please select Gana");
+    return;
+  }
+  step = 0;
+  feedback = {};
+  comments = {};
+  showSession();
+}
+
+function showSession(){
+  if(step >= sessions.length){
+    showFinal();
+    return;
   }
 
-  function showSession() {
-    if (step >= sessions.length) {
-      showOptional();
-      return;
-    }
+  let session = sessions[step];
 
-    document.getElementById("app").innerHTML = `
-      <h2>${sessions[step]}</h2>
-      <p>How was this session?</p>
-      <div class="emojis">
-        <span onclick="rate(1)">😞</span>
-        <span onclick="rate(2)">😐</span>
-        <span onclick="rate(3)">🙂</span>
-        <span onclick="rate(4)">😄</span>
-        <span onclick="rate(5)">🤩</span>
-      </div>
-    `;
-  }
+  document.getElementById("app").innerHTML = '
+    ${header(session)}
+    <p>How was this session?</p>
+    <div class="emojis">
+      <span onclick="rate(1)">😞</span>
+      <span onclick="rate(2)">😐</span>
+      <span onclick="rate(3)">🙂</span>
+      <span onclick="rate(4)">😄</span>
+      <span onclick="rate(5)">🤩</span>
+    </div>
+    <textarea id="comment" placeholder="Optional comment"></textarea>
+    <button onclick="next()">Next</button>
+  ';
+}
 
-  function rate(value) {
-    feedback[sessions[step]] = value;
-    step++;
-    showSession();
-  }
+function rate(value){
+  feedback[sessions[step]] = value;
+}
 
-  function showOptional() {
-    document.getElementById("app").innerHTML = '<h3>Optional</h3><input id="name" placeholder="Your name (optional)" /> <textarea id="comment" placeholder="Any feedback?"></textarea><button onclick="submitFinal()">Submit</button>';
-  }
+function next(){
+  let session = sessions[step];
+  comments[session] = document.getElementById("comment").value || "";
+  step++;
+  showSession();
+}
 
-  function submitFinal() {
-    const name = document.getElementById("name").value;
-    const comment = document.getElementById("comment").value;
+function showFinal(){
+  document.getElementById("app").innerHTML = '
+    ${header("Final Feedback")}
+    <input id="name" placeholder="Your name (optional)" />
+    <textarea id="overall" placeholder="Overall comments"></textarea>
+    <button onclick="submitFinal()">Submit</button>
+  ';
+}
 
-    addDoc(collection(db, "feedbacks"), {
-      shakha: "Ramakrishna Parivaar Shakha - Leamington SPA",
-      date: new Date().toISOString().split("T")[0],
+function submitFinal(){
+  const name = document.getElementById("name").value;
+  const overall = document.getElementById("overall").value;
+
+  addDoc(collection(db, "feedbacks"), {
+    shakha: SHAKHA_NAME,
+    date: SHAKHA_DATE,
+    gana: gana,
+    ratings: {
       shareerik: feedback["Shareerik"],
       bauddik: feedback["Bauddik"],
-      achar: feedback["Achar Paddhati"],
-      name: name || null,
-      comment: comment || null,
-      source: window.location.search.includes("qr=1") ? "QR" : "Shared",
-      timestamp: new Date()
-    }).then(() => {
-      document.getElementById("app").innerHTML = '<h2>🙏 Dhanyavaad!</h2><p>Feedback recorded</p>';
-    }).catch((error) => {
-      alert("Error saving feedback: " + error);
-    });
-  }
+      achar: feedback["Achar Paddhati"]
+    },
+    comments: comments,
+    name: name || null,
+    overallComment: overall || null,
+    source: window.location.search.includes("qr=1") ? "QR" : "Shared",
+    timestamp: new Date()
+  }).then(() => {
+    document.getElementById("app").innerHTML = '
+      ${header("🙏 Dhanyavaad!")}
+      
+    ';
+  });
+}
 </script>
 
-<!-- Firebase (MUST be at bottom) -->
+<!-- Firebase -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-  const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyDb4NpYEwtcoY8SgmIHRqAok9qKJF4Ej4k",
   authDomain: "shakha-feedback.firebaseapp.com",
   projectId: "shakha-feedback",
@@ -138,12 +193,13 @@
   measurementId: "G-PFR8EEQQQF"
 };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
 
-  window.db = db;
-  window.collection = collection;
-  window.addDoc = addDoc;
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.db = db;
+window.collection = collection;
+window.addDoc = addDoc;
 </script>
 
 </body>
