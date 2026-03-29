@@ -57,6 +57,7 @@
 <div class="card" id="app">
   <h3>Ramakrishna Parivaar Shakha - L SPA</h3>
   <p>Today's Shakha Feedback</p>
+   <p>v1.1</p>
   <button onclick="start()">Start</button>
 </div>
 
@@ -97,12 +98,12 @@
   }
 
   function showOptional() {
-    document.getElementById("app").innerHTML = `
+    document.getElementById("app").innerHTML = '
       <h3>Optional</h3>
       <input id="name" placeholder="Your name (optional)" />
       <textarea id="comment" placeholder="Any feedback?"></textarea>
       <button onclick="submitFinal()">Submit</button>
-    `;
+    ';
   }
 
   function submitFinal() {
@@ -110,7 +111,7 @@
     const comment = document.getElementById("comment").value;
 
     addDoc(collection(db, "feedbacks"), {
-      shakha: "Ramakrishna Parivaar Shakha - L SPA",
+      shakha: "Ramakrishna Parivaar Shakha - Leamington SPA",
       date: new Date().toISOString().split("T")[0],
       shareerik: feedback["Shareerik"],
       bauddik: feedback["Bauddik"],
@@ -120,11 +121,10 @@
       source: window.location.search.includes("qr=1") ? "QR" : "Shared",
       timestamp: new Date()
     }).then(() => {
-      document.getElementById("app").innerHTML = `
+      document.getElementById("app").innerHTML = '
         <h2>🙏 Dhanyavaad!</h2>
         <p>Feedback recorded</p>
-        <button onclick="start()">Next Person</button>
-      `;
+      ';
     }).catch((error) => {
       alert("Error saving feedback: " + error);
     });
