@@ -57,7 +57,7 @@ button {
 <script>
 const SHAKHA_NAME = "Ramakrishna Parivaar Shakha - L SPA";
 const SHAKHA_DATE = "27 Mar 2026"; // 👈 change manually
-const APP_VER = "0.8"
+const APP_VER = "0.9"
 const sessions = ["Achar Paddhati", "Shareerik",  "Bauddikh"];
 const GANA_DATA = {
   Kishore: {
@@ -83,7 +83,6 @@ function header(title){
     <h3>${SHAKHA_NAME}</h3>
     <h2>Shakha on: ${SHAKHA_DATE}</h2>
     <p>${title}</p>
-    
       `;
 }
 
@@ -132,12 +131,12 @@ function showSession(){
   let ganaDisplay = "";
   if(session === "Bauddikh"){
     ganaDisplay = `
-      <p>Gana:<b>${gana}</b></p>
-      <p><b>${GANA_DATA[gana].bauddikhTitle}</b></p>
-      <p>by-${GANA_DATA[gana].bauddikhShikshak}</p>
+      <p>Gana:<b>[${gana}]</b></p>
+      <p>Topic:<b>${GANA_DATA[gana].bauddikhTitle}</b></p>
+      <p>Shikshak:${GANA_DATA[gana].bauddikhShikshak}</p>
     `;
   } else {
-    ganaDisplay = `<p>Gana:<b>${gana}</b></p>`;
+    ganaDisplay = `<p>[<b>${gana}]</b></p>`;
   }
 
   document.getElementById("app").innerHTML = `
@@ -196,16 +195,16 @@ function submitFinal(){
     timestamp: new Date()
   }).then((docRef) => {
     console.log("SUCCESS:", docRef.id);
-    alert("Saved!");
+    //alert("Saved!");
     document.getElementById("app").innerHTML = `
       ${header("🙏 Dhanyavaad!")}
       We have recorded your feedback.
-      <br> You may close this window now.
+      <br><br> You may close this window now.
     `;
   })
   .catch((error) => {
     console.error("FAILED:", error);
-    alert("Error");
+    //alert("Error");
   });
 }
 </script>
