@@ -57,7 +57,7 @@ button {
 <script>
 const SHAKHA_NAME = "Ramakrishna Parivaar Shakha - L SPA";
 const SHAKHA_DATE = "27 Mar 2026"; // 👈 change manually
-const APP_VER = "1.4"
+const APP_VER = "1.5"
 const sessions = ["Shareerik", "Bauddik", "Achar Paddhati"];
 const GANA_DATA = {
   Kishore: {
@@ -81,15 +81,16 @@ startScreen();
 function header(title){
   return `
     <h3>${SHAKHA_NAME}</h3>
+    <h2>Shakha on: ${SHAKHA_DATE}</h2>
     <p>${title}</p>
-    <h2>Shakha date: ${SHAKHA_DATE}</h2>
+    
       `;
 }
 
 function startScreen(){
   document.getElementById("app").innerHTML = `
-    ${header("Quick Feedback")}
-    <br>This will be quick, we Promise! :-)<br>
+    ${header("Feedback")}
+    <br>This will be quick, we Promise! :-)<br><br>
     <button onclick="chooseGana()">Start</button>
     <br><p>ver:${APP_VER}</p>
   `;
@@ -131,12 +132,12 @@ function showSession(){
   let ganaDisplay = "";
   if(session === "Bauddik"){
     ganaDisplay = `
-      <p><b>${gana}</b></p>
-      <p>${GANA_DATA[gana].bauddikTitle}</p>
-      <p>${GANA_DATA[gana].bauddikShikshak}</p>
+      <p>Gana:<b>${gana}</b></p>
+      <p><b>${GANA_DATA[gana].bauddikTitle}</b></p>
+      <p>by-${GANA_DATA[gana].bauddikShikshak}</p>
     `;
   } else {
-    ganaDisplay = `<p><b>${gana}</b></p>`;
+    ganaDisplay = `<p>Gana:<b>${gana}</b></p>`;
   }
 
   document.getElementById("app").innerHTML = `
@@ -151,10 +152,6 @@ function showSession(){
       <span onclick="rate(4)">😄</span>
       <span onclick="rate(5)">🤩</span>
     </div>
-
-    <textarea id="comment" placeholder="Optional comment"></textarea>
-
-    <button onclick="next()">Next</button>
   `;
 }
 function rate(value){
