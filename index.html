@@ -3,6 +3,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Shakha Feedback</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,6 +14,7 @@
       height: 100vh;
       margin: 0;
     }
+
     .card {
       background: white;
       padding: 24px;
@@ -22,11 +24,21 @@
       text-align: center;
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
+
     .emojis span {
       font-size: 32px;
       margin: 10px;
       cursor: pointer;
     }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
     button {
       padding: 12px;
       width: 100%;
@@ -39,6 +51,7 @@
     }
   </style>
 </head>
+
 <body>
 
 <div class="card" id="app">
@@ -57,41 +70,13 @@
     feedback = {};
     showSession();
   }
-function showOptional() {
-  document.getElementById("app").innerHTML = `
-    <h3>Optional</h3>
-    <input id="name" placeholder="Your name (optional)" style="width:100%; padding:8px; margin:8px 0;" />
-    <textarea id="comment" placeholder="Any feedback?" style="width:100%; padding:8px;"></textarea>
-    <button onclick="submitFinal()">Submit</button>
-  `;
-}
-  function showSession() {
-  if (step >= sessions.length) {
-  showOptional();
-  return;
-  }
-}
-function submitFinal() {
-  const name = document.getElementById("name").value;
-  const comment = document.getElementById("comment").value;
 
-  db.collection("feedbacks").add({
-    shakha: "Ramakrishna Parivaar Shakha - L SPA",
-    date: new Date().toISOString().split("T")[0],
-    shareerik: feedback["Shareerik"],
-    bauddik: feedback["Bauddik"],
-    achar: feedback["Achar Paddhati"],
-    name: name || null,
-    comment: comment || null,
-    source: window.location.search.includes("qr=1") ? "QR" : "Shared",
-    timestamp: new Date()
-  }).then(() => {
-    document.getElementById("app").innerHTML = `
-      <h2>🙏 Dhanyavaad!</h2>
-      <button onclick="start()">Next Person</button>
-    `;
-  });
-}
+  function showSession() {
+    if (step >= sessions.length) {
+      showOptional();
+      return;
+    }
+
     document.getElementById("app").innerHTML = `
       <h2>${sessions[step]}</h2>
       <p>How was this session?</p>
@@ -111,22 +96,47 @@ function submitFinal() {
     showSession();
   }
 
-  function saveFeedback() {
-    const data = JSON.parse(localStorage.getItem("shakhaFeedback") || "[]");
-    data.push({
-      date: new Date().toISOString().split("T")[0],
+  function showOptional() {
+    document.getElementById("app").innerHTML = `
+      <h3>Optional</h3>
+      <input id="name" placeholder="Your name (optional)" />
+      <textarea id="comment" placeholder="Any feedback?"></textarea>
+      <button onclick="submitFinal()">Submit</button>
+    `;
+  }
+
+  function submitFinal() {
+    const name = document.getElementById("name").value;
+    const comment = document.getElementById("comment").value;
+
+    addDoc(collection(db, "feedbacks"), {
       shakha: "Ramakrishna Parivaar Shakha - L SPA",
-      ratings: feedback
+      date: new Date().toISOString().split("T")[0],
+      shareerik: feedback["Shareerik"],
+      bauddik: feedback["Bauddik"],
+      achar: feedback["Achar Paddhati"],
+      name: name || null,
+      comment: comment || null,
+      source: window.location.search.includes("qr=1") ? "QR" : "Shared",
+      timestamp: new Date()
+    }).then(() => {
+      document.getElementById("app").innerHTML = `
+        <h2>🙏 Dhanyavaad!</h2>
+        <p>Feedback recorded</p>
+        <button onclick="start()">Next Person</button>
+      `;
+    }).catch((error) => {
+      alert("Error saving feedback: " + error);
     });
-    localStorage.setItem("shakhaFeedback", JSON.stringify(data));
   }
 </script>
 
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"></script>
+<!-- Firebase (MUST be at bottom) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-<script>
-const firebaseConfig = {
+  const firebaseConfig = {
   apiKey: "AIzaSyDb4NpYEwtcoY8SgmIHRqAok9qKJF4Ej4k",
   authDomain: "shakha-feedback.firebaseapp.com",
   projectId: "shakha-feedback",
@@ -136,8 +146,12 @@ const firebaseConfig = {
   measurementId: "G-PFR8EEQQQF"
 };
 
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.db = db;
+  window.collection = collection;
+  window.addDoc = addDoc;
 </script>
 
 </body>
