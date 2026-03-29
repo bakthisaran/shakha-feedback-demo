@@ -68,34 +68,25 @@ let gana = "";
 startScreen();
 
 function header(title){
-  return '
-    <h3>${SHAKHA_NAME}</h3>
-    <p>${SHAKHA_DATE}</p>
-    <h2>${title}</h2>
-    ver:${APP_VER}
-  ';
+  return '<h3>${SHAKHA_NAME}</h3><p>${SHAKHA_DATE}</p> <h2>${title}</h2> <BR>ver:${APP_VER}';
 }
 
 function startScreen(){
-  document.getElementById("app").innerHTML = '
-    ${header("Shakha Feedback")}
-    <button onclick="chooseGana()">Start</button>
-  <bR>Will take just a few seconds of your time, we Promise!
-  ';
+  document.getElementById("app").innerHTML = '${header("Shakha Feedback")}<button onclick="chooseGana()">Start</button> <bR>Will take just a few seconds of your time, we Promise!';
+}
+function chooseGana() {
+    document.getElementById("app").innerHTML = `
+        ${header("Select Gana")}
+        <select id="gana">
+            <option value="">Select</option>
+            <option>Kishore</option>
+            <option>Kishori</option>
+            <option>Yuva</option>
+        </select>
+        <button onclick="start()">Continue</button>
+    `;
 }
 
-function chooseGana(){
-  document.getElementById("app").innerHTML = '
-    ${header("Select Gana")}
-    <select id="gana">
-      <option value="">Select</option>
-      <option>Kishore</option>
-      <option>Kishori</option>
-      <option>Yuva</option>
-    </select>
-    <button onclick="start()">Continue</button>
-  ';
-}
 
 function start(){
   gana = document.getElementById("gana").value;
@@ -117,7 +108,7 @@ function showSession(){
 
   let session = sessions[step];
 
-  document.getElementById("app").innerHTML = '
+  document.getElementById("app").innerHTML = `
     ${header(session)}
     <p>How was this session?</p>
     <div class="emojis">
@@ -129,7 +120,7 @@ function showSession(){
     </div>
     <textarea id="comment" placeholder="Optional comment"></textarea>
     <button onclick="next()">Next</button>
-  ';
+  `;
 }
 
 function rate(value){
@@ -144,12 +135,12 @@ function next(){
 }
 
 function showFinal(){
-  document.getElementById("app").innerHTML = '
+  document.getElementById("app").innerHTML = `
     ${header("Final Feedback")}
     <input id="name" placeholder="Your name (optional)" />
     <textarea id="overall" placeholder="Overall comments"></textarea>
     <button onclick="submitFinal()">Submit</button>
-  ';
+  `;
 }
 
 function submitFinal(){
