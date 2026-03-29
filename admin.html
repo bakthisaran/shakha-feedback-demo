@@ -82,18 +82,18 @@ async function loadData() {
 
 function buildSessionChart(data) {
 
-  let totals = { shareerik:0, bauddik:0, achar:0 };
+  let totals = { shareerik:0, bauddikh:0, achar:0 };
   let count = data.length || 1;
 
   data.forEach(d => {
     totals.shareerik += d.ratings?.shareerik || 0;
-    totals.bauddik += d.ratings?.bauddik || 0;
+    totals.bauddikh += d.ratings?.bauddikh || 0;
     totals.achar += d.ratings?.achar || 0;
   });
 
   let averages = [
     (totals.shareerik / count).toFixed(2),
-    (totals.bauddik / count).toFixed(2),
+    (totals.bauddikh / count).toFixed(2),
     (totals.achar / count).toFixed(2)
   ];
 
@@ -102,7 +102,7 @@ function buildSessionChart(data) {
   sessionChart = new Chart(document.getElementById("sessionChart"), {
     type: "bar",
     data: {
-      labels: ["Shareerik", "Bauddik", "Achar"],
+      labels: ["Shareerik", "Bauddikh", "Achar"],
       datasets: [{
         label: "Average Rating",
         data: averages
@@ -122,23 +122,23 @@ function buildTrendChart(data){
     let date = d.date;
 
     if(!grouped[date]){
-      grouped[date] = { shareerik:0, bauddik:0, achar:0, count:0 };
+      grouped[date] = { shareerik:0, bauddikh:0, achar:0, count:0 };
     }
 
     grouped[date].shareerik += d.ratings?.shareerik || 0;
-    grouped[date].bauddik += d.ratings?.bauddik || 0;
+    grouped[date].bauddikh += d.ratings?.bauddikh || 0;
     grouped[date].achar += d.ratings?.achar || 0;
     grouped[date].count++;
   });
 
   let dates = Object.keys(grouped).sort();
 
-  let shareerik = [], bauddik = [], achar = [];
+  let shareerik = [], bauddikh = [], achar = [];
 
   dates.forEach(d => {
     let g = grouped[d];
     shareerik.push((g.shareerik / g.count).toFixed(2));
-    bauddik.push((g.bauddik / g.count).toFixed(2));
+    bauddikh.push((g.bauddikh / g.count).toFixed(2));
     achar.push((g.achar / g.count).toFixed(2));
   });
 
@@ -150,7 +150,7 @@ function buildTrendChart(data){
       labels: dates,
       datasets: [
         { label: "Shareerik", data: shareerik },
-        { label: "Bauddik", data: bauddik },
+        { label: "Bauddikh", data: bauddikh },
         { label: "Achar", data: achar }
       ]
     },
