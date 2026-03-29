@@ -57,20 +57,20 @@ button {
 <script>
 const SHAKHA_NAME = "Ramakrishna Parivaar Shakha - L SPA";
 const SHAKHA_DATE = "27 Mar 2026"; // 👈 change manually
-const APP_VER = "0.7"
-const sessions = ["Achar Paddhati", "Shareerik (WarmUp/Khels)",  "Bauddik"];
+const APP_VER = "0.8"
+const sessions = ["Achar Paddhati", "Shareerik",  "Bauddikh"];
 const GANA_DATA = {
   Kishore: {
-    bauddikTitle: "Deep dive in to Classical Dances:Kuchipudi",
-    bauddikShikshak: "Keerthi"
+    bauddikhTitle: "Deep dive in to Classical Dances:Kuchipudi",
+    bauddikhShikshak: "Keerthi"
   },
   Kishori: {
-    bauddikTitle: "Deep dive in to Classical Dances:Kuchipudi",
-    bauddikShikshak: "Keerthi Ben"
+    bauddikhTitle: "Deep dive in to Classical Dances:Kuchipudi",
+    bauddikhShikshak: "Keerthi Ben"
   },
   Yuva: {
-    bauddikTitle: "Charcha on Current Affairs",
-    bauddikShikshak: "Ankush Ji"
+    bauddikhTitle: "Charcha on Current Affairs",
+    bauddikhShikshak: "Ankush Ji"
   }
 };
 let step = -1;
@@ -130,11 +130,11 @@ function showSession(){
   let session = sessions[step];
 
   let ganaDisplay = "";
-  if(session === "Bauddik"){
+  if(session === "Bauddikh"){
     ganaDisplay = `
       <p>Gana:<b>${gana}</b></p>
-      <p><b>${GANA_DATA[gana].bauddikTitle}</b></p>
-      <p>by-${GANA_DATA[gana].bauddikShikshak}</p>
+      <p><b>${GANA_DATA[gana].bauddikhTitle}</b></p>
+      <p>by-${GANA_DATA[gana].bauddikhShikshak}</p>
     `;
   } else {
     ganaDisplay = `<p>Gana:<b>${gana}</b></p>`;
@@ -183,12 +183,13 @@ function submitFinal(){
     shakha: SHAKHA_NAME,
     date: SHAKHA_DATE,
     gana: gana,
-    bauddikTitle: GANA_DATA[gana].bauddikTitle,
-    bauddikShikshak: GANA_DATA[gana].bauddikShikshak,
+    bauddikhTitle: GANA_DATA[gana].bauddikhTitle,
+    bauddikhShikshak: GANA_DATA[gana].bauddikhShikshak,
     ratings: {
-      shareerik: feedback["Shareerik"],
-      bauddik: feedback["Bauddik"],
       achar: feedback["Achar Paddhati"]
+      shareerik: feedback["Shareerik"],
+      bauddikh: feedback["Bauddikh"],
+      
     },
     name: name || null,
     overallComment: overall || null,
