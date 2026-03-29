@@ -68,7 +68,12 @@ let gana = "";
 startScreen();
 
 function header(title){
-  return '<h3>${SHAKHA_NAME}</h3><p>${SHAKHA_DATE}</p> <h2>${title}</h2> <BR>ver:${APP_VER}';
+  return `
+    <h3>${SHAKHA_NAME}</h3>
+    <p>${SHAKHA_DATE}</p>
+    <h2>${title}</h2>
+    <p>ver:${APP_VER}</p>
+  `;
 }
 
 function startScreen(){
