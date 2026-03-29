@@ -77,7 +77,10 @@ function header(title){
 }
 
 function startScreen(){
-  document.getElementById("app").innerHTML = '${header("Shakha Feedback")}<button onclick="chooseGana()">Start</button> <bR>Will take just a few seconds of your time, we Promise!';
+  document.getElementById("app").innerHTML = `
+    ${header("Today's Feedback")}
+    <button onclick="chooseGana()">Start</button>
+  `;
 }
 function chooseGana() {
     document.getElementById("app").innerHTML = `
