@@ -57,18 +57,41 @@
     feedback = {};
     showSession();
   }
-
+function showOptional() {
+  document.getElementById("app").innerHTML = `
+    <h3>Optional</h3>
+    <input id="name" placeholder="Your name (optional)" style="width:100%; padding:8px; margin:8px 0;" />
+    <textarea id="comment" placeholder="Any feedback?" style="width:100%; padding:8px;"></textarea>
+    <button onclick="submitFinal()">Submit</button>
+  `;
+}
   function showSession() {
-    if (step >= sessions.length) {
-      saveFeedback();
-      document.getElementById("app").innerHTML = `
-        <h2>🙏 Dhanyavaad!</h2>
-        <p>Feedback recorded</p>
-        <button onclick="start()">Next Person</button>
-      `;
-      return;
-    }
+  if (step >= sessions.length) {
+  showOptional();
+  return;
+  }
+}
+function submitFinal() {
+  const name = document.getElementById("name").value;
+  const comment = document.getElementById("comment").value;
 
+  db.collection("feedbacks").add({
+    shakha: "Ramakrishna Parivaar Shakha - L SPA",
+    date: new Date().toISOString().split("T")[0],
+    shareerik: feedback["Shareerik"],
+    bauddik: feedback["Bauddik"],
+    achar: feedback["Achar Paddhati"],
+    name: name || null,
+    comment: comment || null,
+    source: window.location.search.includes("qr=1") ? "QR" : "Shared",
+    timestamp: new Date()
+  }).then(() => {
+    document.getElementById("app").innerHTML = `
+      <h2>🙏 Dhanyavaad!</h2>
+      <button onclick="start()">Next Person</button>
+    `;
+  });
+}
     document.getElementById("app").innerHTML = `
       <h2>${sessions[step]}</h2>
       <p>How was this session?</p>
@@ -97,6 +120,24 @@
     });
     localStorage.setItem("shakhaFeedback", JSON.stringify(data));
   }
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDb4NpYEwtcoY8SgmIHRqAok9qKJF4Ej4k",
+  authDomain: "shakha-feedback.firebaseapp.com",
+  projectId: "shakha-feedback",
+  storageBucket: "shakha-feedback.firebasestorage.app",
+  messagingSenderId: "1046199610177",
+  appId: "1:1046199610177:web:e85f6418fa9aca5dd44fc0",
+  measurementId: "G-PFR8EEQQQF"
+};
+
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 </script>
 
 </body>
