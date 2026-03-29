@@ -57,8 +57,8 @@ button {
 <script>
 const SHAKHA_NAME = "Ramakrishna Parivaar Shakha - L SPA";
 const SHAKHA_DATE = "27 Mar 2026"; // 👈 change manually
-const APP_VER = "0.6"
-const sessions = ["Shareerik", "Bauddik", "Achar Paddhati"];
+const APP_VER = "0.7"
+const sessions = ["Achar Paddhati", "Shareerik (WarmUp/Khels)",  "Bauddik"];
 const GANA_DATA = {
   Kishore: {
     bauddikTitle: "Deep dive in to Classical Dances:Kuchipudi",
@@ -194,7 +194,7 @@ function submitFinal(){
     overallComment: overall || null,
     source: window.location.search.includes("qr=1") ? "QR" : "Shared",
     timestamp: new Date()
-  }).then(() => {
+  }).then((docRef) => {
     console.log("SUCCESS:", docRef.id);
     alert("Saved!");
     document.getElementById("app").innerHTML = `
@@ -205,7 +205,7 @@ function submitFinal(){
   })
   .catch((error) => {
     console.error("FAILED:", error);
-    alert(error.message);
+    alert("Error");
   });
 }
 </script>
