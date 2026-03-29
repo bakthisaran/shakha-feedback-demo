@@ -167,10 +167,9 @@ function submitFinal(){
     source: window.location.search.includes("qr=1") ? "QR" : "Shared",
     timestamp: new Date()
   }).then(() => {
-    document.getElementById("app").innerHTML = '
+    document.getElementById("app").innerHTML = `
       ${header("🙏 Dhanyavaad!")}
-      
-    ';
+    `;
   });
 }
 </script>
