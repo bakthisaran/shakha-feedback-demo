@@ -1,58 +1,166 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
-    }
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shakha Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f5f5f5;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+</style>
 </head>
+
 <body>
 
-<h2>Admin Dashboard</h2>
-<p>Ramakrishna Parivaar Shakha - L SPA</p>
+<h2>Shakha Dashboard</h2>
+
+<select id="ganaFilter" onchange="loadData()">
+  <option value="">All Gana</option>
+  <option>Kishore</option>
+  <option>Kishori</option>
+  <option>Yuva</option>
+</select>
 
 <div class="card">
-  <canvas id="avgChart"></canvas>
+  <canvas id="sessionChart"></canvas>
 </div>
 
-<script>
-  const raw = JSON.parse(localStorage.getItem("shakhaFeedback") || "[]");
-  const sessions = ["Shareerik", "Bauddik", "Achar Paddhati"];
+<div class="card">
+  <canvas id="trendChart"></canvas>
+</div>
 
-  const averages = sessions.map(s => {
-    const vals = raw.map(r => r.ratings[s]).filter(Boolean);
-    if (vals.length === 0) return 0;
-    return (vals.reduce((a,b)=>a+b,0) / vals.length).toFixed(2);
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyDb4NpYEwtcoY8SgmIHRqAok9qKJF4Ej4k",
+  authDomain: "shakha-feedback.firebaseapp.com",
+  projectId: "shakha-feedback",
+  storageBucket: "shakha-feedback.firebasestorage.app",
+  messagingSenderId: "1046199610177",
+  appId: "1:1046199610177:web:e85f6418fa9aca5dd44fc0",
+  measurementId: "G-PFR8EEQQQF"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let sessionChart, trendChart;
+
+async function loadData() {
+
+  const snapshot = await getDocs(collection(db, "feedbacks"));
+  const selectedGana = document.getElementById("ganaFilter").value;
+
+  let data = [];
+
+  snapshot.forEach(doc => {
+    let d = doc.data();
+
+    if (!selectedGana || d.gana === selectedGana) {
+      data.push(d);
+    }
   });
 
-  new Chart(document.getElementById("avgChart"), {
+  buildSessionChart(data);
+  buildTrendChart(data);
+}
+
+function buildSessionChart(data) {
+
+  let totals = { shareerik:0, bauddik:0, achar:0 };
+  let count = data.length || 1;
+
+  data.forEach(d => {
+    totals.shareerik += d.ratings?.shareerik || 0;
+    totals.bauddik += d.ratings?.bauddik || 0;
+    totals.achar += d.ratings?.achar || 0;
+  });
+
+  let averages = [
+    (totals.shareerik / count).toFixed(2),
+    (totals.bauddik / count).toFixed(2),
+    (totals.achar / count).toFixed(2)
+  ];
+
+  if(sessionChart) sessionChart.destroy();
+
+  sessionChart = new Chart(document.getElementById("sessionChart"), {
     type: "bar",
     data: {
-      labels: sessions,
+      labels: ["Shareerik", "Bauddik", "Achar"],
       datasets: [{
         label: "Average Rating",
         data: averages
       }]
     },
     options: {
-      scales: {
-        y: { min: 0, max: 5 }
-      }
+      scales: { y: { min: 0, max: 5 } }
     }
   });
+}
+
+function buildTrendChart(data){
+
+  let grouped = {};
+
+  data.forEach(d => {
+    let date = d.date;
+
+    if(!grouped[date]){
+      grouped[date] = { shareerik:0, bauddik:0, achar:0, count:0 };
+    }
+
+    grouped[date].shareerik += d.ratings?.shareerik || 0;
+    grouped[date].bauddik += d.ratings?.bauddik || 0;
+    grouped[date].achar += d.ratings?.achar || 0;
+    grouped[date].count++;
+  });
+
+  let dates = Object.keys(grouped).sort();
+
+  let shareerik = [], bauddik = [], achar = [];
+
+  dates.forEach(d => {
+    let g = grouped[d];
+    shareerik.push((g.shareerik / g.count).toFixed(2));
+    bauddik.push((g.bauddik / g.count).toFixed(2));
+    achar.push((g.achar / g.count).toFixed(2));
+  });
+
+  if(trendChart) trendChart.destroy();
+
+  trendChart = new Chart(document.getElementById("trendChart"), {
+    type: "line",
+    data: {
+      labels: dates,
+      datasets: [
+        { label: "Shareerik", data: shareerik },
+        { label: "Bauddik", data: bauddik },
+        { label: "Achar", data: achar }
+      ]
+    },
+    options: {
+      scales: { y: { min: 0, max: 5 } }
+    }
+  });
+}
+
+loadData();
 </script>
 
 </body>
