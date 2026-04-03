@@ -56,21 +56,21 @@ button {
 
 <script>
 const SHAKHA_NAME = "Ramakrishna Parivaar Shakha - L SPA";
-const SHAKHA_DATE = "27 Mar 2026"; // 👈 change manually
+const SHAKHA_DATE = "03 Apr 2026"; // 👈 change manually
 const APP_VER = "0.9"
 const sessions = ["Achar Paddhati", "Shareerik",  "Bauddikh"];
 const GANA_DATA = {
   Kishore: {
-    bauddikhTitle: "Deep dive in to Classical Dances:Kuchipudi",
-    bauddikhShikshak: "Keerthi"
+    bauddikhTitle: "Hanuman Ji",
+    bauddikhShikshak: "Tanaya Ben"
   },
   Kishori: {
-    bauddikhTitle: "Deep dive in to Classical Dances:Kuchipudi",
-    bauddikhShikshak: "Keerthi Ben"
+    bauddikhTitle: "Hanuman Ji",
+    bauddikhShikshak: "Tanaya Ben"
   },
   Yuva: {
-    bauddikhTitle: "Charcha on Current Affairs",
-    bauddikhShikshak: "Ankush Ji"
+    bauddikhTitle: "Charcha on Hindu/Indian Challenges",
+    bauddikhShikshak: "Shrishail Ji"
   }
 };
 let step = -1;
@@ -167,9 +167,9 @@ function next(){
 
 function showFinal(){
   document.getElementById("app").innerHTML = `
-    ${header("Overall comments")}
+    ${header("Overall comments/Improvements, please be honest and critical")}
     <input id="name" placeholder="Your name (optional)" />
-    <textarea id="overall" placeholder="Overall comments"></textarea>
+    <textarea id="overall" placeholder="Overall comments, please be honest and critical"></textarea>
     <button onclick="submitFinal()">Submit</button>
   `;
 }
