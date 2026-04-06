@@ -4,21 +4,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shakha Dashboard</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 
 <style>
-body {
-  font-family: Arial;
-  background: #f5f5f5;
-  padding: 20px;
-}
-
+body { font-family: Arial; background:#f5f5f5; padding:20px; }
 .card {
-  background: white;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  background:white;
+  padding:16px;
+  border-radius:12px;
+  margin-bottom:20px;
 }
 </style>
 </head>
@@ -27,19 +21,32 @@ body {
 
 <h2>Shakha Dashboard</h2>
 
-<select id="ganaFilter" onchange="loadData()">
+<!-- Filters -->
+<select id="shakhaFilter">
+  <option value="Ramakrishna Parivaar Shakha - L SPA">Ramakrishna Parivaar Shakha - L SPA</option>
+</select>
+
+<select id="ganaFilter" onchange="loadChart1()">
   <option value="">All Gana</option>
   <option>Kishore</option>
   <option>Kishori</option>
   <option>Yuva</option>
 </select>
 
+<!-- Chart 1 -->
 <div class="card">
-  <canvas id="sessionChart"></canvas>
+  <h3>Session Trends</h3>
+  <canvas id="trendChart"></canvas>
 </div>
 
+<!-- Chart 2 -->
+<select id="dateFilter" onchange="loadChart2()">
+  <option value="">Select Date</option>
+</select>
+
 <div class="card">
-  <canvas id="trendChart"></canvas>
+  <h3>Daily Drill-down</h3>
+  <div id="details"></div>
 </div>
 
 <script type="module">
@@ -55,91 +62,69 @@ import { getFirestore, collection, getDocs } from "https://www.gstatic.com/fireb
   appId: "1:1046199610177:web:e85f6418fa9aca5dd44fc0",
   measurementId: "G-PFR8EEQQQF"
 };
-
+  
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let sessionChart, trendChart;
+let allData = [];
+let trendChart;
 
-async function loadData() {
-
+async function init(){
   const snapshot = await getDocs(collection(db, "feedbacks"));
-  const selectedGana = document.getElementById("ganaFilter").value;
-
-  let data = [];
 
   snapshot.forEach(doc => {
-    let d = doc.data();
-
-    if (!selectedGana || d.gana === selectedGana) {
-      data.push(d);
-    }
+    allData.push(doc.data());
   });
 
-  buildSessionChart(data);
-  buildTrendChart(data);
+  populateDates();
+  loadChart1();
 }
 
-function buildSessionChart(data) {
+function populateDates(){
+  let dates = [...new Set(allData.map(d => d.date))];
 
-  let totals = { shareerik:0, bauddikh:0, achar:0 };
-  let count = data.length || 1;
+  let dropdown = document.getElementById("dateFilter");
 
-  data.forEach(d => {
-    totals.shareerik += d.ratings?.shareerik || 0;
-    totals.bauddikh += d.ratings?.bauddikh || 0;
-    totals.achar += d.ratings?.achar || 0;
-  });
-
-  let averages = [
-    (totals.shareerik / count).toFixed(2),
-    (totals.bauddikh / count).toFixed(2),
-    (totals.achar / count).toFixed(2)
-  ];
-
-  if(sessionChart) sessionChart.destroy();
-
-  sessionChart = new Chart(document.getElementById("sessionChart"), {
-    type: "bar",
-    data: {
-      labels: ["Shareerik", "Bauddikh", "Achar"],
-      datasets: [{
-        label: "Average Rating",
-        data: averages
-      }]
-    },
-    options: {
-      scales: { y: { min: 0, max: 5 } }
-    }
+  dates.forEach(d => {
+    let opt = document.createElement("option");
+    opt.value = d;
+    opt.text = d;
+    dropdown.appendChild(opt);
   });
 }
 
-function buildTrendChart(data){
+function loadChart1(){
+
+  let gana = document.getElementById("ganaFilter").value;
+
+  let filtered = allData.filter(d => {
+    return (!gana || d.gana === gana);
+  });
 
   let grouped = {};
 
-  data.forEach(d => {
+  filtered.forEach(d => {
     let date = d.date;
 
     if(!grouped[date]){
-      grouped[date] = { shareerik:0, bauddikh:0, achar:0, count:0 };
+      grouped[date] = { s:0, b:0, a:0, c:0 };
     }
 
-    grouped[date].shareerik += d.ratings?.shareerik || 0;
-    grouped[date].bauddikh += d.ratings?.bauddikh || 0;
-    grouped[date].achar += d.ratings?.achar || 0;
-    grouped[date].count++;
+    grouped[date].s += d.ratings?.shareerik || 0;
+    grouped[date].b += d.ratings?.bauddik || 0;
+    grouped[date].a += d.ratings?.achar || 0;
+    grouped[date].c++;
   });
 
   let dates = Object.keys(grouped).sort();
 
-  let shareerik = [], bauddikh = [], achar = [];
+  let s = [], b = [], a = [];
 
   dates.forEach(d => {
     let g = grouped[d];
-    shareerik.push((g.shareerik / g.count).toFixed(2));
-    bauddikh.push((g.bauddikh / g.count).toFixed(2));
-    achar.push((g.achar / g.count).toFixed(2));
+    s.push((g.s/g.c).toFixed(2));
+    b.push((g.b/g.c).toFixed(2));
+    a.push((g.a/g.c).toFixed(2));
   });
 
   if(trendChart) trendChart.destroy();
@@ -149,9 +134,9 @@ function buildTrendChart(data){
     data: {
       labels: dates,
       datasets: [
-        { label: "Shareerik", data: shareerik },
-        { label: "Bauddikh", data: bauddikh },
-        { label: "Achar", data: achar }
+        { label: "Shareerik", data: s },
+        { label: "Bauddik", data: b },
+        { label: "Achar", data: a }
       ]
     },
     options: {
@@ -160,7 +145,35 @@ function buildTrendChart(data){
   });
 }
 
-loadData();
+function loadChart2(){
+
+  let date = document.getElementById("dateFilter").value;
+
+  let filtered = allData.filter(d => d.date === date);
+
+  let html = "";
+
+  filtered.forEach(d => {
+    html += `
+      <div style="border-bottom:1px solid #ddd; padding:10px;">
+        <b>Gana:</b> ${d.gana} <br>
+        <b>Shareerik:</b> ${d.ratings?.shareerik} |
+        <b>Bauddik:</b> ${d.ratings?.bauddik} |
+        <b>Achar:</b> ${d.ratings?.achar} <br>
+
+        <i>${d.comments?.Shareerik || ""}</i><br>
+        <i>${d.comments?.Bauddik || ""}</i><br>
+        <i>${d.comments?.["Achar Paddhati"] || ""}</i><br>
+
+        <b>${d.name || ""}</b>
+      </div>
+    `;
+  });
+
+  document.getElementById("details").innerHTML = html || "No data";
+}
+
+init();
 </script>
 
 </body>
