@@ -8,11 +8,17 @@
 
 <style>
 body { font-family: Arial; background:#f5f5f5; padding:20px; }
+
 .card {
   background:white;
   padding:16px;
   border-radius:12px;
   margin-bottom:20px;
+}
+
+select {
+  padding:8px;
+  margin:8px 8px 16px 0;
 }
 </style>
 </head>
@@ -40,91 +46,22 @@ body { font-family: Arial; background:#f5f5f5; padding:20px; }
 </div>
 
 <!-- Chart 2 -->
-<select id="dateFilter" onchange="loadChart2()">
+<select id="dateFilter">
   <option value="">Select Date</option>
 </select>
 
 <div class="card">
   <h3>Daily Drill-down</h3>
   <div id="details"></div>
+</div>
 
-  <div class="card">
+<!-- Insights -->
+<div class="card">
   <h3>Comment Insights</h3>
   <div id="insights"></div>
 </div>
-  
-</div>
 
 <script type="module">
-  
-function generateInsights(data){
-
-  let allComments = [];
-
-  data.forEach(d => {
-    if(d.comments){
-      Object.values(d.comments).forEach(c => {
-        if(c) allComments.push(c.toLowerCase());
-      });
-    }
-
-    if(d.overallComment){
-      allComments.push(d.overallComment.toLowerCase());
-    }
-  });
-
-  let words = {};
-  let positive = [];
-  let negative = [];
-
-  const positiveWords = ["good","great","nice","clear","enjoyed","useful","well"];
-  const negativeWords = ["bad","slow","boring","unclear","confusing","long","improve"];
-
-  allComments.forEach(comment => {
-
-    // word count
-    comment.split(" ").forEach(w => {
-      if(w.length > 3){
-        words[w] = (words[w] || 0) + 1;
-      }
-    });
-
-    // sentiment grouping
-    if(positiveWords.some(p => comment.includes(p))){
-      positive.push(comment);
-    }
-
-    if(negativeWords.some(n => comment.includes(n))){
-      negative.push(comment);
-    }
-
-  });
-
-  // top words
-  let topWords = Object.entries(words)
-    .sort((a,b) => b[1]-a[1])
-    .slice(0,5);
-
-  let html = `
-    <b>Top Keywords:</b><br>
-    ${topWords.map(w => `${w[0]} (${w[1]})`).join(", ")}<br><br>
-
-    <b>👍 Positive Themes:</b><br>
-    ${positive.slice(0,3).join("<br>") || "None"}<br><br>
-
-    <b>👎 Improvement Areas:</b><br>
-    ${negative.slice(0,3).join("<br>") || "None"}
-  `;
-
-  document.getElementById("insights").innerHTML = html;
-}
-  
-  document.getElementById("ganaFilter")
-  .addEventListener("change", loadChart1);
-
-document.getElementById("dateFilter")
-  .addEventListener("change", loadChart2);
-  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -137,13 +74,14 @@ import { getFirestore, collection, getDocs } from "https://www.gstatic.com/fireb
   appId: "1:1046199610177:web:e85f6418fa9aca5dd44fc0",
   measurementId: "G-PFR8EEQQQF"
 };
-  
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 let allData = [];
 let trendChart;
 
+// INIT
 async function init(){
   const snapshot = await getDocs(collection(db, "feedbacks"));
 
@@ -155,8 +93,10 @@ async function init(){
   loadChart1();
 }
 
+// Populate date dropdown
 function populateDates(){
-  let dates = [...new Set(allData.map(d => d.date))];
+let dates = [...new Set(allData.map(d => d.date))]
+  .sort((a, b) => new Date(a) - new Date(b));
 
   let dropdown = document.getElementById("dateFilter");
 
@@ -167,7 +107,20 @@ function populateDates(){
     dropdown.appendChild(opt);
   });
 }
+function rollingAverage(arr, windowSize = 3){
+  let result = [];
 
+  for(let i = 0; i < arr.length; i++){
+    let start = Math.max(0, i - windowSize + 1);
+    let subset = arr.slice(start, i + 1);
+
+    let avg = subset.reduce((a,b)=>a + Number(b), 0) / subset.length;
+    result.push(avg.toFixed(2));
+  }
+
+  return result;
+}
+// CHART 1 (Trend)
 function loadChart1(){
 
   let gana = document.getElementById("ganaFilter").value;
@@ -207,11 +160,11 @@ function loadChart1(){
   trendChart = new Chart(document.getElementById("trendChart"), {
     type: "line",
     data: {
-      labels: dates,
+      labels: dates.map(d => new Date(d).toLocaleDateString()),
       datasets: [
-        { label: "Shareerik", data: s },
-        { label: "Bauddik", data: b },
-        { label: "Achar", data: a }
+        { label: "Shareerik", data: rollingAverage(s) },
+        { label: "Bauddik", data: rollingAverage(b) },
+        { label: "Achar", data: rollingAverage(a) }
       ]
     },
     options: {
@@ -220,6 +173,7 @@ function loadChart1(){
   });
 }
 
+// CHART 2 (Drill-down)
 function loadChart2(){
 
   let date = document.getElementById("dateFilter").value;
@@ -248,10 +202,77 @@ function loadChart2(){
   document.getElementById("details").innerHTML = html || "No data";
 
   generateInsights(filtered);
-  
 }
 
+// COMMENT INSIGHTS
+function generateInsights(data){
+
+  let allComments = [];
+
+  data.forEach(d => {
+    if(d.comments){
+      Object.values(d.comments).forEach(c => {
+        if(c) allComments.push(c.toLowerCase());
+      });
+    }
+
+    if(d.overallComment){
+      allComments.push(d.overallComment.toLowerCase());
+    }
+  });
+
+  let words = {};
+  let positive = [];
+  let negative = [];
+
+  const positiveWords = ["good","great","nice","clear","enjoyed","useful","well"];
+  const negativeWords = ["bad","slow","boring","unclear","confusing","long","improve"];
+
+  allComments.forEach(comment => {
+
+    comment.split(" ").forEach(w => {
+      if(w.length > 3){
+        words[w] = (words[w] || 0) + 1;
+      }
+    });
+
+    if(positiveWords.some(p => comment.includes(p))){
+      positive.push(comment);
+    }
+
+    if(negativeWords.some(n => comment.includes(n))){
+      negative.push(comment);
+    }
+  });
+
+  let topWords = Object.entries(words)
+    .sort((a,b) => b[1]-a[1])
+    .slice(0,5);
+
+  let html = `
+    <b>Top Keywords:</b><br>
+    ${topWords.map(w => `${w[0]} (${w[1]})`).join(", ") || "None"}<br><br>
+
+    <b>👍 Positive Themes:</b><br>
+    ${positive.slice(0,3).join("<br>") || "None"}<br><br>
+
+    <b>👎 Improvement Areas:</b><br>
+    ${negative.slice(0,3).join("<br>") || "None"}
+  `;
+
+  document.getElementById("insights").innerHTML = html;
+}
+
+// EVENT LISTENERS (clean approach)
+document.getElementById("ganaFilter")
+  .addEventListener("change", loadChart1);
+
+document.getElementById("dateFilter")
+  .addEventListener("change", loadChart2);
+
+// INIT CALL
 init();
+
 </script>
 
 </body>
