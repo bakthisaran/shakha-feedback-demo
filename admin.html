@@ -26,7 +26,7 @@ body { font-family: Arial; background:#f5f5f5; padding:20px; }
   <option value="Ramakrishna Parivaar Shakha - L SPA">Ramakrishna Parivaar Shakha - L SPA</option>
 </select>
 
-<select id="ganaFilter" onchange="loadChart1()">
+<select id="ganaFilter">
   <option value="">All Gana</option>
   <option>Kishore</option>
   <option>Kishori</option>
@@ -47,9 +47,84 @@ body { font-family: Arial; background:#f5f5f5; padding:20px; }
 <div class="card">
   <h3>Daily Drill-down</h3>
   <div id="details"></div>
+
+  <div class="card">
+  <h3>Comment Insights</h3>
+  <div id="insights"></div>
+</div>
+  
 </div>
 
 <script type="module">
+  
+function generateInsights(data){
+
+  let allComments = [];
+
+  data.forEach(d => {
+    if(d.comments){
+      Object.values(d.comments).forEach(c => {
+        if(c) allComments.push(c.toLowerCase());
+      });
+    }
+
+    if(d.overallComment){
+      allComments.push(d.overallComment.toLowerCase());
+    }
+  });
+
+  let words = {};
+  let positive = [];
+  let negative = [];
+
+  const positiveWords = ["good","great","nice","clear","enjoyed","useful","well"];
+  const negativeWords = ["bad","slow","boring","unclear","confusing","long","improve"];
+
+  allComments.forEach(comment => {
+
+    // word count
+    comment.split(" ").forEach(w => {
+      if(w.length > 3){
+        words[w] = (words[w] || 0) + 1;
+      }
+    });
+
+    // sentiment grouping
+    if(positiveWords.some(p => comment.includes(p))){
+      positive.push(comment);
+    }
+
+    if(negativeWords.some(n => comment.includes(n))){
+      negative.push(comment);
+    }
+
+  });
+
+  // top words
+  let topWords = Object.entries(words)
+    .sort((a,b) => b[1]-a[1])
+    .slice(0,5);
+
+  let html = `
+    <b>Top Keywords:</b><br>
+    ${topWords.map(w => `${w[0]} (${w[1]})`).join(", ")}<br><br>
+
+    <b>👍 Positive Themes:</b><br>
+    ${positive.slice(0,3).join("<br>") || "None"}<br><br>
+
+    <b>👎 Improvement Areas:</b><br>
+    ${negative.slice(0,3).join("<br>") || "None"}
+  `;
+
+  document.getElementById("insights").innerHTML = html;
+}
+  
+  document.getElementById("ganaFilter")
+  .addEventListener("change", loadChart1);
+
+document.getElementById("dateFilter")
+  .addEventListener("change", loadChart2);
+  
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -171,6 +246,9 @@ function loadChart2(){
   });
 
   document.getElementById("details").innerHTML = html || "No data";
+
+  generateInsights(filtered);
+  
 }
 
 init();
