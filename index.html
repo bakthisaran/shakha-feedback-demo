@@ -3,208 +3,432 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shakha Feedback</title>
-
 <style>
-body {
-  font-family: Arial;
-  background: #f5f5f5;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-  margin:0;
-}
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600&family=DM+Sans:wght@400;500&display=swap');
 
-.card {
-  background:white;
-  padding:24px;
-  border-radius:16px;
-  width:90%;
-  max-width:360px;
-  text-align:center;
-  box-shadow:0 10px 20px rgba(0,0,0,0.1);
-}
+  :root {
+    --saffron: #FF6B1A;
+    --deep: #1a1207;
+    --card-bg: #fffdf8;
+    --muted: #8a7e6e;
+    --border: #e8e0d0;
+    --radius: 14px;
+  }
 
-.emojis span {
-  font-size:32px;
-  margin:10px;
-  cursor:pointer;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-input, textarea, select {
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f0ebe0;
+    background-image: radial-gradient(circle at 20% 20%, #ffe8d0 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, #ffdfc0 0%, transparent 50%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
 
-button {
-  padding:12px;
-  width:100%;
-  border-radius:10px;
-  border:none;
-  background:#111;
-  color:white;
-}
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    width: 100%;
+    max-width: 380px;
+    padding: 28px 24px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.1);
+    border: 1px solid var(--border);
+  }
+
+  .shakha-name {
+    font-family: 'Noto Serif', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--saffron);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .shakha-date {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--deep);
+    margin-bottom: 4px;
+  }
+
+  .step-label {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  .session-title {
+    font-family: 'Noto Serif', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--deep);
+    margin-bottom: 6px;
+  }
+
+  .session-meta {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .session-meta strong {
+    color: var(--deep);
+    font-weight: 500;
+  }
+
+  .prompt {
+    font-size: 15px;
+    color: var(--deep);
+    margin-bottom: 16px;
+  }
+
+  .emojis {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .emoji-btn {
+    font-size: 28px;
+    cursor: pointer;
+    background: none;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 6px 8px;
+    transition: border-color 0.15s, transform 0.15s;
+    line-height: 1;
+  }
+  .emoji-btn:hover { transform: scale(1.15); }
+  .emoji-btn.selected { border-color: var(--saffron); background: #fff5ee; }
+
+  select, input, textarea {
+    width: 100%;
+    padding: 11px 14px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: white;
+    color: var(--deep);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  select:focus, input:focus, textarea:focus { border-color: var(--saffron); }
+  textarea { resize: vertical; min-height: 90px; }
+
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 13px;
+    margin-top: 14px;
+    border-radius: 10px;
+    border: none;
+    background: var(--deep);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn:hover { background: #2d2010; }
+  .btn:active { transform: scale(0.98); }
+  .btn.primary { background: var(--saffron); }
+  .btn.primary:hover { background: #e55a0f; }
+
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .dot.active { background: var(--saffron); }
+  .dot.done { background: var(--deep); }
+
+  .ver {
+    font-size: 11px;
+    color: #ccc;
+    margin-top: 16px;
+  }
+
+  .loading {
+    color: var(--muted);
+    font-size: 14px;
+    padding: 20px 0;
+  }
+
+  .error {
+    color: #c0392b;
+    font-size: 14px;
+    padding: 12px;
+    background: #fdf0ee;
+    border-radius: 8px;
+    margin-top: 10px;
+  }
+
+  .thankyou-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
 </style>
 </head>
 
 <body>
-
-<div class="card" id="app"></div>
+<div class="card" id="app">
+  <div class="loading">Loading...</div>
+</div>
 
 <script>
-const SHAKHA_NAME = "Ramakrishna Parivaar Shakha - L SPA";
-const SHAKHA_DATE = "03 Apr 2026"; // 👈 change manually
-const APP_VER = "0.9"
-const sessions = ["Achar Paddhati", "Shareerik",  "Bauddikh"];
-const GANA_DATA = {
-  Kishore: {
-    bauddikhTitle: "Hanuman Ji",
-    bauddikhShikshak: "Tanaya Ben"
-  },
-  Kishori: {
-    bauddikhTitle: "Hanuman Ji",
-    bauddikhShikshak: "Tanaya Ben"
-  },
-  Yuva: {
-    bauddikhTitle: "Charcha on Hindu/Indian Challenges in UK",
-    bauddikhShikshak: "Shrishail Ji"
-  }
-};
+const APP_VER = "1.0";
+
+let config = null;
 let step = -1;
 let feedback = {};
 let gana = "";
+let sessions = [];
 
-startScreen();
-function header(title){
-  return `
-    <h3>${SHAKHA_NAME}</h3>
-    <h2>Shakha on: ${SHAKHA_DATE}</h2>
-    <p>${title}</p>
-      `;
+// --- URL params ---
+function getParams() {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    nagar: p.get("nagar"),
+    shakha: p.get("shakha"),
+    date: p.get("date")
+  };
 }
 
-function startScreen(){
-  document.getElementById("app").innerHTML = `
-    ${header("Feedback")}
-    <br>This will be quick, we Promise! :-)<br><br>
-    <button onclick="chooseGana()">Start</button>
-    <br><p>ver:${APP_VER}</p>
-  `;
-}
-function chooseGana() {
-    document.getElementById("app").innerHTML = `
-        ${header("Select Gana")}
-        <select id="gana">
-            <option value="">Select</option>
-            <option>Kishore</option>
-            <option>Kishori</option>
-            <option>Yuva</option>
-        </select>
-        <button onclick="start()">Continue</button>
-    `;
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+// --- Config loader (called from module script once db is ready) ---
+window.loadConfig = async function() {
+  const { nagar, shakha, date } = getParams();
 
-function start(){
-  gana = document.getElementById("gana").value;
-  if(!gana){
-    alert("Please select Gana");
+  // Fallback for old URLs with no params — remove once demo period is over
+  if (!nagar || !shakha || !date) {
+    config = {
+      shakhaName: "Ramakrishna Parivaar Shakha - L SPA",
+      date: "2026-04-03",
+      ganas: ["Kishore", "Kishori", "Yuva"],
+      sessions: ["Achar Paddhati", "Shareerik", "Bauddikh"],
+      ganaData: {
+        Kishore:  { bauddikhTitle: "Hanuman Ji", bauddikhShikshak: "Tanaya Ben" },
+        Kishori:  { bauddikhTitle: "Hanuman Ji", bauddikhShikshak: "Tanaya Ben" },
+        Yuva:     { bauddikhTitle: "Charcha on Hindu/Indian Challenges in UK", bauddikhShikshak: "Shrishail Ji" }
+      }
+    };
+    sessions = config.sessions;
+    startScreen();
     return;
   }
+
+  try {
+    // Fetch shakha config
+    const shakhaRef = window.firestoreDoc(window.db, "nagars", nagar, "shakhas", shakha);
+    const shakhaSnap = await window.firestoreGetDoc(shakhaRef);
+
+    if (!shakhaSnap.exists()) {
+      showError(`Shakha "${shakha}" not found under nagar "${nagar}".`);
+      return;
+    }
+
+    config = shakhaSnap.data();
+
+    // Try to fetch session-level overrides (optional)
+    const sessionRef = window.firestoreDoc(window.db, "nagars", nagar, "shakhas", shakha, "sessions", date);
+    const sessionSnap = await window.firestoreGetDoc(sessionRef);
+
+    if (sessionSnap.exists()) {
+      // Session doc can override date, sessions list, or ganaData
+      config = { ...config, ...sessionSnap.data() };
+    } else {
+      // Use the date from URL if no session doc
+      config.date = date;
+    }
+
+    sessions = config.sessions || [];
+    startScreen();
+
+  } catch (err) {
+    console.error(err);
+    showError("Failed to load config: " + err.message);
+  }
+};
+
+// --- Render helpers ---
+function render(html) {
+  document.getElementById("app").innerHTML = html;
+}
+
+function showError(msg) {
+  render(`<div class="error">${msg}</div>`);
+}
+
+function header() {
+  return `
+    <div class="shakha-name">${config.shakhaName || config.nagarName || ""}</div>
+    <div class="shakha-date">Shakha: ${formatDate(config.date)}</div>
+  `;
+}
+
+function progressDots(currentStep) {
+  return `<div class="progress-dots">
+    ${sessions.map((_, i) => `<div class="dot ${i < currentStep ? 'done' : i === currentStep ? 'active' : ''}"></div>`).join('')}
+  </div>`;
+}
+
+// --- Screens ---
+function startScreen() {
+  render(`
+    ${header()}
+    <div class="divider"></div>
+    <div class="step-label">Feedback Form</div>
+    <p class="prompt">This will be quick, we Promise! 🙏</p>
+    <button class="btn primary" onclick="chooseGana()">Start</button>
+    <div class="ver">ver ${APP_VER}</div>
+  `);
+}
+
+function chooseGana() {
+  const ganas = config.ganas || [];
+  render(`
+    ${header()}
+    <div class="divider"></div>
+    <div class="step-label">Select your Gana</div>
+    <select id="gana">
+      <option value="">-- Select --</option>
+      ${ganas.map(g => `<option>${g}</option>`).join('')}
+    </select>
+    <button class="btn" onclick="start()">Continue</button>
+  `);
+}
+
+function start() {
+  gana = document.getElementById("gana").value;
+  if (!gana) { alert("Please select your Gana"); return; }
   step = 0;
   feedback = {};
-  
   showSession();
 }
 
-function showSession(){
-  if(step >= sessions.length){
-    showFinal();
-    return;
+function showSession() {
+  if (step >= sessions.length) { showFinal(); return; }
+
+  const session = sessions[step];
+  const gd = (config.ganaData || {})[gana] || {};
+
+  let metaHtml = `<div class="session-meta"><strong>${gana}</strong></div>`;
+
+  if (gd.bauddikhTitle && session.toLowerCase().includes("bauddikh")) {
+    metaHtml = `
+      <div class="session-meta">
+        <strong>${gana}</strong><br>
+        ${gd.bauddikhTitle}<br>
+        <span style="font-size:12px">Shikshak: ${gd.bauddikhShikshak || ""}</span>
+      </div>`;
   }
 
-  let session = sessions[step];
-
-  let ganaDisplay = "";
-  if(session === "Bauddikh"){
-    ganaDisplay = `
-      <p>Gana:<b>[${gana}]</b></p>
-      <p>Topic:<b>${GANA_DATA[gana].bauddikhTitle}</b></p>
-      <p>Shikshak:${GANA_DATA[gana].bauddikhShikshak}</p>
-    `;
-  } else {
-    ganaDisplay = `<p>[<b>${gana}]</b></p>`;
-  }
-
-  document.getElementById("app").innerHTML = `
-    ${header(session)}
-    ${ganaDisplay}
-    <p>How was this session?</p>
-
+  render(`
+    ${header()}
+    <div class="divider"></div>
+    ${progressDots(step)}
+    <div class="session-title">${session}</div>
+    ${metaHtml}
+    <p class="prompt">How was this session?</p>
     <div class="emojis">
-      <span onclick="rate(1)">😞</span>
-      <span onclick="rate(2)">😐</span>
-      <span onclick="rate(3)">🙂</span>
-      <span onclick="rate(4)">😄</span>
-      <span onclick="rate(5)">🤩</span>
+      <button class="emoji-btn" onclick="rate(1)">😞</button>
+      <button class="emoji-btn" onclick="rate(2)">😐</button>
+      <button class="emoji-btn" onclick="rate(3)">🙂</button>
+      <button class="emoji-btn" onclick="rate(4)">😄</button>
+      <button class="emoji-btn" onclick="rate(5)">🤩</button>
     </div>
-  `;
+  `);
 }
-function rate(value){
+
+function rate(value) {
   feedback[sessions[step]] = value;
-  next();
+
+  // Flash selected emoji briefly before moving on
+  const btns = document.querySelectorAll(".emoji-btn");
+  if (btns[value - 1]) {
+    btns[value - 1].classList.add("selected");
+    setTimeout(() => { step++; showSession(); }, 320);
+  } else {
+    step++;
+    showSession();
+  }
 }
 
-function next(){
-  let session = sessions[step];
-  
-  step++;
-  showSession();
-}
-
-function showFinal(){
-  document.getElementById("app").innerHTML = `
-    ${header("Overall comments/Improvements, please be honest and critical")}
+function showFinal() {
+  render(`
+    ${header()}
+    <div class="divider"></div>
+    <div class="step-label">Almost done!</div>
     <input id="name" placeholder="Your name (optional)" />
-    <textarea id="overall" placeholder="Overall comments/Improvements, please be honest and critical"></textarea>
-    <button onclick="submitFinal()">Submit</button>
-  `;
+    <textarea id="overall" placeholder="Any comments or suggestions? Please be honest 🙏"></textarea>
+    <button class="btn primary" onclick="submitFinal()">Submit Feedback</button>
+  `);
 }
 
-function submitFinal(){
-  const name = document.getElementById("name").value;
-  const overall = document.getElementById("overall").value;
+function submitFinal() {
+  const name = document.getElementById("name").value.trim();
+  const overall = document.getElementById("overall").value.trim();
+  const gd = (config.ganaData || {})[gana] || {};
 
-  addDoc(collection(db, "feedbacks"), {
-    shakha: SHAKHA_NAME,
-    date: SHAKHA_DATE,
-    gana: gana,
-    bauddikhTitle: GANA_DATA[gana].bauddikhTitle,
-    bauddikhShikshak: GANA_DATA[gana].bauddikhShikshak,
-    ratings: {
-      achar: feedback["Achar Paddhati"],
-      shareerik: feedback["Shareerik"],
-      bauddikh: feedback["Bauddikh"]
-    },
+  // Build ratings object dynamically from whatever sessions were configured
+  const ratings = {};
+  sessions.forEach(s => {
+    const key = s.toLowerCase().replace(/\s+/g, "_");
+    ratings[key] = feedback[s] || null;
+  });
+
+  const { nagar, shakha } = getParams();
+
+  window.addDoc(window.collection(window.db, "feedbacks"), {
+    nagar: nagar || null,
+    shakha: shakha || null,
+    shakhaName: config.shakhaName || "",
+    date: config.date,
+    gana,
+    bauddikhTitle: gd.bauddikhTitle || null,
+    bauddikhShikshak: gd.bauddikhShikshak || null,
+    ratings,
     name: name || null,
     overallComment: overall || null,
     source: window.location.search.includes("qr=1") ? "QR" : "Shared",
     timestamp: new Date()
-  }).then((docRef) => {
-    console.log("SUCCESS:", docRef.id);
-    //alert("Saved!");
-    document.getElementById("app").innerHTML = `
-      ${header("🙏 Dhanyavaad!")}
-      We have recorded your feedback.
-      <br><br> You may close this window now.
-    `;
-  })
-  .catch((error) => {
-    console.error("FAILED:", error);
-    //alert("Error");
+  }).then(() => {
+    render(`
+      <div class="thankyou-icon">🙏</div>
+      <div class="session-title">Dhanyavaad!</div>
+      <div class="divider"></div>
+      <p class="session-meta">We have recorded your feedback.<br>You may close this window now.</p>
+    `);
+  }).catch(err => {
+    console.error("Submit failed:", err);
+    showError("Could not save your feedback. Please try again.");
   });
 }
 </script>
@@ -212,7 +436,7 @@ function submitFinal(){
 <!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDb4NpYEwtcoY8SgmIHRqAok9qKJF4Ej4k",
@@ -224,13 +448,17 @@ const firebaseConfig = {
   measurementId: "G-PFR8EEQQQF"
 };
 
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 window.db = db;
 window.collection = collection;
 window.addDoc = addDoc;
+window.firestoreDoc = doc;
+window.firestoreGetDoc = getDoc;
+
+// Kick off config load now that db is ready
+window.loadConfig();
 </script>
 
 </body>
