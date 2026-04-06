@@ -139,12 +139,13 @@ function loadChart1(){
     }
 
     grouped[date].s += d.ratings?.shareerik || 0;
-    grouped[date].b += d.ratings?.bauddik || 0;
+    grouped[date].b += d.ratings?.bauddikh || 0;
     grouped[date].a += d.ratings?.achar || 0;
     grouped[date].c++;
   });
 
-  let dates = Object.keys(grouped).sort();
+  let dates = Object.keys(grouped)
+  .sort((a, b) => new Date(a) - new Date(b)); // ASCENDING
 
   let s = [], b = [], a = [];
 
@@ -163,7 +164,7 @@ function loadChart1(){
       labels: dates.map(d => new Date(d).toLocaleDateString()),
       datasets: [
         { label: "Shareerik", data: rollingAverage(s) },
-        { label: "Bauddik", data: rollingAverage(b) },
+        { label: "Bauddikh", data: rollingAverage(b) },
         { label: "Achar", data: rollingAverage(a) }
       ]
     },
@@ -180,26 +181,48 @@ function loadChart2(){
 
   let filtered = allData.filter(d => d.date === date);
 
-  let html = "";
+  if(filtered.length === 0){
+    document.getElementById("details").innerHTML = "No data";
+    document.getElementById("insights").innerHTML = "";
+    return;
+  }
+
+  let grouped = {};
 
   filtered.forEach(d => {
-    html += `
-      <div style="border-bottom:1px solid #ddd; padding:10px;">
-        <b>Gana:</b> ${d.gana} <br>
-        <b>Shareerik:</b> ${d.ratings?.shareerik} |
-        <b>Bauddik:</b> ${d.ratings?.bauddik} |
-        <b>Achar:</b> ${d.ratings?.achar} <br>
+    let g = d.gana;
 
-        <i>${d.comments?.Shareerik || ""}</i><br>
-        <i>${d.comments?.Bauddik || ""}</i><br>
-        <i>${d.comments?.["Achar Paddhati"] || ""}</i><br>
+    if(!grouped[g]){
+      grouped[g] = { s:0, b:0, a:0, c:0 };
+    }
 
-        <b>${d.name || ""}</b>
-      </div>
-    `;
+    grouped[g].s += d.ratings?.shareerik || 0;
+    grouped[g].b += d.ratings?.bauddik || 0;
+    grouped[g].a += d.ratings?.achar || 0;
+    grouped[g].c++;
   });
 
-  document.getElementById("details").innerHTML = html || "No data";
+  let html = "";
+
+  Object.keys(grouped).forEach(g => {
+    let data = grouped[g];
+
+    let sAvg = (data.s / data.c).toFixed(2);
+    let bAvg = (data.b / data.c).toFixed(2);
+    let aAvg = (data.a / data.c).toFixed(2);
+
+   html += `
+  <div style="border-bottom:1px solid #ddd; padding:12px;">
+    <h4>${g} (${data.c} responses)</h4>
+
+    <b>Shareerik:</b> ${sAvg} <br>
+    <b>Bauddikh:</b> ${bAvg} <br>
+    <b>Achar:</b> ${aAvg}
+  </div>
+`;
+  });
+
+  document.getElementById("details").innerHTML = html;
 
   generateInsights(filtered);
 }
