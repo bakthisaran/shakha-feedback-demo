@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shakha Analytics</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600&family=DM+Sans:wght@400;500&display=swap');
+
+  :root {
+    --saffron: #FF6B1A;
+    --deep: #1a1207;
+    --bg: #f5f0e8;
+    --card: #fffdf8;
+    --muted: #8a7e6e;
+    --border: #e8e0d0;
+    --success: #2d7a4f;
+    --error: #c0392b;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    padding: 32px 16px 64px;
+    color: var(--deep);
+  }
+
+  /* ---- Auth gate ---- */
+  #authGate {
+    display: none;
+    max-width: 360px;
+    margin: 80px auto 0;
+    text-align: center;
+  }
+  .auth-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 40px 32px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 12px 32px rgba(0,0,0,0.08);
+  }
+  .auth-icon { font-size: 36px; margin-bottom: 12px; }
+  .auth-title { font-family: 'Noto Serif', serif; font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .auth-subtitle { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+  .btn-google {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 13px 20px; border-radius: 10px;
+    border: 1.5px solid var(--border); background: white;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    color: var(--deep); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .btn-google:hover { border-color: #aaa; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .google-logo { width: 18px; height: 18px; flex-shrink: 0; }
+  .auth-denied { display: none; margin-top: 16px; padding: 12px; background: #fdf0ee; border-radius: 8px; font-size: 13px; color: var(--error); }
+
+  /* ---- User bar ---- */
+  #userBar {
+    display: none; max-width: 900px; margin: 0 auto 20px;
+    padding: 10px 16px; background: var(--card);
+    border-radius: 10px; border: 1px solid var(--border);
+    font-size: 13px; color: var(--muted);
+    align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .user-email { color: var(--deep); font-weight: 500; }
+  .btn-signout {
+    padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border);
+    background: white; font-family: 'DM Sans', sans-serif; font-size: 12px;
+    color: var(--muted); cursor: pointer; transition: border-color 0.15s;
+  }
+  .btn-signout:hover { border-color: var(--error); color: var(--error); }
+
+  /* ---- Main content ---- */
+  #mainContent { display: none; max-width: 900px; margin: 0 auto; }
+
+  .page-header { margin-bottom: 28px; }
+  .page-title { font-family: 'Noto Serif', serif; font-size: 26px; font-weight: 600; }
+  .page-subtitle { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+  /* ---- Filters ---- */
+  .filters {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-end;
+  }
+
+  .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 160px; }
+  .filter-label { font-size: 12px; font-weight: 500; color: var(--muted); }
+
+  select {
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: white;
+    color: var(--deep);
+    outline: none;
+    transition: border-color 0.15s;
+    cursor: pointer;
+  }
+  select:focus { border-color: var(--saffron); }
+  select:disabled { background: #f5f5f5; color: #bbb; cursor: not-allowed; }
+
+  .btn-load {
+    padding: 10px 20px; border-radius: 8px; border: none;
+    background: var(--saffron); color: white;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s; white-space: nowrap; align-self: flex-end;
+  }
+  .btn-load:hover { background: #e55a0f; }
+  .btn-load:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* ---- Summary pills ---- */
+  .summary-row {
+    display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px;
+  }
+  .summary-pill {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 20px; flex: 1; min-width: 130px;
+    text-align: center;
+  }
+  .pill-value { font-family: 'Noto Serif', serif; font-size: 28px; font-weight: 600; color: var(--saffron); }
+  .pill-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* ---- Chart cards ---- */
+  .chart-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px;
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .chart-title {
+    font-family: 'Noto Serif', serif;
+    font-size: 16px; font-weight: 600;
+    color: var(--deep); margin-bottom: 4px;
+  }
+  .chart-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+  .chart-wrap { width: 100%; overflow-x: auto; }
+  svg text { font-family: 'DM Sans', sans-serif; }
+
+  /* D3 chart styles */
+  .axis path, .axis line { stroke: var(--border); }
+  .axis text { fill: var(--muted); font-size: 11px; }
+  .grid line { stroke: var(--border); stroke-dasharray: 3 3; opacity: 0.6; }
+  .grid path { stroke: none; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Tooltip */
+  .d3-tooltip {
+    position: absolute;
+    background: var(--deep);
+    color: #f5f0e8;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    line-height: 1.6;
+    white-space: nowrap;
+    z-index: 10;
+  }
+
+  .empty-state {
+    text-align: center; padding: 48px 20px;
+    color: var(--muted); font-size: 14px;
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 10px; }
+
+  .loading-state { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- Auth gate -->
+<div id="authGate">
+  <div class="auth-card">
+    <div class="auth-icon">📊</div>
+    <div class="auth-title">Shakha Analytics</div>
+    <div class="auth-subtitle">Sign in with an approved account to view feedback analytics.</div>
+    <button class="btn-google" onclick="signIn()">
+      <svg class="google-logo" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+        <path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
+        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/>
+      </svg>
+      Sign in with Google
+    </button>
+    <div class="auth-denied" id="authDenied">Your account is not authorised. Please contact the Nagar admin.</div>
+  </div>
+</div>
+
+<!-- User bar -->
+<div id="userBar">
+  <span>Signed in as <span class="user-email" id="userEmail">—</span></span>
+  <button class="btn-signout" onclick="signOut()">Sign out</button>
+</div>
+
+<!-- Main content -->
+<div id="mainContent">
+  <div class="page-header">
+    <div class="page-title">Shakha Analytics</div>
+    <div class="page-subtitle">Feedback trends across sessions and ganas</div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-group">
+      <span class="filter-label">Nagar</span>
+      <select id="selNagar" onchange="onNagarChange()">
+        <option value="">Select Nagar…</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Shakha</span>
+      <select id="selShakha" onchange="onShakhaChange()" disabled>
+        <option value="">Select Shakha…</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Gana</span>
+      <select id="selGana" disabled>
+        <option value="all">All Ganas</option>
+      </select>
+    </div>
+    <button class="btn-load" id="btnLoad" onclick="loadAnalytics()" disabled>Load</button>
+  </div>
+
+  <!-- Summary pills -->
+  <div class="summary-row" id="summaryRow" style="display:none">
+    <div class="summary-pill">
+      <div class="pill-value" id="pillResponses">—</div>
+      <div class="pill-label">Total responses</div>
+    </div>
+    <div class="summary-pill">
+      <div class="pill-value" id="pillSessions">—</div>
+      <div class="pill-label">Shakha dates</div>
+    </div>
+    <div class="summary-pill">
+      <div class="pill-value" id="pillAvg">—</div>
+      <div class="pill-label">Overall avg score</div>
+    </div>
+    <div class="summary-pill">
+      <div class="pill-value" id="pillTop">—</div>
+      <div class="pill-label">Top session</div>
+    </div>
+  </div>
+
+  <!-- Trend chart -->
+  <div class="chart-card" id="trendCard" style="display:none">
+    <div class="chart-title">Session score trends over time</div>
+    <div class="chart-subtitle">Average emoji rating per session across Shakha dates</div>
+    <div class="chart-wrap" id="trendWrap"></div>
+    <div class="legend" id="trendLegend"></div>
+  </div>
+
+  <!-- Latest bar chart -->
+  <div class="chart-card" id="barCard" style="display:none">
+    <div class="chart-title">Latest Shakha — scores by session &amp; gana</div>
+    <div class="chart-subtitle" id="barSubtitle"></div>
+    <div class="chart-wrap" id="barWrap"></div>
+    <div class="legend" id="barLegend"></div>
+  </div>
+
+  <!-- Empty / loading states -->
+  <div id="emptyState" style="display:none" class="chart-card">
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      No feedback found for the selected filters. Try a different Gana or check back after the next Shakha.
+    </div>
+  </div>
+</div>
+
+<div class="d3-tooltip" id="tooltip"></div>
+
+<!-- D3 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+
+<script>
+// ---- Config ----
+const ADMIN_EMAILS = [
+  "bakthisaran@gmail.com"
+];
+
+const SESSION_COLORS = [
+  "#FF6B1A", "#1D9E75", "#378ADD", "#D85A30",
+  "#7F77DD", "#BA7517", "#D4537E"
+];
+
+const GANA_COLORS = [
+  "#FF6B1A", "#1D9E75", "#378ADD", "#7F77DD",
+  "#D85A30", "#BA7517", "#D4537E", "#0F6E56",
+  "#534AB7", "#993C1D", "#3B6D11"
+];
+
+// ---- Auth ----
+window.signIn  = () => window._signIn();
+window.signOut = () => window._signOut();
+
+window.onAuthStateChanged = function(user) {
+  if (user && ADMIN_EMAILS.includes(user.email)) {
+    document.getElementById("authGate").style.display = "none";
+    document.getElementById("authDenied").style.display = "none";
+    document.getElementById("userBar").style.display = "flex";
+    document.getElementById("userEmail").textContent = user.email;
+    document.getElementById("mainContent").style.display = "block";
+    loadNagars();
+  } else if (user) {
+    document.getElementById("authGate").style.display = "block";
+    document.getElementById("authDenied").style.display = "block";
+    document.getElementById("userBar").style.display = "none";
+    document.getElementById("mainContent").style.display = "none";
+  } else {
+    document.getElementById("authGate").style.display = "block";
+    document.getElementById("authDenied").style.display = "none";
+    document.getElementById("userBar").style.display = "none";
+    document.getElementById("mainContent").style.display = "none";
+  }
+};
+
+// ---- Firestore helpers ----
+async function loadNagars() {
+  try {
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "nagars"));
+    const sel = document.getElementById("selNagar");
+    snap.forEach(doc => {
+      const opt = document.createElement("option");
+      opt.value = doc.id;
+      opt.textContent = doc.data().nagarName || doc.id;
+      sel.appendChild(opt);
+    });
+  } catch(e) { console.error(e); }
+}
+
+async function onNagarChange() {
+  const nagar = document.getElementById("selNagar").value;
+  const shakhaEl = document.getElementById("selShakha");
+  shakhaEl.innerHTML = '<option value="">Select Shakha…</option>';
+  shakhaEl.disabled = true;
+  document.getElementById("selGana").disabled = true;
+  document.getElementById("btnLoad").disabled = true;
+  resetCharts();
+
+  if (!nagar) return;
+
+  try {
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "nagars", nagar, "shakhas"));
+    snap.forEach(doc => {
+      const opt = document.createElement("option");
+      opt.value = doc.id;
+      opt.textContent = doc.data().shakhaName || doc.id;
+      shakhaEl.appendChild(opt);
+    });
+    shakhaEl.disabled = false;
+  } catch(e) { console.error(e); }
+}
+
+async function onShakhaChange() {
+  const nagar  = document.getElementById("selNagar").value;
+  const shakha = document.getElementById("selShakha").value;
+  const ganaEl = document.getElementById("selGana");
+  ganaEl.innerHTML = '<option value="all">All Ganas</option>';
+  ganaEl.disabled = true;
+  document.getElementById("btnLoad").disabled = true;
+  resetCharts();
+
+  if (!shakha) return;
+
+  try {
+    const doc = await window.fsGetDoc(window.fsDoc(window.db, "nagars", nagar, "shakhas", shakha));
+    if (doc.exists()) {
+      const ganas = doc.data().ganas || [];
+      ganas.forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = g; opt.textContent = g;
+        ganaEl.appendChild(opt);
+      });
+    }
+    ganaEl.disabled = false;
+    document.getElementById("btnLoad").disabled = false;
+  } catch(e) { console.error(e); }
+}
+
+// ---- Load & aggregate analytics ----
+async function loadAnalytics() {
+  const nagar  = document.getElementById("selNagar").value;
+  const shakha = document.getElementById("selShakha").value;
+  const gana   = document.getElementById("selGana").value;
+
+  resetCharts();
+  document.getElementById("btnLoad").disabled = true;
+  document.getElementById("btnLoad").textContent = "Loading…";
+
+  try {
+    // Query feedbacks for this nagar + shakha
+    let q = window.fsQuery(
+      window.fsCollection(window.db, "feedbacks"),
+      window.fsWhere("nagar", "==", nagar),
+      window.fsWhere("shakha", "==", shakha)
+    );
+    if (gana !== "all") {
+      q = window.fsQuery(
+        window.fsCollection(window.db, "feedbacks"),
+        window.fsWhere("nagar", "==", nagar),
+        window.fsWhere("shakha", "==", shakha),
+        window.fsWhere("gana", "==", gana)
+      );
+    }
+
+    const snap = await window.fsGetDocs(q);
+    const docs = [];
+    snap.forEach(d => docs.push(d.data()));
+
+    if (docs.length === 0) {
+      document.getElementById("emptyState").style.display = "block";
+      return;
+    }
+
+    renderAnalytics(docs, gana);
+
+  } catch(e) {
+    console.error(e);
+    alert("Error loading data: " + e.message);
+  } finally {
+    document.getElementById("btnLoad").disabled = false;
+    document.getElementById("btnLoad").textContent = "Load";
+  }
+}
+
+function renderAnalytics(docs, selectedGana) {
+  // Collect all session keys across all docs
+  const sessionKeys = new Set();
+  docs.forEach(d => {
+    if (d.ratings) Object.keys(d.ratings).forEach(k => { if (d.ratings[k] != null) sessionKeys.add(k); });
+  });
+  const sessions = [...sessionKeys].sort();
+
+  // Friendly session labels
+  const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+  // Group by date
+  const byDate = {};
+  docs.forEach(d => {
+    const date = d.date || "unknown";
+    if (!byDate[date]) byDate[date] = [];
+    byDate[date].push(d);
+  });
+  const dates = Object.keys(byDate).sort();
+
+  // Compute avg score per session per date
+  const trendData = sessions.map((sess, si) => ({
+    session: sess,
+    label: label(sess),
+    color: SESSION_COLORS[si % SESSION_COLORS.length],
+    points: dates.map(date => {
+      const group = byDate[date];
+      const vals = group.map(d => d.ratings?.[sess]).filter(v => v != null && v > 0);
+      return { date, avg: vals.length ? d3.mean(vals) : null, n: vals.length };
+    }).filter(p => p.avg != null)
+  }));
+
+  // Summary stats
+  const allRatings = [];
+  docs.forEach(d => { if (d.ratings) Object.values(d.ratings).forEach(v => { if (v > 0) allRatings.push(v); }); });
+  const overallAvg = allRatings.length ? d3.mean(allRatings) : 0;
+
+  // Top session
+  const sessionAvgs = sessions.map(s => {
+    const vals = docs.map(d => d.ratings?.[s]).filter(v => v != null && v > 0);
+    return { session: s, avg: vals.length ? d3.mean(vals) : 0 };
+  });
+  sessionAvgs.sort((a, b) => b.avg - a.avg);
+  const topSession = sessionAvgs[0]?.session || "—";
+
+  // Update summary pills
+  document.getElementById("summaryRow").style.display = "flex";
+  document.getElementById("pillResponses").textContent = docs.length;
+  document.getElementById("pillSessions").textContent = dates.length;
+  document.getElementById("pillAvg").textContent = overallAvg.toFixed(1);
+  document.getElementById("pillTop").textContent = label(topSession);
+
+  // Draw trend chart
+  drawTrendChart(trendData, dates);
+
+  // Draw bar chart for latest date
+  const latestDate = dates[dates.length - 1];
+  const latestDocs = byDate[latestDate];
+  drawBarChart(latestDocs, sessions, label, latestDate, selectedGana);
+}
+
+// ---- Trend line chart ----
+function drawTrendChart(trendData, dates) {
+  document.getElementById("trendCard").style.display = "block";
+  const wrap = document.getElementById("trendWrap");
+  wrap.innerHTML = "";
+
+  const W = wrap.clientWidth || 800;
+  const margin = { top: 20, right: 20, bottom: 50, left: 44 };
+  const width  = W - margin.left - margin.right;
+  const height = 280 - margin.top - margin.bottom;
+
+  const parseDate = d3.timeParse("%Y-%m-%d");
+  const fmtDate   = d3.timeFormat("%d %b");
+
+  // Flatten all points for scale
+  const allPoints = trendData.flatMap(s => s.points);
+  if (allPoints.length === 0) return;
+
+  const xDomain = allPoints.map(p => parseDate(p.date)).filter(Boolean);
+  const x = d3.scaleTime().domain(d3.extent(xDomain)).range([0, width]);
+  const y = d3.scaleLinear().domain([1, 5]).range([height, 0]);
+
+  const svg = d3.select(wrap).append("svg")
+    .attr("width", W)
+    .attr("height", height + margin.top + margin.bottom);
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Grid
+  g.append("g").attr("class", "grid")
+    .call(d3.axisLeft(y).ticks(4).tickSize(-width).tickFormat(""));
+
+  // Axes
+  g.append("g").attr("class", "axis")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x).ticks(Math.min(dates.length, 6)).tickFormat(d => fmtDate(d)));
+
+  g.append("g").attr("class", "axis")
+    .call(d3.axisLeft(y).ticks(4).tickFormat(d => ["","😞","😐","🙂","😄","🤩"][d] || d));
+
+  const tooltip = document.getElementById("tooltip");
+
+  // Lines + dots per session
+  trendData.forEach(series => {
+    if (series.points.length === 0) return;
+
+    const line = d3.line()
+      .x(p => x(parseDate(p.date)))
+      .y(p => y(p.avg))
+      .curve(d3.curveMonotoneX);
+
+    g.append("path")
+      .datum(series.points)
+      .attr("fill", "none")
+      .attr("stroke", series.color)
+      .attr("stroke-width", 2.5)
+      .attr("stroke-linejoin", "round")
+      .attr("d", line);
+
+    g.selectAll(`.dot-${series.session}`)
+      .data(series.points)
+      .enter().append("circle")
+      .attr("cx", p => x(parseDate(p.date)))
+      .attr("cy", p => y(p.avg))
+      .attr("r", 5)
+      .attr("fill", series.color)
+      .attr("stroke", "white")
+      .attr("stroke-width", 2)
+      .style("cursor", "pointer")
+      .on("mouseover", function(event, p) {
+        tooltip.style.opacity = "1";
+        tooltip.innerHTML = `<strong>${series.label}</strong><br>${p.date}<br>Avg: ${p.avg.toFixed(2)} (${p.n} responses)`;
+      })
+      .on("mousemove", function(event) {
+        tooltip.style.left = (event.pageX + 12) + "px";
+        tooltip.style.top  = (event.pageY - 28) + "px";
+      })
+      .on("mouseout", () => { tooltip.style.opacity = "0"; });
+  });
+
+  // Legend
+  const legend = document.getElementById("trendLegend");
+  legend.innerHTML = trendData.map(s => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${s.color}"></div>
+      ${s.label}
+    </div>
+  `).join('');
+}
+
+// ---- Bar chart (latest shakha, by session & gana) ----
+function drawBarChart(docs, sessions, labelFn, date, selectedGana) {
+  document.getElementById("barCard").style.display = "block";
+  document.getElementById("barSubtitle").textContent = `Shakha date: ${date}`;
+
+  const wrap = document.getElementById("barWrap");
+  wrap.innerHTML = "";
+
+  const ganas = selectedGana === "all"
+    ? [...new Set(docs.map(d => d.gana).filter(Boolean))].sort()
+    : [selectedGana];
+
+  // Avg per gana per session
+  const data = sessions.map(sess => {
+    const entry = { session: sess, label: labelFn(sess) };
+    ganas.forEach(g => {
+      const vals = docs.filter(d => d.gana === g)
+        .map(d => d.ratings?.[sess]).filter(v => v != null && v > 0);
+      entry[g] = vals.length ? d3.mean(vals) : null;
+    });
+    return entry;
+  });
+
+  const W = wrap.clientWidth || 800;
+  const margin = { top: 20, right: 20, bottom: 70, left: 44 };
+  const width  = W - margin.left - margin.right;
+  const height = 280 - margin.top - margin.bottom;
+
+  const x0 = d3.scaleBand().domain(sessions).range([0, width]).padding(0.25);
+  const x1 = d3.scaleBand().domain(ganas).range([0, x0.bandwidth()]).padding(0.08);
+  const y  = d3.scaleLinear().domain([0, 5]).range([height, 0]);
+
+  const svg = d3.select(wrap).append("svg")
+    .attr("width", W)
+    .attr("height", height + margin.top + margin.bottom);
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Grid
+  g.append("g").attr("class", "grid")
+    .call(d3.axisLeft(y).ticks(4).tickSize(-width).tickFormat(""));
+
+  // Axes
+  g.append("g").attr("class", "axis")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x0).tickFormat(labelFn))
+    .selectAll("text")
+    .attr("transform", "rotate(-30)")
+    .style("text-anchor", "end")
+    .attr("dy", "0.5em")
+    .attr("dx", "-0.5em");
+
+  g.append("g").attr("class", "axis")
+    .call(d3.axisLeft(y).ticks(4).tickFormat(d => ["","😞","😐","🙂","😄","🤩"][d] || d));
+
+  const tooltip = document.getElementById("tooltip");
+
+  // Bars
+  sessions.forEach(sess => {
+    const sessGroup = g.append("g")
+      .attr("transform", `translate(${x0(sess)},0)`);
+
+    ganas.forEach((gana, gi) => {
+      const val = data.find(d => d.session === sess)?.[gana];
+      if (val == null) return;
+
+      sessGroup.append("rect")
+        .attr("x", x1(gana))
+        .attr("y", y(val))
+        .attr("width", x1.bandwidth())
+        .attr("height", height - y(val))
+        .attr("rx", 4)
+        .attr("fill", GANA_COLORS[gi % GANA_COLORS.length])
+        .attr("opacity", 0.85)
+        .style("cursor", "pointer")
+        .on("mouseover", function(event) {
+          d3.select(this).attr("opacity", 1);
+          tooltip.style.opacity = "1";
+          tooltip.innerHTML = `<strong>${gana}</strong> — ${labelFn(sess)}<br>Avg: ${val.toFixed(2)}`;
+        })
+        .on("mousemove", function(event) {
+          tooltip.style.left = (event.pageX + 12) + "px";
+          tooltip.style.top  = (event.pageY - 28) + "px";
+        })
+        .on("mouseout", function() {
+          d3.select(this).attr("opacity", 0.85);
+          tooltip.style.opacity = "0";
+        });
+    });
+  });
+
+  // Legend
+  const legend = document.getElementById("barLegend");
+  legend.innerHTML = ganas.map((g, i) => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${GANA_COLORS[i % GANA_COLORS.length]}"></div>
+      ${g}
+    </div>
+  `).join('');
+}
+
+function resetCharts() {
+  document.getElementById("summaryRow").style.display = "none";
+  document.getElementById("trendCard").style.display = "none";
+  document.getElementById("barCard").style.display = "none";
+  document.getElementById("emptyState").style.display = "none";
+  document.getElementById("trendWrap").innerHTML = "";
+  document.getElementById("barWrap").innerHTML = "";
+}
+</script>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, doc, getDoc, getDocs, query, where }
+  from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDb4NpYEwtcoY8SgmIHRqAok9qKJF4Ej4k",
+  authDomain: "shakha-feedback.firebaseapp.com",
+  projectId: "shakha-feedback",
+  storageBucket: "shakha-feedback.firebasestorage.app",
+  messagingSenderId: "1046199610177",
+  appId: "1:1046199610177:web:e85f6418fa9aca5dd44fc0",
+  measurementId: "G-PFR8EEQQQF"
+};
+
+const app      = initializeApp(firebaseConfig);
+const db       = getFirestore(app);
+const auth     = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+window.db            = db;
+window.fsCollection  = collection;
+window.fsDoc         = doc;
+window.fsGetDoc      = getDoc;
+window.fsGetDocs     = getDocs;
+window.fsQuery       = query;
+window.fsWhere       = where;
+
+window._signIn  = () => signInWithPopup(auth, provider).catch(e => console.error(e));
+window._signOut = () => signOut(auth);
+
+onAuthStateChanged(auth, user => window.onAuthStateChanged(user));
+</script>
+
+</body>
+</html>
