@@ -2,70 +2,650 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shakha Dashboard</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-
+<title>Shakha Admin</title>
 <style>
-body { font-family: Arial; background:#f5f5f5; padding:20px; }
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600&family=DM+Sans:wght@400;500&display=swap');
 
-.card {
-  background:white;
-  padding:16px;
-  border-radius:12px;
-  margin-bottom:20px;
-}
+  :root {
+    --saffron: #FF6B1A;
+    --deep: #1a1207;
+    --bg: #f5f0e8;
+    --card: #fffdf8;
+    --muted: #8a7e6e;
+    --border: #e8e0d0;
+    --success: #2d7a4f;
+    --error: #c0392b;
+    --radius: 12px;
+    --section-gap: 28px;
+  }
 
-select {
-  padding:8px;
-  margin:8px 8px 16px 0;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    padding: 32px 16px 64px;
+    color: var(--deep);
+  }
+
+  /* ---- Auth gate ---- */
+  #authGate {
+    display: none;
+    max-width: 360px;
+    margin: 80px auto 0;
+    text-align: center;
+  }
+
+  .auth-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 40px 32px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 12px 32px rgba(0,0,0,0.08);
+  }
+
+  .auth-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+
+  .auth-title {
+    font-family: 'Noto Serif', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--deep);
+    margin-bottom: 6px;
+  }
+
+  .auth-subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 13px 20px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--deep);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .btn-google:hover { border-color: #aaa; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+  .google-logo {
+    width: 18px; height: 18px; flex-shrink: 0;
+  }
+
+  .auth-denied {
+    display: none;
+    margin-top: 16px;
+    padding: 12px;
+    background: #fdf0ee;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--error);
+  }
+
+  /* ---- User bar (shown when signed in) ---- */
+  #userBar {
+    display: none;
+    max-width: 640px;
+    margin: 0 auto 20px;
+    padding: 10px 16px;
+    background: var(--card);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .user-email { color: var(--deep); font-weight: 500; }
+
+  .btn-signout {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.15s;
+    white-space: nowrap;
+  }
+  .btn-signout:hover { border-color: var(--error); color: var(--error); }
+
+  /* ---- Main form (hidden until auth) ---- */
+  .page-header { max-width: 640px; margin: 0 auto 28px; display: none; }
+  .page-title { font-family: 'Noto Serif', serif; font-size: 26px; font-weight: 600; }
+  .page-subtitle { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+  #formWrap {
+    display: none;
+    max-width: 640px;
+    margin: 0 auto;
+    flex-direction: column;
+    gap: var(--section-gap);
+  }
+
+  .section {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px;
+    border: 1px solid var(--border);
+  }
+
+  .section-title {
+    font-family: 'Noto Serif', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--saffron);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  input[type="text"], input[type="date"] {
+    width: 100%;
+    padding: 10px 13px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: white;
+    color: var(--deep);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus, input[type="date"]:focus { border-color: var(--saffron); }
+
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  /* Gana picker */
+  .gana-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .gana-pill {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+    user-select: none;
+  }
+  .gana-pill:hover { border-color: var(--saffron); color: var(--saffron); }
+  .gana-pill.selected { border-color: var(--saffron); background: #fff5ee; color: var(--saffron); }
+
+  /* Sessions */
+  .session-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .session-check {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 13px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+  .session-check:hover { border-color: var(--saffron); }
+  .session-check.checked { border-color: var(--saffron); background: #fff5ee; }
+  .session-check input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--saffron); cursor: pointer; flex-shrink: 0; }
+  .session-check span { font-size: 14px; font-weight: 500; }
+
+  /* Gana data blocks */
+  .gana-data-section { margin-top: 20px; }
+
+  .gana-block {
+    margin-bottom: 16px;
+    padding: 16px;
+    background: #faf8f4;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .gana-block:last-child { margin-bottom: 0; }
+
+  .gana-block-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--deep);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .gana-block-title span { color: var(--saffron); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  @media (max-width: 480px) {
+    .two-col { grid-template-columns: 1fr; }
+    .session-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Preview */
+  .preview-box {
+    background: #1a1207;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    color: #e8dfc8;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .preview-label { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+
+  .url-preview {
+    background: #f0ebe0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--deep);
+    word-break: break-all;
+    border: 1px solid var(--border);
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    background: var(--saffron);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    margin-top: 8px;
+  }
+  .btn-submit:hover { background: #e55a0f; }
+  .btn-submit:active { transform: scale(0.98); }
+  .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    padding: 13px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: transform 0.3s ease;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--success); color: white; }
+  .toast.error { background: var(--error); color: white; }
 </style>
 </head>
-
 <body>
 
-<h2>Shakha Dashboard</h2>
-
-<!-- Filters -->
-<select id="shakhaFilter">
-  <option value="Ramakrishna Parivaar Shakha - L SPA">Ramakrishna Parivaar Shakha - L SPA</option>
-</select>
-
-<select id="ganaFilter">
-  <option value="">All Gana</option>
-  <option>Kishore</option>
-  <option>Kishori</option>
-  <option>Yuva</option>
-</select>
-
-<!-- Chart 1 -->
-<div class="card">
-  <h3>Session Trends</h3>
-  <canvas id="trendChart"></canvas>
+<!-- Auth gate (shown when signed out) -->
+<div id="authGate">
+  <div class="auth-card">
+    <div class="auth-icon">🔐</div>
+    <div class="auth-title">Shakha Admin</div>
+    <div class="auth-subtitle">Sign in with an approved Google account to manage Shakha configurations.</div>
+    <button class="btn-google" onclick="signIn()">
+      <svg class="google-logo" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+        <path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
+        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/>
+      </svg>
+      Sign in with Google
+    </button>
+    <div class="auth-denied" id="authDenied">
+      Your account is not authorised for admin access. Please contact the Nagar admin.
+    </div>
+  </div>
 </div>
 
-<!-- Chart 2 -->
-<select id="dateFilter">
-  <option value="">Select Date</option>
-</select>
-
-<div class="card">
-  <h3>Daily Drill-down</h3>
-  <div id="details"></div>
+<!-- User bar (shown when signed in) -->
+<div id="userBar">
+  <span>Signed in as <span class="user-email" id="userEmail">—</span></span>
+  <button class="btn-signout" onclick="signOut()">Sign out</button>
 </div>
 
-<!-- Insights -->
-<div class="card">
-  <h3>Comment Insights</h3>
-  <div id="insights"></div>
+<!-- Page header (shown when signed in) -->
+<div class="page-header" id="pageHeader">
+  <div class="page-title">Shakha Admin</div>
+  <div class="page-subtitle">Create or update a Shakha configuration in Firestore</div>
 </div>
 
+<!-- Main form (shown when signed in) -->
+<div id="formWrap">
+
+  <!-- Section 1: Identity -->
+  <div class="section">
+    <div class="section-title">Nagar &amp; Shakha Identity</div>
+
+    <div class="field">
+      <label>Nagar Name</label>
+      <input type="text" id="nagarName" placeholder="e.g. London Nagar" oninput="updateSlugs()">
+    </div>
+    <div class="field">
+      <label>Nagar URL slug</label>
+      <input type="text" id="nagarSlug" placeholder="e.g. london">
+      <div class="hint">Lowercase, no spaces. Used in ?nagar= param.</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="field">
+      <label>Shakha Full Name</label>
+      <input type="text" id="shakhaName" placeholder="e.g. Ramakrishna Parivaar Shakha - L SPA" oninput="updateSlugs()">
+    </div>
+    <div class="field">
+      <label>Shakha URL slug</label>
+      <input type="text" id="shakhaSlug" placeholder="e.g. rk-spa">
+      <div class="hint">Lowercase, hyphens ok. Used in ?shakha= param.</div>
+    </div>
+  </div>
+
+  <!-- Section 2: Ganas -->
+  <div class="section">
+    <div class="section-title">Ganas</div>
+    <div class="hint" style="margin-bottom:12px">Select all Ganas present at this Shakha.</div>
+    <div class="gana-picker" id="ganaPicker"></div>
+  </div>
+
+  <!-- Section 3: Shakha Date -->
+  <div class="section">
+    <div class="section-title">Shakha Date</div>
+    <div class="field">
+      <label>Date of Shakha</label>
+      <input type="date" id="shakhaDate" oninput="updatePreview()">
+      <div class="hint">This will appear in the feedback URL as ?date=YYYY-MM-DD</div>
+    </div>
+  </div>
+
+  <!-- Section 4: Sessions -->
+  <div class="section">
+    <div class="section-title">Sessions to Collect Feedback For</div>
+    <div class="session-grid" id="sessionGrid"></div>
+
+    <div class="gana-data-section" id="ganaDataSection" style="display:none">
+      <div class="divider"></div>
+      <div class="section-title" style="margin-bottom:14px">Session Details per Gana</div>
+      <div id="ganaDataBlocks"></div>
+    </div>
+  </div>
+
+  <!-- Section 5: Preview & Save -->
+  <div class="section">
+    <div class="section-title">Preview &amp; Save</div>
+
+    <div class="preview-label">Firestore path</div>
+    <div class="url-preview" id="firestorePath" style="margin-bottom:16px">—</div>
+
+    <div class="preview-label">Feedback URL for this Shakha</div>
+    <div class="url-preview" id="sampleUrl" style="margin-bottom:16px">—</div>
+
+    <div class="preview-label">Document preview</div>
+    <div class="preview-box" id="docPreview">{}</div>
+
+    <button class="btn-submit" id="saveBtn" onclick="saveToFirestore()">Save to Firestore</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---- Approved admin emails — add/remove as needed ----
+const ADMIN_EMAILS = [
+  "bakthisaran@gmail.com"
+];
+
+const ALL_GANAS = ["Shishu", "Baal", "Baalika", "Kishore", "Kishori", "Tarun", "Taruni", "Yuva", "Yuvati", "Jyeshtha", "Jyeshthaa"];
+const ALL_SESSIONS = ["Achar Paddhati", "Shareerik", "Bauddikh", "Geet", "Subashchit", "Ghosh", "Prarthana"];
+const DETAIL_SESSIONS = {
+  "Bauddikh":  [{ key: "bauddikhTitle", label: "Topic / Title" }, { key: "bauddikhShikshak", label: "Shikshak" }],
+  "Shareerik": [{ key: "shareerikVishay", label: "Vishay" },      { key: "shareerikShikshak", label: "Shikshak" }]
+};
+
+let ganas = new Set();
+let selectedSessions = new Set();
+
+// ---- Auth helpers (called from module script) ----
+window.signIn = () => window._signIn();
+window.signOut = () => window._signOut();
+
+window.onAuthStateChanged = function(user) {
+  if (user && ADMIN_EMAILS.includes(user.email)) {
+    // Approved — show the form
+    document.getElementById("authGate").style.display = "none";
+    document.getElementById("authDenied").style.display = "none";
+    document.getElementById("userBar").style.display = "flex";
+    document.getElementById("userEmail").textContent = user.email;
+    document.getElementById("pageHeader").style.display = "block";
+    document.getElementById("formWrap").style.display = "flex";
+    renderGanaPicker();
+    renderSessionGrid();
+    updatePreview();
+  } else if (user && !ADMIN_EMAILS.includes(user.email)) {
+    // Signed in but not approved
+    document.getElementById("authGate").style.display = "block";
+    document.getElementById("authDenied").style.display = "block";
+    document.getElementById("userBar").style.display = "none";
+    document.getElementById("pageHeader").style.display = "none";
+    document.getElementById("formWrap").style.display = "none";
+  } else {
+    // Signed out
+    document.getElementById("authGate").style.display = "block";
+    document.getElementById("authDenied").style.display = "none";
+    document.getElementById("userBar").style.display = "none";
+    document.getElementById("pageHeader").style.display = "none";
+    document.getElementById("formWrap").style.display = "none";
+  }
+};
+
+// ---- Form logic ----
+function renderGanaPicker() {
+  document.getElementById("ganaPicker").innerHTML = ALL_GANAS.map(g => `
+    <button class="gana-pill ${ganas.has(g) ? 'selected' : ''}"
+      onclick="toggleGana('${g}')">${g}</button>
+  `).join('');
+}
+
+function toggleGana(g) {
+  if (ganas.has(g)) ganas.delete(g);
+  else ganas.add(g);
+  renderGanaPicker();
+  renderGanaDataSection();
+  updatePreview();
+}
+
+function renderSessionGrid() {
+  document.getElementById("sessionGrid").innerHTML = ALL_SESSIONS.map(s => `
+    <label class="session-check ${selectedSessions.has(s) ? 'checked' : ''}" id="sc-${slugify(s)}">
+      <input type="checkbox" ${selectedSessions.has(s) ? 'checked' : ''}
+        onchange="toggleSession('${s}', this.checked)">
+      <span>${s}</span>
+    </label>
+  `).join('');
+}
+
+function toggleSession(session, checked) {
+  if (checked) selectedSessions.add(session);
+  else selectedSessions.delete(session);
+  const label = document.getElementById("sc-" + slugify(session));
+  if (label) label.classList.toggle("checked", checked);
+  renderGanaDataSection();
+  updatePreview();
+}
+
+function renderGanaDataSection() {
+  const detailSessions = [...selectedSessions].filter(s => DETAIL_SESSIONS[s]);
+  const section = document.getElementById("ganaDataSection");
+
+  if (detailSessions.length === 0 || ganas.size === 0) {
+    section.style.display = "none";
+    return;
+  }
+
+  section.style.display = "block";
+
+  document.getElementById("ganaDataBlocks").innerHTML = [...ganas].map(gana => `
+    <div class="gana-block">
+      <div class="gana-block-title">Gana: <span>${gana}</span></div>
+      ${detailSessions.map(session => `
+        <div style="margin-bottom:12px">
+          <div style="font-size:12px;color:var(--muted);font-weight:500;margin-bottom:8px">${session}</div>
+          <div class="two-col">
+            ${DETAIL_SESSIONS[session].map(field => `
+              <div>
+                <label>${field.label}</label>
+                <input type="text" id="gd-${slugify(gana)}-${field.key}"
+                  placeholder="${field.label}" oninput="updatePreview()">
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function slugify(str) {
+  return str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+function updateSlugs() {
+  const nagarSlugEl = document.getElementById("nagarSlug");
+  if (!nagarSlugEl.dataset.manual) {
+    nagarSlugEl.value = slugify(document.getElementById("nagarName").value.trim());
+  }
+  const shakhaSlugEl = document.getElementById("shakhaSlug");
+  if (!shakhaSlugEl.dataset.manual) {
+    shakhaSlugEl.value = slugify(document.getElementById("shakhaName").value.trim()).substring(0, 20);
+  }
+  updatePreview();
+}
+
+document.getElementById("nagarSlug").addEventListener("input", function() { this.dataset.manual = "1"; updatePreview(); });
+document.getElementById("shakhaSlug").addEventListener("input", function() { this.dataset.manual = "1"; updatePreview(); });
+
+function buildDoc() {
+  const nagarSlug  = document.getElementById("nagarSlug").value.trim();
+  const shakhaSlug = document.getElementById("shakhaSlug").value.trim();
+  const nagarName  = document.getElementById("nagarName").value.trim();
+  const shakhaName = document.getElementById("shakhaName").value.trim();
+  const shakhaDate = document.getElementById("shakhaDate").value;
+  const sessions   = [...selectedSessions];
+
+  const ganaData = {};
+  const detailSessions = sessions.filter(s => DETAIL_SESSIONS[s]);
+
+  [...ganas].forEach(gana => {
+    ganaData[gana] = {};
+    detailSessions.forEach(session => {
+      DETAIL_SESSIONS[session].forEach(field => {
+        const el = document.getElementById(`gd-${slugify(gana)}-${field.key}`);
+        if (el) ganaData[gana][field.key] = el.value.trim();
+      });
+    });
+  });
+
+  return { nagarName, shakhaName, nagarSlug, shakhaSlug, shakhaDate, ganas: [...ganas], sessions, ganaData };
+}
+
+function updatePreview() {
+  const nagarSlug  = document.getElementById("nagarSlug").value.trim()  || "<nagar>";
+  const shakhaSlug = document.getElementById("shakhaSlug").value.trim() || "<shakha>";
+  const date       = document.getElementById("shakhaDate").value         || "<date>";
+
+  document.getElementById("firestorePath").textContent = `nagars/${nagarSlug}/shakhas/${shakhaSlug}`;
+  document.getElementById("sampleUrl").textContent = `?nagar=${nagarSlug}&shakha=${shakhaSlug}&date=${date}&qr=1`;
+  document.getElementById("docPreview").textContent = JSON.stringify(buildDoc(), null, 2);
+}
+
+async function saveToFirestore() {
+  const nagarSlug  = document.getElementById("nagarSlug").value.trim();
+  const shakhaSlug = document.getElementById("shakhaSlug").value.trim();
+
+  if (!nagarSlug || !shakhaSlug)              { showToast("Please fill in Nagar and Shakha slugs", "error"); return; }
+  if (ganas.size === 0)                       { showToast("Please select at least one Gana", "error"); return; }
+  if (!document.getElementById("shakhaDate").value) { showToast("Please select a Shakha date", "error"); return; }
+  if (selectedSessions.size === 0)            { showToast("Please select at least one session", "error"); return; }
+
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true;
+  btn.textContent = "Saving...";
+
+  try {
+    const ref = window.firestoreDoc(window.db, "nagars", nagarSlug, "shakhas", shakhaSlug);
+    await window.firestoreSetDoc(ref, buildDoc());
+    showToast("Saved successfully!", "success");
+  } catch (err) {
+    console.error(err);
+    showToast("Error: " + err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Save to Firestore";
+  }
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = `toast ${type}`;
+  requestAnimationFrame(() => t.classList.add("show"));
+  setTimeout(() => t.classList.remove("show"), 3500);
+}
+</script>
+
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-  const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyDb4NpYEwtcoY8SgmIHRqAok9qKJF4Ej4k",
   authDomain: "shakha-feedback.firebaseapp.com",
   projectId: "shakha-feedback",
@@ -75,227 +655,24 @@ import { getFirestore, collection, getDocs } from "https://www.gstatic.com/fireb
   measurementId: "G-PFR8EEQQQF"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app      = initializeApp(firebaseConfig);
+const db       = getFirestore(app);
+const auth     = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-let allData = [];
-let trendChart;
+window.db             = db;
+window.firestoreDoc   = doc;
+window.firestoreSetDoc = setDoc;
 
-// INIT
-async function init(){
-  const snapshot = await getDocs(collection(db, "feedbacks"));
+// Wire sign-in / sign-out
+window._signIn  = () => signInWithPopup(auth, provider).catch(err => {
+  console.error(err);
+  window.showToast("Sign-in failed: " + err.message, "error");
+});
+window._signOut = () => signOut(auth);
 
-  snapshot.forEach(doc => {
-    allData.push(doc.data());
-  });
-
-  populateDates();
-  loadChart1();
-}
-
-// Populate date dropdown
-function populateDates(){
-let dates = [...new Set(allData.map(d => d.date))]
-  .sort((a, b) => new Date(a) - new Date(b));
-
-  let dropdown = document.getElementById("dateFilter");
-
-  dates.forEach(d => {
-    let opt = document.createElement("option");
-    opt.value = d;
-    opt.text = d;
-    dropdown.appendChild(opt);
-  });
-}
-function rollingAverage(arr, windowSize = 3){
-  let result = [];
-
-  for(let i = 0; i < arr.length; i++){
-    let start = Math.max(0, i - windowSize + 1);
-    let subset = arr.slice(start, i + 1);
-
-    let avg = subset.reduce((a,b)=>a + Number(b), 0) / subset.length;
-    result.push(avg.toFixed(2));
-  }
-
-  return result;
-}
-// CHART 1 (Trend)
-function loadChart1(){
-
-  let gana = document.getElementById("ganaFilter").value;
-
-  let filtered = allData.filter(d => {
-    return (!gana || d.gana === gana);
-  });
-
-  let grouped = {};
-
-  filtered.forEach(d => {
-    let date = d.date;
-
-    if(!grouped[date]){
-      grouped[date] = { s:0, b:0, a:0, c:0 };
-    }
-
-    grouped[date].s += d.ratings?.shareerik || 0;
-    grouped[date].b += d.ratings?.bauddikh || 0;
-    grouped[date].a += d.ratings?.achar || 0;
-    grouped[date].c++;
-  });
-
-  let dates = Object.keys(grouped)
-  .sort((a, b) => new Date(a) - new Date(b)); // ASCENDING
-
-  let s = [], b = [], a = [];
-
-  dates.forEach(d => {
-    let g = grouped[d];
-    s.push((g.s/g.c).toFixed(2));
-    b.push((g.b/g.c).toFixed(2));
-    a.push((g.a/g.c).toFixed(2));
-  });
-
-  if(trendChart) trendChart.destroy();
-
-  trendChart = new Chart(document.getElementById("trendChart"), {
-    type: "line",
-    data: {
-      labels: dates.map(d => new Date(d).toLocaleDateString()),
-      datasets: [
-        { label: "Shareerik", data: rollingAverage(s) },
-        { label: "Bauddikh", data: rollingAverage(b) },
-        { label: "Achar", data: rollingAverage(a) }
-      ]
-    },
-    options: {
-      scales: { y: { min: 0, max: 5 } }
-    }
-  });
-}
-
-// CHART 2 (Drill-down)
-function loadChart2(){
-
-  let date = document.getElementById("dateFilter").value;
-
-  let filtered = allData.filter(d => d.date === date);
-
-  if(filtered.length === 0){
-    document.getElementById("details").innerHTML = "No data";
-    document.getElementById("insights").innerHTML = "";
-    return;
-  }
-
-  let grouped = {};
-
-  filtered.forEach(d => {
-    let g = d.gana;
-
-    if(!grouped[g]){
-      grouped[g] = { s:0, b:0, a:0, c:0 };
-    }
-
-    grouped[g].s += d.ratings?.shareerik || 0;
-    grouped[g].b += d.ratings?.bauddikh || 0;
-    grouped[g].a += d.ratings?.achar || 0;
-    grouped[g].c++;
-  });
-
-  let html = "";
-
-  Object.keys(grouped).forEach(g => {
-    let data = grouped[g];
-
-    let sAvg = (data.s / data.c).toFixed(2);
-    let bAvg = (data.b / data.c).toFixed(2);
-    let aAvg = (data.a / data.c).toFixed(2);
-
-   html += `
-  <div style="border-bottom:1px solid #ddd; padding:12px;">
-    <h4>${g} (${data.c} responses)</h4>
-
-    <b>Shareerik:</b> ${sAvg} <br>
-    <b>Bauddikh:</b> ${bAvg} <br>
-    <b>Achar:</b> ${aAvg}
-  </div>
-`;
-  });
-
-  document.getElementById("details").innerHTML = html;
-
-  generateInsights(filtered);
-}
-
-// COMMENT INSIGHTS
-function generateInsights(data){
-
-  let allComments = [];
-
-  data.forEach(d => {
-    if(d.comments){
-      Object.values(d.comments).forEach(c => {
-        if(c) allComments.push(c.toLowerCase());
-      });
-    }
-
-    if(d.overallComment){
-      allComments.push(d.overallComment.toLowerCase());
-    }
-  });
-
-  let words = {};
-  let positive = [];
-  let negative = [];
-
-  const positiveWords = ["good","great","nice","clear","enjoyed","useful","well"];
-  const negativeWords = ["bad","slow","boring","unclear","confusing","long","improve"];
-
-  allComments.forEach(comment => {
-
-    comment.split(" ").forEach(w => {
-      if(w.length > 3){
-        words[w] = (words[w] || 0) + 1;
-      }
-    });
-
-    if(positiveWords.some(p => comment.includes(p))){
-      positive.push(comment);
-    }
-
-    if(negativeWords.some(n => comment.includes(n))){
-      negative.push(comment);
-    }
-  });
-
-  let topWords = Object.entries(words)
-    .sort((a,b) => b[1]-a[1])
-    .slice(0,5);
-
-  let html = `
-    <b>Top Keywords:</b><br>
-    ${topWords.map(w => `${w[0]} (${w[1]})`).join(", ") || "None"}<br><br>
-
-    <b>👍 Positive Themes:</b><br>
-    ${positive.slice(0,3).join("<br>") || "None"}<br><br>
-
-    <b>👎 Improvement Areas:</b><br>
-    ${negative.slice(0,3).join("<br>") || "None"}
-  `;
-
-  document.getElementById("insights").innerHTML = html;
-}
-
-// EVENT LISTENERS (clean approach)
-document.getElementById("ganaFilter")
-  .addEventListener("change", loadChart1);
-
-document.getElementById("dateFilter")
-  .addEventListener("change", loadChart2);
-
-// INIT CALL
-init();
-
+// Auth state drives the UI
+onAuthStateChanged(auth, (user) => window.onAuthStateChanged(user));
 </script>
 
 </body>
