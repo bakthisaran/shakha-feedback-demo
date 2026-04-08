@@ -573,11 +573,14 @@ document.getElementById("nagarSlug").addEventListener("input", function() { this
 document.getElementById("shakhaSlug").addEventListener("input", function() { this.dataset.manual = "1"; updateConfigPreview(); });
 
 function buildConfigDoc() {
+  const nagarSlug  = document.getElementById("nagarSlug").value.trim();
+  const shakhaSlug = document.getElementById("shakhaSlug").value.trim();
   return {
     nagarName:  document.getElementById("nagarName").value.trim(),
-    nagarSlug:  document.getElementById("nagarSlug").value.trim(),
+    nagarSlug,
     shakhaName: document.getElementById("shakhaName").value.trim(),
-    shakhaSlug: document.getElementById("shakhaSlug").value.trim(),
+    shakhaSlug,
+    shakhaId:   nagarSlug && shakhaSlug ? `${nagarSlug}_${shakhaSlug}` : "",
     ganas: [...configGanas]
   };
 }
@@ -585,7 +588,8 @@ function buildConfigDoc() {
 function updateConfigPreview() {
   const ns = document.getElementById("nagarSlug").value.trim() || "<nagar>";
   const ss = document.getElementById("shakhaSlug").value.trim() || "<shakha>";
-  document.getElementById("configFirestorePath").textContent = `nagars/${ns}/shakhas/${ss}`;
+  const docId = (ns !== "<nagar>" && ss !== "<shakha>") ? `${ns}_${ss}` : `${ns}_${ss}`;
+  document.getElementById("configFirestorePath").textContent = `shakhas/${docId}`;
   document.getElementById("configDocPreview").textContent = JSON.stringify(buildConfigDoc(), null, 2);
 }
 
@@ -598,10 +602,14 @@ async function saveConfig() {
   const btn = document.getElementById("configSaveBtn");
   btn.disabled = true; btn.textContent = "Saving…";
   try {
-    const ref = window.firestoreDoc(window.db, "nagars", doc.nagarSlug, "shakhas", doc.shakhaSlug);
-    await window.firestoreSetDoc(ref, doc, { merge: true });
+    // Write Nagar doc: nagars/{nagarSlug}
+    const nagarRef = window.firestoreDoc(window.db, "nagars", doc.nagarSlug);
+    await window.firestoreSetDoc(nagarRef, { nagarName: doc.nagarName, nagarSlug: doc.nagarSlug }, { merge: true });
+    // Write Shakha doc: shakhas/{nagarSlug}_{shakhaSlug}
+    const shakhaRef = window.firestoreDoc(window.db, "shakhas", doc.shakhaId);
+    await window.firestoreSetDoc(shakhaRef, doc, { merge: true });
     showToast("Shakha configuration saved!", "success");
-    await loadNagarsFromFirestore(); // refresh dropdowns
+    await loadNagarsFromFirestore();
   } catch(err) {
     console.error(err);
     showToast("Error: " + err.message, "error");
@@ -616,25 +624,34 @@ async function saveConfig() {
 
 async function loadNagarsFromFirestore() {
   try {
-    const snapshot = await window.firestoreGetDocs(
+    // Load all nagars
+    const nagarSnap = await window.firestoreGetDocs(
       window.firestoreCollection(window.db, "nagars")
     );
     nagarCache = {};
     const sel = document.getElementById("fbNagarSelect");
     sel.innerHTML = '<option value="">— Select Nagar —</option>';
 
-    for (const nagarDoc of snapshot.docs) {
-      const nagarSlug = nagarDoc.id;
-      const shakhaSnap = await window.firestoreGetDocs(
-        window.firestoreCollection(window.db, "nagars", nagarSlug, "shakhas")
-      );
-      nagarCache[nagarSlug] = { nagarName: nagarDoc.data().nagarName || nagarSlug, shakhas: {} };
-      shakhaSnap.docs.forEach(sd => { nagarCache[nagarSlug].shakhas[sd.id] = sd.data(); });
+    nagarSnap.docs.forEach(d => {
+      const data = d.data();
+      nagarCache[d.id] = { nagarName: data.nagarName || d.id, shakhas: {} };
       const opt = document.createElement("option");
-      opt.value = nagarSlug;
-      opt.textContent = nagarCache[nagarSlug].nagarName || nagarSlug;
+      opt.value = d.id;
+      opt.textContent = data.nagarName || d.id;
       sel.appendChild(opt);
-    }
+    });
+
+    // Load all shakhas into the cache (one read, flat collection)
+    const shakhaSnap = await window.firestoreGetDocs(
+      window.firestoreCollection(window.db, "shakhas")
+    );
+    shakhaSnap.docs.forEach(d => {
+      const data = d.data();
+      const ns = data.nagarSlug;
+      if (ns && nagarCache[ns]) {
+        nagarCache[ns].shakhas[d.id] = data;
+      }
+    });
   } catch(err) {
     console.error("Could not load Nagars:", err);
   }
@@ -650,26 +667,26 @@ function onFbNagarChange() {
   renderFbSessionGrid(); renderFbGanaDataSection(); updateFeedbackPreview();
   if (!nagarSlug) return;
   const shakhas = nagarCache[nagarSlug]?.shakhas || {};
-  Object.entries(shakhas).forEach(([slug, data]) => {
+  // Keys are nagarSlug_shakhaSlug (the composite doc ID)
+  Object.entries(shakhas).forEach(([shakhaId, data]) => {
     const opt = document.createElement("option");
-    opt.value = slug;
-    opt.textContent = data.shakhaName || slug;
+    opt.value = shakhaId;
+    opt.textContent = data.shakhaName || shakhaId;
     shakhasSel.appendChild(opt);
   });
 }
 
 function onFbShakhaChange() {
   const nagarSlug  = document.getElementById("fbNagarSelect").value;
-  const shakhaSlug = document.getElementById("fbShakhaSelect").value;
+  const shakhaId   = document.getElementById("fbShakhaSelect").value;  // this is nagarSlug_shakhaSlug
   document.getElementById("shakhaInfoCard").style.display = "none";
   fbLoadedShakha = null; fbGanas = []; fbSelectedSessions.clear();
-  if (!nagarSlug || !shakhaSlug) { renderFbSessionGrid(); renderFbGanaDataSection(); updateFeedbackPreview(); return; }
-  const doc = nagarCache[nagarSlug]?.shakhas?.[shakhaSlug];
+  if (!nagarSlug || !shakhaId) { renderFbSessionGrid(); renderFbGanaDataSection(); updateFeedbackPreview(); return; }
+  const doc = nagarCache[nagarSlug]?.shakhas?.[shakhaId];
   if (!doc) return;
-  fbLoadedShakha = { ...doc, nagarSlug, shakhaSlug };
+  fbLoadedShakha = { ...doc };
   fbGanas = doc.ganas || [];
-  // Show summary card
-  document.getElementById("siShakhaName").textContent = doc.shakhaName || shakhaSlug;
+  document.getElementById("siShakhaName").textContent = doc.shakhaName || shakhaId;
   document.getElementById("siNagarName").textContent  = doc.nagarName  || nagarSlug;
   document.getElementById("siGanas").innerHTML = fbGanas.map(g =>
     `<span class="shakha-info-gana-tag">${g}</span>`
@@ -727,8 +744,9 @@ function renderFbGanaDataSection() {
 }
 
 function buildFbDoc() {
-  const nagarSlug  = document.getElementById("fbNagarSelect").value;
-  const shakhaSlug = document.getElementById("fbShakhaSelect").value;
+  const nagarSlug  = fbLoadedShakha?.nagarSlug  || document.getElementById("fbNagarSelect").value;
+  const shakhaSlug = fbLoadedShakha?.shakhaSlug || document.getElementById("fbShakhaSelect").value;
+  const shakhaId   = fbLoadedShakha?.shakhaId   || `${nagarSlug}_${shakhaSlug}`;
   const shakhaDate = document.getElementById("fbShakhaDate").value;
   const sessions   = [...fbSelectedSessions];
   const detailSessions = sessions.filter(s => DETAIL_SESSIONS[s]);
@@ -745,31 +763,37 @@ function buildFbDoc() {
   return {
     nagarName:  fbLoadedShakha?.nagarName  || nagarSlug,
     shakhaName: fbLoadedShakha?.shakhaName || shakhaSlug,
-    nagarSlug, shakhaSlug, shakhaDate,
+    nagarSlug, shakhaSlug, shakhaId, shakhaDate,
     ganas: fbGanas, sessions, ganaData
   };
 }
 
 function updateFeedbackPreview() {
-  const nagarSlug  = document.getElementById("fbNagarSelect").value  || "<nagar>";
-  const shakhaSlug = document.getElementById("fbShakhaSelect").value || "<shakha>";
-  const date       = document.getElementById("fbShakhaDate").value   || "<date>";
-  document.getElementById("fbFirestorePath").textContent = `nagars/${nagarSlug}/shakhas/${shakhaSlug}`;
+  const nagarSlug  = fbLoadedShakha?.nagarSlug  || document.getElementById("fbNagarSelect").value  || "<nagar>";
+  const shakhaSlug = fbLoadedShakha?.shakhaSlug || document.getElementById("fbShakhaSelect").value || "<shakha>";
+  const shakhaId   = (nagarSlug !== "<nagar>" && shakhaSlug !== "<shakha>") ? `${nagarSlug}_${shakhaSlug}` : `${nagarSlug}_${shakhaSlug}`;
+  const date       = document.getElementById("fbShakhaDate").value || "<date>";
+  const requestId  = `${shakhaId}_${date}`;
+  document.getElementById("fbFirestorePath").textContent = `feedback-requests/${requestId}`;
   document.getElementById("fbSampleUrl").textContent = `?nagar=${nagarSlug}&shakha=${shakhaSlug}&date=${date}&qr=1`;
   document.getElementById("fbDocPreview").textContent = JSON.stringify(buildFbDoc(), null, 2);
 }
 
 async function saveFeedbackSetup() {
-  const nagarSlug  = document.getElementById("fbNagarSelect").value;
-  const shakhaSlug = document.getElementById("fbShakhaSelect").value;
-  if (!nagarSlug || !shakhaSlug)                      { showToast("Select a Nagar and Shakha", "error"); return; }
-  if (!document.getElementById("fbShakhaDate").value) { showToast("Select a Shakha date", "error"); return; }
-  if (fbSelectedSessions.size === 0)                  { showToast("Select at least one session", "error"); return; }
+  const nagarSlug  = fbLoadedShakha?.nagarSlug;
+  const shakhaSlug = fbLoadedShakha?.shakhaSlug;
+  const shakhaId   = fbLoadedShakha?.shakhaId;
+  const date       = document.getElementById("fbShakhaDate").value;
+  if (!nagarSlug || !shakhaSlug)   { showToast("Select a Nagar and Shakha", "error"); return; }
+  if (!date)                        { showToast("Select a Shakha date", "error"); return; }
+  if (fbSelectedSessions.size === 0){ showToast("Select at least one session", "error"); return; }
   const btn = document.getElementById("fbSaveBtn");
   btn.disabled = true; btn.textContent = "Saving…";
   try {
-    const ref = window.firestoreDoc(window.db, "nagars", nagarSlug, "shakhas", shakhaSlug);
-    await window.firestoreSetDoc(ref, buildFbDoc(), { merge: true });
+    // feedback-requests/{nagarSlug}_{shakhaSlug}_{date}
+    const requestId = `${shakhaId}_${date}`;
+    const ref = window.firestoreDoc(window.db, "feedback-requests", requestId);
+    await window.firestoreSetDoc(ref, buildFbDoc());
     showToast("Feedback request saved!", "success");
   } catch(err) {
     console.error(err);
@@ -791,7 +815,7 @@ function showToast(msg, type) {
 <!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, doc, setDoc, collection, getDocs }
+import { getFirestore, doc, setDoc, collection, getDocs, query, where }
   from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut }
   from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -816,6 +840,8 @@ window.firestoreDoc          = doc;
 window.firestoreSetDoc       = setDoc;
 window.firestoreCollection   = collection;
 window.firestoreGetDocs      = getDocs;
+window.firestoreQuery        = query;
+window.firestoreWhere        = where;
 
 window._signIn  = () => signInWithPopup(auth, provider).catch(err => {
   console.error(err); window.showToast("Sign-in failed: " + err.message, "error");
