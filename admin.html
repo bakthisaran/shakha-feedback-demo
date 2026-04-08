@@ -520,7 +520,7 @@
     <div class="section-title">Shakha Date</div>
     <div class="field">
       <label>Date of Shakha</label>
-      <input type="date" id="fbShakhaDate" oninput="updateFeedbackPreview()">
+      <input type="date" id="fbdate" oninput="updateFeedbackPreview()">
       <div class="hint">This will appear in the feedback URL as ?date=YYYY-MM-DD</div>
     </div>
   </div>
@@ -952,7 +952,7 @@ function buildFbDoc() {
   const nagarSlug  = fbLoadedShakha?.nagarSlug  || document.getElementById("fbNagarSelect").value;
   const shakhaSlug = fbLoadedShakha?.shakhaSlug || document.getElementById("fbShakhaSelect").value;
   const shakhaId   = fbLoadedShakha?.shakhaId   || `${nagarSlug}_${shakhaSlug}`;
-  const shakhaDate = document.getElementById("fbShakhaDate").value;
+  const date = document.getElementById("fbdate").value;
   const sessions   = [...fbSelectedSessions];
   const detailSessions = sessions.filter(s => DETAIL_SESSIONS[s]);
   const ganaData = {};
@@ -968,7 +968,7 @@ function buildFbDoc() {
   return {
     nagarName:  fbLoadedShakha?.nagarName  || nagarSlug,
     shakhaName: fbLoadedShakha?.shakhaName || shakhaSlug,
-    nagarSlug, shakhaSlug, shakhaId, shakhaDate,
+    nagarSlug, shakhaSlug, shakhaId, date,
     ganas: fbGanas, sessions, ganaData
   };
 }
@@ -977,7 +977,7 @@ function updateFeedbackPreview() {
   const nagarSlug  = fbLoadedShakha?.nagarSlug  || document.getElementById("fbNagarSelect").value  || "<nagar>";
   const shakhaSlug = fbLoadedShakha?.shakhaSlug || document.getElementById("fbShakhaSelect").value || "<shakha>";
   const shakhaId   = (nagarSlug !== "<nagar>" && shakhaSlug !== "<shakha>") ? `${nagarSlug}_${shakhaSlug}` : `${nagarSlug}_${shakhaSlug}`;
-  const date       = document.getElementById("fbShakhaDate").value || "<date>";
+  const date       = document.getElementById("fbdate").value || "<date>";
   const requestId  = `${shakhaId}_${date}`;
   document.getElementById("fbFirestorePath").textContent = `feedback-requests/${requestId}`;
   document.getElementById("fbSampleUrl").textContent = `?nagar=${nagarSlug}&shakha=${shakhaSlug}&date=${date}&qr=1`;
@@ -988,7 +988,7 @@ async function saveFeedbackSetup() {
   const nagarSlug  = fbLoadedShakha?.nagarSlug;
   const shakhaSlug = fbLoadedShakha?.shakhaSlug;
   const shakhaId   = fbLoadedShakha?.shakhaId;
-  const date       = document.getElementById("fbShakhaDate").value;
+  const date       = document.getElementById("fbdate").value;
   if (!nagarSlug || !shakhaSlug)   { showToast("Select a Nagar and Shakha", "error"); return; }
   if (!date)                        { showToast("Select a Shakha date", "error"); return; }
   if (fbSelectedSessions.size === 0){ showToast("Select at least one session", "error"); return; }
