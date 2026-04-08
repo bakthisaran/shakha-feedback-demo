@@ -217,6 +217,58 @@
   }
   .gana-block-title span { color: var(--saffron); }
 
+  /* Config mode selector */
+  .config-selector {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    border: 1px solid var(--border);
+  }
+  .config-selector-title {
+    font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 12px;
+  }
+  .config-mode-row {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .config-mode-row select { flex: 1; min-width: 0; }
+  .btn-new-shakha {
+    padding: 10px 16px; border-radius: 8px;
+    border: 1.5px solid var(--saffron); background: white;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    font-weight: 500; color: var(--saffron); cursor: pointer;
+    white-space: nowrap; transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-new-shakha:hover { background: #fff5ee; }
+
+  /* Mode badge shown in form sections */
+  .mode-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    margin-bottom: 16px;
+  }
+  .mode-badge.editing { background: #e8f5ee; color: var(--success); border: 1px solid #b8e2cb; }
+  .mode-badge.creating { background: #fff5ee; color: var(--saffron); border: 1px solid #ffdcc4; }
+
+  /* Slug lock */
+  .slug-lock-row { display: flex; gap: 8px; align-items: flex-start; }
+  .slug-lock-row input { flex: 1; }
+  .btn-unlock {
+    margin-top: 2px; padding: 10px 11px; border-radius: 8px;
+    border: 1.5px solid var(--border); background: white;
+    font-size: 14px; cursor: pointer; line-height: 1;
+    transition: border-color 0.15s; flex-shrink: 0;
+    color: var(--muted);
+  }
+  .btn-unlock:hover { border-color: var(--saffron); color: var(--saffron); }
+  .slug-locked { background: #f5f0e8 !important; color: var(--muted) !important; }
+  .slug-warning {
+    display: none; margin-top: 6px; padding: 8px 10px;
+    background: #fffbea; border: 1px solid #f0d060;
+    border-radius: 6px; font-size: 12px; color: #7a6010; line-height: 1.5;
+  }
+
   /* Info banner */
   .info-banner {
     padding: 14px 16px;
@@ -349,11 +401,26 @@
 <div id="configWrap">
 
   <div class="info-banner">
-    <strong>One-time setup.</strong> Define your Nagar and Shakha details here. Once saved, these become available to select in the Feedback Setup tab.
+    <strong>Configuration.</strong> Load an existing Shakha to edit, or create a new one. Changes are saved back to Firestore.
+  </div>
+
+  <!-- Load / New selector -->
+  <div class="config-selector">
+    <div class="config-selector-title">Select an existing Shakha to edit, or start fresh</div>
+    <div class="config-mode-row">
+      <select id="configNagarSelect" onchange="onConfigNagarChange()">
+        <option value="">— Select Nagar —</option>
+      </select>
+      <select id="configShakhaSelect" onchange="onConfigShakhaLoad()" disabled>
+        <option value="">— Select Shakha —</option>
+      </select>
+      <button class="btn-new-shakha" onclick="resetConfigForm()">＋ New Shakha</button>
+    </div>
   </div>
 
   <!-- Nagar -->
-  <div class="section">
+  <div class="section" id="configFormSections" style="display:none">
+    <div id="configModeBadge" class="mode-badge creating">✦ New Shakha</div>
     <div class="section-title">Nagar</div>
     <div class="two-col">
       <div class="field">
@@ -362,14 +429,17 @@
       </div>
       <div class="field">
         <label>Nagar URL slug</label>
-        <input type="text" id="nagarSlug" placeholder="e.g. london">
+        <div class="slug-lock-row">
+          <input type="text" id="nagarSlug" placeholder="e.g. london" class="slug-locked" readonly>
+          <button class="btn-unlock" id="nagarSlugUnlockBtn" onclick="unlockSlug('nagar')" title="Unlock to edit slug">🔒</button>
+        </div>
         <div class="hint">Lowercase, no spaces. Used in ?nagar= param.</div>
+        <div class="slug-warning" id="nagarSlugWarning">⚠️ Changing the slug will create a new Nagar record. The old one will remain in Firestore.</div>
       </div>
     </div>
   </div>
 
-  <!-- Shakha -->
-  <div class="section">
+  <div class="section" id="configShakhaSection" style="display:none">
     <div class="section-title">Shakha</div>
     <div class="two-col">
       <div class="field">
@@ -378,21 +448,25 @@
       </div>
       <div class="field">
         <label>Shakha URL slug</label>
-        <input type="text" id="shakhaSlug" placeholder="e.g. rk-spa">
+        <div class="slug-lock-row">
+          <input type="text" id="shakhaSlug" placeholder="e.g. rk-spa" class="slug-locked" readonly>
+          <button class="btn-unlock" id="shakhaSlugUnlockBtn" onclick="unlockSlug('shakha')" title="Unlock to edit slug">🔒</button>
+        </div>
         <div class="hint">Lowercase, hyphens ok. Used in ?shakha= param.</div>
+        <div class="slug-warning" id="shakhaSlugWarning">⚠️ Changing the slug will create a new Shakha record. The old one will remain in Firestore.</div>
       </div>
     </div>
   </div>
 
   <!-- Ganas -->
-  <div class="section">
+  <div class="section" id="configGanaSection" style="display:none">
     <div class="section-title">Ganas at this Shakha</div>
     <div class="hint" style="margin-bottom:12px">Select all Ganas present at this Shakha.</div>
     <div class="gana-picker" id="configGanaPicker"></div>
   </div>
 
   <!-- Save -->
-  <div class="section">
+  <div class="section" id="configSaveSection" style="display:none">
     <div class="section-title">Preview &amp; Save</div>
     <div class="preview-label">Firestore path</div>
     <div class="url-preview" id="configFirestorePath" style="margin-bottom:16px">—</div>
@@ -509,8 +583,6 @@ window.onAuthStateChanged = async function(user) {
     document.getElementById("pageHeader").style.display = "block";
     document.getElementById("tabBar").style.display = "flex";
     switchTab('config');
-    renderConfigGanaPicker();
-    updateConfigPreview();
     await loadNagarsFromFirestore();
   } else if (user) {
     document.getElementById("authGate").style.display = "block";
@@ -543,6 +615,136 @@ function switchTab(tab) {
 // TAB 1 — CONFIGURATION
 // =========================================================
 
+let configMode = 'new'; // 'new' | 'edit'
+
+function showConfigSections() {
+  ['configFormSections','configShakhaSection','configGanaSection','configSaveSection'].forEach(id => {
+    document.getElementById(id).style.display = 'block';
+  });
+}
+
+function setConfigMode(mode) {
+  configMode = mode;
+  const badge = document.getElementById('configModeBadge');
+  if (mode === 'edit') {
+    badge.className = 'mode-badge editing';
+    badge.textContent = '✎ Editing existing Shakha';
+  } else {
+    badge.className = 'mode-badge creating';
+    badge.textContent = '✦ New Shakha';
+  }
+}
+
+function lockSlug(which) {
+  const input = document.getElementById(which + 'Slug');
+  const btn   = document.getElementById(which + 'SlugUnlockBtn');
+  const warn  = document.getElementById(which + 'SlugWarning');
+  input.readOnly = true;
+  input.classList.add('slug-locked');
+  btn.textContent = '🔒';
+  warn.style.display = 'none';
+}
+
+function unlockSlug(which) {
+  const input = document.getElementById(which + 'Slug');
+  const btn   = document.getElementById(which + 'SlugUnlockBtn');
+  const warn  = document.getElementById(which + 'SlugWarning');
+  input.readOnly = false;
+  input.classList.remove('slug-locked');
+  input.dataset.manual = '1';
+  btn.textContent = '🔓';
+  if (configMode === 'edit') warn.style.display = 'block';
+  input.focus();
+}
+
+// Populate the Nagar dropdown in the Config tab from nagarCache
+function populateConfigNagarDropdown() {
+  const sel = document.getElementById('configNagarSelect');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Select Nagar —</option>';
+  Object.entries(nagarCache).forEach(([slug, data]) => {
+    const opt = document.createElement('option');
+    opt.value = slug;
+    opt.textContent = data.nagarName || slug;
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
+}
+
+function onConfigNagarChange() {
+  const nagarSlug = document.getElementById('configNagarSelect').value;
+  const shakhasSel = document.getElementById('configShakhaSelect');
+  shakhasSel.innerHTML = '<option value="">— Select Shakha —</option>';
+  shakhasSel.disabled = !nagarSlug;
+  if (!nagarSlug) return;
+  const shakhas = nagarCache[nagarSlug]?.shakhas || {};
+  Object.entries(shakhas).forEach(([shakhaId, data]) => {
+    const opt = document.createElement('option');
+    opt.value = shakhaId;
+    opt.textContent = data.shakhaName || shakhaId;
+    shakhasSel.appendChild(opt);
+  });
+}
+
+function onConfigShakhaLoad() {
+  const nagarSlug = document.getElementById('configNagarSelect').value;
+  const shakhaId  = document.getElementById('configShakhaSelect').value;
+  if (!shakhaId) return;
+  const data = nagarCache[nagarSlug]?.shakhas?.[shakhaId];
+  if (!data) return;
+
+  // Populate fields
+  document.getElementById('nagarName').value  = data.nagarName  || '';
+  document.getElementById('nagarSlug').value  = data.nagarSlug  || '';
+  document.getElementById('shakhaName').value = data.shakhaName || '';
+  document.getElementById('shakhaSlug').value = data.shakhaSlug || '';
+
+  // Lock slugs & clear manual flags
+  delete document.getElementById('nagarSlug').dataset.manual;
+  delete document.getElementById('shakhaSlug').dataset.manual;
+  lockSlug('nagar');
+  lockSlug('shakha');
+
+  // Restore ganas
+  configGanas = new Set(data.ganas || []);
+  renderConfigGanaPicker();
+
+  setConfigMode('edit');
+  showConfigSections();
+  updateConfigPreview();
+}
+
+function resetConfigForm() {
+  // Clear dropdowns
+  document.getElementById('configNagarSelect').value = '';
+  document.getElementById('configShakhaSelect').innerHTML = '<option value="">— Select Shakha —</option>';
+  document.getElementById('configShakhaSelect').disabled = true;
+
+  // Clear fields
+  ['nagarName','nagarSlug','shakhaName','shakhaSlug'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    delete el.dataset.manual;
+  });
+
+  // Unlock slugs (new record, free to type)
+  ['nagar','shakha'].forEach(which => {
+    const input = document.getElementById(which + 'Slug');
+    const btn   = document.getElementById(which + 'SlugUnlockBtn');
+    const warn  = document.getElementById(which + 'SlugWarning');
+    input.readOnly = false;
+    input.classList.remove('slug-locked');
+    btn.textContent = '🔒'; // still shows lock icon but field is editable — cosmetic
+    warn.style.display = 'none';
+  });
+
+  configGanas = new Set();
+  renderConfigGanaPicker();
+  setConfigMode('new');
+  showConfigSections();
+  updateConfigPreview();
+}
+
 function renderConfigGanaPicker() {
   document.getElementById("configGanaPicker").innerHTML = ALL_GANAS.map(g => `
     <button class="gana-pill ${configGanas.has(g) ? 'selected' : ''}"
@@ -563,9 +765,9 @@ function slugify(str) {
 
 function updateConfigSlugs() {
   const ns = document.getElementById("nagarSlug");
-  if (!ns.dataset.manual) ns.value = slugify(document.getElementById("nagarName").value.trim());
+  if (!ns.dataset.manual && !ns.readOnly) ns.value = slugify(document.getElementById("nagarName").value.trim());
   const ss = document.getElementById("shakhaSlug");
-  if (!ss.dataset.manual) ss.value = slugify(document.getElementById("shakhaName").value.trim()).substring(0, 20);
+  if (!ss.dataset.manual && !ss.readOnly) ss.value = slugify(document.getElementById("shakhaName").value.trim()).substring(0, 20);
   updateConfigPreview();
 }
 
@@ -588,8 +790,7 @@ function buildConfigDoc() {
 function updateConfigPreview() {
   const ns = document.getElementById("nagarSlug").value.trim() || "<nagar>";
   const ss = document.getElementById("shakhaSlug").value.trim() || "<shakha>";
-  const docId = (ns !== "<nagar>" && ss !== "<shakha>") ? `${ns}_${ss}` : `${ns}_${ss}`;
-  document.getElementById("configFirestorePath").textContent = `shakhas/${docId}`;
+  document.getElementById("configFirestorePath").textContent = `shakhas/${ns}_${ss}`;
   document.getElementById("configDocPreview").textContent = JSON.stringify(buildConfigDoc(), null, 2);
 }
 
@@ -602,14 +803,16 @@ async function saveConfig() {
   const btn = document.getElementById("configSaveBtn");
   btn.disabled = true; btn.textContent = "Saving…";
   try {
-    // Write Nagar doc: nagars/{nagarSlug}
     const nagarRef = window.firestoreDoc(window.db, "nagars", doc.nagarSlug);
     await window.firestoreSetDoc(nagarRef, { nagarName: doc.nagarName, nagarSlug: doc.nagarSlug }, { merge: true });
-    // Write Shakha doc: shakhas/{nagarSlug}_{shakhaSlug}
     const shakhaRef = window.firestoreDoc(window.db, "shakhas", doc.shakhaId);
     await window.firestoreSetDoc(shakhaRef, doc, { merge: true });
     showToast("Shakha configuration saved!", "success");
     await loadNagarsFromFirestore();
+    // If we just saved, switch to edit mode and lock slugs
+    setConfigMode('edit');
+    lockSlug('nagar');
+    lockSlug('shakha');
   } catch(err) {
     console.error(err);
     showToast("Error: " + err.message, "error");
@@ -652,6 +855,8 @@ async function loadNagarsFromFirestore() {
         nagarCache[ns].shakhas[d.id] = data;
       }
     });
+    // Also refresh the Config tab dropdowns
+    populateConfigNagarDropdown();
   } catch(err) {
     console.error("Could not load Nagars:", err);
   }
