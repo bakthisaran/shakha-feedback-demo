@@ -194,7 +194,9 @@ function getParams() {
 }
 
 function formatDate(iso) {
-  const d = new Date(iso);
+  if (!iso) return "";
+  const [year, month, day] = iso.split("-").map(Number);
+  const d = new Date(year, month - 1, day); // local time, no UTC shift
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
