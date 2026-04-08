@@ -5,7 +5,6 @@
 <title>Shakha Feedback</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600&family=DM+Sans:wght@400;500&display=swap');
-
   :root {
     --saffron: #FF6B1A;
     --deep: #1a1207;
@@ -14,9 +13,7 @@
     --border: #e8e0d0;
     --radius: 14px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     font-family: 'DM Sans', sans-serif;
     background: #f0ebe0;
@@ -28,7 +25,6 @@
     align-items: center;
     padding: 20px;
   }
-
   .card {
     background: var(--card-bg);
     border-radius: var(--radius);
@@ -39,7 +35,6 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.1);
     border: 1px solid var(--border);
   }
-
   .shakha-name {
     font-family: 'Noto Serif', serif;
     font-size: 13px;
@@ -49,26 +44,22 @@
     text-transform: uppercase;
     margin-bottom: 4px;
   }
-
   .shakha-date {
     font-size: 18px;
     font-weight: 500;
     color: var(--deep);
     margin-bottom: 4px;
   }
-
   .step-label {
     font-size: 14px;
     color: var(--muted);
     margin-bottom: 20px;
   }
-
   .divider {
     height: 1px;
     background: var(--border);
     margin: 16px 0;
   }
-
   .session-title {
     font-family: 'Noto Serif', serif;
     font-size: 22px;
@@ -76,32 +67,27 @@
     color: var(--deep);
     margin-bottom: 6px;
   }
-
   .session-meta {
     font-size: 13px;
     color: var(--muted);
     margin-bottom: 20px;
     line-height: 1.6;
   }
-
   .session-meta strong {
     color: var(--deep);
     font-weight: 500;
   }
-
   .prompt {
     font-size: 15px;
     color: var(--deep);
     margin-bottom: 16px;
   }
-
   .emojis {
     display: flex;
     justify-content: center;
     gap: 6px;
     margin-bottom: 8px;
   }
-
   .emoji-btn {
     font-size: 28px;
     cursor: pointer;
@@ -114,7 +100,6 @@
   }
   .emoji-btn:hover { transform: scale(1.15); }
   .emoji-btn.selected { border-color: var(--saffron); background: #fff5ee; }
-
   select, input, textarea {
     width: 100%;
     padding: 11px 14px;
@@ -130,7 +115,6 @@
   }
   select:focus, input:focus, textarea:focus { border-color: var(--saffron); }
   textarea { resize: vertical; min-height: 90px; }
-
   .btn {
     display: block;
     width: 100%;
@@ -150,7 +134,6 @@
   .btn:active { transform: scale(0.98); }
   .btn.primary { background: var(--saffron); }
   .btn.primary:hover { background: #e55a0f; }
-
   .progress-dots {
     display: flex;
     justify-content: center;
@@ -164,19 +147,16 @@
   }
   .dot.active { background: var(--saffron); }
   .dot.done { background: var(--deep); }
-
   .ver {
     font-size: 11px;
     color: #ccc;
     margin-top: 16px;
   }
-
   .loading {
     color: var(--muted);
     font-size: 14px;
     padding: 20px 0;
   }
-
   .error {
     color: #c0392b;
     font-size: 14px;
@@ -185,22 +165,18 @@
     border-radius: 8px;
     margin-top: 10px;
   }
-
   .thankyou-icon {
     font-size: 40px;
     margin-bottom: 10px;
   }
 </style>
 </head>
-
 <body>
 <div class="card" id="app">
   <div class="loading">Loading...</div>
 </div>
-
 <script>
-const APP_VER = "1.0";
-
+const APP_VER = "1.1";
 let config = null;
 let step = -1;
 let feedback = {};
@@ -211,9 +187,9 @@ let sessions = [];
 function getParams() {
   const p = new URLSearchParams(window.location.search);
   return {
-    nagar: p.get("nagar"),
+    nagar:  p.get("nagar"),
     shakha: p.get("shakha"),
-    date: p.get("date")
+    date:   p.get("date")
   };
 }
 
@@ -229,14 +205,14 @@ window.loadConfig = async function() {
   // Fallback for old URLs with no params — remove once demo period is over
   if (!nagar || !shakha || !date) {
     config = {
-      shakhaName: "Ramakrishna Parivaar Shakha - L SPA",
+      shakhaName: "Ramakrishna Parivar Shakha - L SPA",
       date: "2026-04-03",
       ganas: ["Kishore", "Kishori", "Yuva"],
       sessions: ["Achar Paddhati", "Shareerik", "Bauddikh"],
       ganaData: {
-        Kishore:  { bauddikhTitle: "Hanuman Ji", bauddikhShikshak: "Tanaya Ben" },
-        Kishori:  { bauddikhTitle: "Hanuman Ji", bauddikhShikshak: "Tanaya Ben" },
-        Yuva:     { bauddikhTitle: "Charcha on Hindu/Indian Challenges in UK", bauddikhShikshak: "Shrishail Ji" }
+        Kishore: { bauddikhTitle: "Hanuman Ji", bauddikhShikshak: "Tanaya Ben" },
+        Kishori: { bauddikhTitle: "Hanuman Ji", bauddikhShikshak: "Tanaya Ben" },
+        Yuva:    { bauddikhTitle: "Charcha on Hindu/Indian Challenges in UK", bauddikhShikshak: "Shrishail Ji" }
       }
     };
     sessions = config.sessions;
@@ -245,32 +221,34 @@ window.loadConfig = async function() {
   }
 
   try {
-    // Fetch shakha config
-    const shakhaRef = window.firestoreDoc(window.db, "nagars", nagar, "shakhas", shakha);
+    // 1. Load Shakha config from flat collection: shakhas/{nagar}_{shakha}
+    const shakhaId  = `${nagar}_${shakha}`;
+    const shakhaRef = window.firestoreDoc(window.db, "shakhas", shakhaId);
     const shakhaSnap = await window.firestoreGetDoc(shakhaRef);
 
     if (!shakhaSnap.exists()) {
-      showError(`Shakha "${shakha}" not found under nagar "${nagar}".`);
+      showError(`Shakha "${shakha}" not found under Nagar "${nagar}".<br><small style="opacity:0.7">Looking for: shakhas/${shakhaId}</small>`);
       return;
     }
-
     config = shakhaSnap.data();
 
-    // Try to fetch session-level overrides (optional)
-    const sessionRef = window.firestoreDoc(window.db, "nagars", nagar, "shakhas", shakha, "sessions", date);
-    const sessionSnap = await window.firestoreGetDoc(sessionRef);
+    // 2. Load feedback-request for this date: feedback-requests/{nagar}_{shakha}_{date}
+    //    This holds the session list + gana-level details for this specific Shakha day.
+    const requestId  = `${shakhaId}_${date}`;
+    const requestRef = window.firestoreDoc(window.db, "feedback-requests", requestId);
+    const requestSnap = await window.firestoreGetDoc(requestRef);
 
-    if (sessionSnap.exists()) {
-      // Session doc can override date, sessions list, or ganaData
-      config = { ...config, ...sessionSnap.data() };
+    if (requestSnap.exists()) {
+      // Merge — feedback-request fields (sessions, ganaData, date) take priority
+      config = { ...config, ...requestSnap.data() };
     } else {
-      // Use the date from URL if no session doc
+      // No feedback-request doc yet — fall back to Shakha-level config
+      // (sessions and ganas come from the shakha doc itself)
       config.date = date;
     }
 
     sessions = config.sessions || [];
     startScreen();
-
   } catch (err) {
     console.error(err);
     showError("Failed to load config: " + err.message);
@@ -288,14 +266,16 @@ function showError(msg) {
 
 function header() {
   return `
-    <div class="shakha-name">${config.shakhaName || config.nagarName || ""}</div>
+    <div class="shakha-name">${config.shakhaName || ""}</div>
     <div class="shakha-date">Shakha: ${formatDate(config.date)}</div>
   `;
 }
 
 function progressDots(currentStep) {
   return `<div class="progress-dots">
-    ${sessions.map((_, i) => `<div class="dot ${i < currentStep ? 'done' : i === currentStep ? 'active' : ''}"></div>`).join('')}
+    ${sessions.map((_, i) => `
+      <div class="dot ${i < currentStep ? 'done' : i === currentStep ? 'active' : ''}"></div>
+    `).join('')}
   </div>`;
 }
 
@@ -335,18 +315,25 @@ function start() {
 
 function showSession() {
   if (step >= sessions.length) { showFinal(); return; }
-
   const session = sessions[step];
   const gd = (config.ganaData || {})[gana] || {};
+  const sessionLower = session.toLowerCase();
 
   let metaHtml = `<div class="session-meta"><strong>${gana}</strong></div>`;
 
-  if (gd.bauddikhTitle && session.toLowerCase().includes("bauddikh")) {
+  if (sessionLower.includes("bauddikh") && gd.bauddikhTitle) {
     metaHtml = `
       <div class="session-meta">
         <strong>${gana}</strong><br>
         ${gd.bauddikhTitle}<br>
         <span style="font-size:12px">Shikshak: ${gd.bauddikhShikshak || ""}</span>
+      </div>`;
+  } else if (sessionLower.includes("shareerik") && gd.shareerikVishay) {
+    metaHtml = `
+      <div class="session-meta">
+        <strong>${gana}</strong><br>
+        ${gd.shareerikVishay}<br>
+        <span style="font-size:12px">Shikshak: ${gd.shareerikShikshak || ""}</span>
       </div>`;
   }
 
@@ -369,8 +356,6 @@ function showSession() {
 
 function rate(value) {
   feedback[sessions[step]] = value;
-
-  // Flash selected emoji briefly before moving on
   const btns = document.querySelectorAll(".emoji-btn");
   if (btns[value - 1]) {
     btns[value - 1].classList.add("selected");
@@ -393,32 +378,34 @@ function showFinal() {
 }
 
 function submitFinal() {
-  const name = document.getElementById("name").value.trim();
+  const name    = document.getElementById("name").value.trim();
   const overall = document.getElementById("overall").value.trim();
-  const gd = (config.ganaData || {})[gana] || {};
+  const gd      = (config.ganaData || {})[gana] || {};
+  const { nagar, shakha, date } = getParams();
 
-  // Build ratings object dynamically from whatever sessions were configured
+  // Build ratings dynamically from whatever sessions were configured
   const ratings = {};
   sessions.forEach(s => {
-    const key = s.toLowerCase().replace(/\s+/g, "_");
-    ratings[key] = feedback[s] || null;
+    ratings[s.toLowerCase().replace(/\s+/g, "_")] = feedback[s] || null;
   });
 
-  const { nagar, shakha } = getParams();
-
-  window.addDoc(window.collection(window.db, "feedbacks"), {
-    nagar: nagar || null,
-    shakha: shakha || null,
-    shakhaName: config.shakhaName || "",
-    date: config.date,
+  window.addDoc(window.firestoreCollection(window.db, "feedbacks"), {
+    nagar:              nagar  || null,
+    shakha:             shakha || null,
+    shakhaId:           nagar && shakha ? `${nagar}_${shakha}` : null,
+    shakhaName:         config.shakhaName  || "",
+    nagarName:          config.nagarName   || "",
+    date:               config.date,
     gana,
-    bauddikhTitle: gd.bauddikhTitle || null,
-    bauddikhShikshak: gd.bauddikhShikshak || null,
+    bauddikhTitle:      gd.bauddikhTitle      || null,
+    bauddikhShikshak:   gd.bauddikhShikshak   || null,
+    shareerikVishay:    gd.shareerikVishay    || null,
+    shareerikShikshak:  gd.shareerikShikshak  || null,
     ratings,
-    name: name || null,
-    overallComment: overall || null,
-    source: window.location.search.includes("qr=1") ? "QR" : "Shared",
-    timestamp: new Date()
+    name:               name    || null,
+    overallComment:     overall || null,
+    source:             window.location.search.includes("qr=1") ? "QR" : "Shared",
+    timestamp:          new Date()
   }).then(() => {
     render(`
       <div class="thankyou-icon">🙏</div>
@@ -435,8 +422,8 @@ function submitFinal() {
 
 <!-- Firebase -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeApp }                                        from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, addDoc, doc, getDoc }       from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDb4NpYEwtcoY8SgmIHRqAok9qKJF4Ej4k",
@@ -449,17 +436,16 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db  = getFirestore(app);
 
-window.db = db;
-window.collection = collection;
-window.addDoc = addDoc;
-window.firestoreDoc = doc;
-window.firestoreGetDoc = getDoc;
+window.db                  = db;
+window.firestoreDoc        = doc;
+window.firestoreGetDoc     = getDoc;
+window.firestoreCollection = collection;
+window.addDoc              = addDoc;
 
 // Kick off config load now that db is ready
 window.loadConfig();
 </script>
-
 </body>
 </html>
