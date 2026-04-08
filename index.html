@@ -195,9 +195,19 @@ function getParams() {
 
 function formatDate(iso) {
   if (!iso) return "";
-  const [year, month, day] = iso.split("-").map(Number);
-  const d = new Date(year, month - 1, day); // local time, no UTC shift
-  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  // Handle Firestore Timestamp objects
+  if (iso && typeof iso === 'object' && typeof iso.toDate === 'function') {
+    iso = iso.toDate().toISOString().split('T')[0];
+  }
+  // Handle plain string "YYYY-MM-DD"
+  if (typeof iso === 'string' && iso.includes('-')) {
+    const [year, month, day] = iso.split("-").map(Number);
+    if (year && month && day) {
+      const d = new Date(year, month - 1, day);
+      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+  }
+  return iso; // fallback: show raw value
 }
 
 // --- Config loader (called from module script once db is ready) ---
@@ -244,12 +254,19 @@ window.loadConfig = async function() {
       // Merge — feedback-request fields (sessions, ganaData, date) take priority
       config = { ...config, ...requestSnap.data() };
     } else {
-      // No feedback-request doc yet — fall back to Shakha-level config
-      // (sessions and ganas come from the shakha doc itself)
+      // No feedback-request doc — use the date straight from the URL
       config.date = date;
     }
 
     sessions = config.sessions || [];
+
+    // Normalise date — Firestore may return a Timestamp or the URL string
+    if (!config.date) {
+      config.date = date; // always fall back to URL param
+    } else if (typeof config.date === 'object' && typeof config.date.toDate === 'function') {
+      config.date = config.date.toDate().toISOString().split('T')[0];
+    }
+
     startScreen();
   } catch (err) {
     console.error(err);
