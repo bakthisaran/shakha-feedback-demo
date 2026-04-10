@@ -334,7 +334,7 @@ window.onAuthStateChanged = function(user) {
 // ---- Firestore helpers ----
 async function loadNagars() {
   try {
-    const snap = await window.fsGetDocs(window.fsCollection(window.db, "shakhas"));
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
     const nagars = {};
     snap.forEach(doc => {
       const data = doc.data();
@@ -369,7 +369,7 @@ async function onNagarChange() {
   if (!nagarSlug) return;
 
   try {
-    const snap = await window.fsGetDocs(window.fsCollection(window.db, "shakhas"));
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
     const shakhas = {};
     snap.forEach(doc => {
       const data = doc.data();
@@ -405,7 +405,7 @@ async function onShakhaChange() {
   if (!shakhaSlug) return;
 
   try {
-    const snap = await window.fsGetDocs(window.fsCollection(window.db, "shakhas"));
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
     const dates = [];
     snap.forEach(doc => {
       const data = doc.data();
@@ -447,17 +447,18 @@ async function onDateChange() {
 
   try {
     const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
-    let ganas = [];
+    const ganaSet = new Set();
     snap.forEach(doc => {
       const data = doc.data();
       if (data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug && data.date === selectedDate) {
-        if (data.ganas && Array.isArray(data.ganas)) {
-          ganas = data.ganas;
+        if (data.gana) {
+          ganaSet.add(data.gana);
         }
       }
     });
     
-    ganas.sort().forEach(gana => {
+    const ganas = Array.from(ganaSet).sort();
+    ganas.forEach(gana => {
       const opt = document.createElement("option");
       opt.value = gana;
       opt.textContent = gana;
