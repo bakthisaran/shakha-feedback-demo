@@ -406,18 +406,20 @@ async function onShakhaChange() {
 
   try {
     const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
-    const dates = [];
+    const dateSet = new Set();
     snap.forEach(doc => {
       const data = doc.data();
       if (data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug) {
-        console.log("Shakha doc data:", data);
-        dates.push(data.date);
+        if (data.date) {
+          dateSet.add(data.date);
+        }
       }
     });
     
-    console.log("Raw dates:", dates);
+    const dates = Array.from(dateSet).sort().reverse();
+    console.log("Unique dates:", dates);
     
-    dates.sort().reverse().forEach(date => {
+    dates.forEach(date => {
       const opt = document.createElement("option");
       opt.value = date;
       // Format as dd-Mmm-yy (e.g., 27-Mar-26)
@@ -451,9 +453,11 @@ async function onDateChange() {
     snap.forEach(doc => {
       const data = doc.data();
       if (data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug && data.date === selectedDate) {
-        if (data.ganas) {
-          console.log("Gana doc data:", data.ganas);
-          ganaSet.add(data.ganas);
+        // ganas is an array, so iterate through it
+        if (data.ganas && Array.isArray(data.ganas)) {
+          data.ganas.forEach(gana => {
+            ganaSet.add(gana);
+          });
         }
       }
     });
