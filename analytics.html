@@ -405,7 +405,7 @@ async function onShakhaChange() {
   if (!shakhaSlug) return;
 
   try {
-    const snap = await window.fsGetDocs(window.fsCollection(window.db, "shakhas"));
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
     const dates = [];
     snap.forEach(doc => {
       const data = doc.data();
