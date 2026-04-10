@@ -405,7 +405,7 @@ async function onShakhaChange() {
   if (!shakhaSlug) return;
 
   try {
-    const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "shakhas"));
     const dates = [];
     snap.forEach(doc => {
       const data = doc.data();
@@ -446,7 +446,7 @@ async function onDateChange() {
   if (!selectedDate) return;
 
   try {
-    const snap = await window.fsGetDocs(window.fsCollection(window.db, "shakhas"));
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
     let ganas = [];
     snap.forEach(doc => {
       const data = doc.data();
@@ -481,18 +481,18 @@ async function loadAnalytics() {
   document.getElementById("btnLoad").textContent = "Loading…";
 
   try {
-    // Query feedback-requests for this nagar + shakha + date
+    // Query feedbacks (using nagar and shakha fields, not slugs)
     let q = window.fsQuery(
-      window.fsCollection(window.db, "feedback-requests"),
-      window.fsWhere("nagarSlug", "==", nagarSlug),
-      window.fsWhere("shakhaSlug", "==", shakhaSlug),
+      window.fsCollection(window.db, "feedbacks"),
+      window.fsWhere("nagar", "==", nagarSlug),
+      window.fsWhere("shakha", "==", shakhaSlug),
       window.fsWhere("date", "==", selectedDate)
     );
     if (gana !== "all") {
       q = window.fsQuery(
-        window.fsCollection(window.db, "feedback-requests"),
-        window.fsWhere("nagarSlug", "==", nagarSlug),
-        window.fsWhere("shakhaSlug", "==", shakhaSlug),
+        window.fsCollection(window.db, "feedbacks"),
+        window.fsWhere("nagar", "==", nagarSlug),
+        window.fsWhere("shakha", "==", shakhaSlug),
         window.fsWhere("date", "==", selectedDate),
         window.fsWhere("gana", "==", gana)
       );
