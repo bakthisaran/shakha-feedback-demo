@@ -233,6 +233,12 @@
       </select>
     </div>
     <div class="filter-group">
+      <span class="filter-label">Shakha Date</span>
+      <select id="selDate" onchange="onDateChange()" disabled>
+        <option value="">Select Date…</option>
+      </select>
+    </div>
+    <div class="filter-group">
       <span class="filter-label">Gana</span>
       <select id="selGana" disabled>
         <option value="all">All Ganas</option>
@@ -249,7 +255,7 @@
     </div>
     <div class="summary-pill">
       <div class="pill-value" id="pillSessions">—</div>
-      <div class="pill-label">Shakha dates</div>
+      <div class="pill-label">Sessions</div>
     </div>
     <div class="summary-pill">
       <div class="pill-value" id="pillAvg">—</div>
@@ -261,17 +267,9 @@
     </div>
   </div>
 
-  <!-- Trend chart -->
-  <div class="chart-card" id="trendCard" style="display:none">
-    <div class="chart-title">Session score trends over time</div>
-    <div class="chart-subtitle">Average emoji rating per session across Shakha dates</div>
-    <div class="chart-wrap" id="trendWrap"></div>
-    <div class="legend" id="trendLegend"></div>
-  </div>
-
-  <!-- Latest bar chart -->
+  <!-- Bar chart (by session & gana) -->
   <div class="chart-card" id="barCard" style="display:none">
-    <div class="chart-title">Latest Shakha — scores by session &amp; gana</div>
+    <div class="chart-title">Scores by session &amp; gana</div>
     <div class="chart-subtitle" id="barSubtitle"></div>
     <div class="chart-wrap" id="barWrap"></div>
     <div class="legend" id="barLegend"></div>
@@ -336,34 +334,57 @@ window.onAuthStateChanged = function(user) {
 // ---- Firestore helpers ----
 async function loadNagars() {
   try {
-    const snap = await window.fsGetDocs(window.fsCollection(window.db, "nagars"));
-    const sel = document.getElementById("selNagar");
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "shakhas"));
+    const nagars = {};
     snap.forEach(doc => {
+      const data = doc.data();
+      const nagarSlug = data.nagarSlug;
+      if (!nagars[nagarSlug]) {
+        nagars[nagarSlug] = data.nagarName;
+      }
+    });
+    
+    const sel = document.getElementById("selNagar");
+    Object.entries(nagars).sort().forEach(([slug, name]) => {
       const opt = document.createElement("option");
-      opt.value = doc.id;
-      opt.textContent = doc.data().nagarName || doc.id;
+      opt.value = slug;
+      opt.textContent = name;
       sel.appendChild(opt);
     });
   } catch(e) { console.error(e); }
 }
 
 async function onNagarChange() {
-  const nagar = document.getElementById("selNagar").value;
+  const nagarSlug = document.getElementById("selNagar").value;
   const shakhaEl = document.getElementById("selShakha");
   shakhaEl.innerHTML = '<option value="">Select Shakha…</option>';
   shakhaEl.disabled = true;
+  document.getElementById("selDate").innerHTML = '<option value="">Select Date…</option>';
+  document.getElementById("selDate").disabled = true;
+  document.getElementById("selGana").innerHTML = '<option value="all">All Ganas</option>';
   document.getElementById("selGana").disabled = true;
   document.getElementById("btnLoad").disabled = true;
   resetCharts();
 
-  if (!nagar) return;
+  if (!nagarSlug) return;
 
   try {
-    const snap = await window.fsGetDocs(window.fsCollection(window.db, "nagars", nagar, "shakhas"));
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "shakhas"));
+    const shakhas = {};
     snap.forEach(doc => {
+      const data = doc.data();
+      if (data.nagarSlug === nagarSlug) {
+        shakhas[data.shakhaSlug] = {
+          name: data.shakhaName,
+          id: doc.id
+        };
+      }
+    });
+    
+    Object.entries(shakhas).sort().forEach(([slug, info]) => {
       const opt = document.createElement("option");
-      opt.value = doc.id;
-      opt.textContent = doc.data().shakhaName || doc.id;
+      opt.value = slug;
+      opt.textContent = info.name;
       shakhaEl.appendChild(opt);
     });
     shakhaEl.disabled = false;
@@ -371,26 +392,70 @@ async function onNagarChange() {
 }
 
 async function onShakhaChange() {
-  const nagar  = document.getElementById("selNagar").value;
-  const shakha = document.getElementById("selShakha").value;
+  const nagarSlug = document.getElementById("selNagar").value;
+  const shakhaSlug = document.getElementById("selShakha").value;
+  const dateEl = document.getElementById("selDate");
+  dateEl.innerHTML = '<option value="">Select Date…</option>';
+  dateEl.disabled = true;
+  document.getElementById("selGana").innerHTML = '<option value="all">All Ganas</option>';
+  document.getElementById("selGana").disabled = true;
+  document.getElementById("btnLoad").disabled = true;
+  resetCharts();
+
+  if (!shakhaSlug) return;
+
+  try {
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "shakhas"));
+    const dates = [];
+    snap.forEach(doc => {
+      const data = doc.data();
+      if (data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug) {
+        dates.push(data.date);
+      }
+    });
+    
+    dates.sort().reverse().forEach(date => {
+      const opt = document.createElement("option");
+      opt.value = date;
+      opt.textContent = new Date(date).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+      dateEl.appendChild(opt);
+    });
+    
+    dateEl.disabled = false;
+  } catch(e) { console.error(e); }
+}
+
+async function onDateChange() {
+  const nagarSlug = document.getElementById("selNagar").value;
+  const shakhaSlug = document.getElementById("selShakha").value;
+  const selectedDate = document.getElementById("selDate").value;
   const ganaEl = document.getElementById("selGana");
   ganaEl.innerHTML = '<option value="all">All Ganas</option>';
   ganaEl.disabled = true;
   document.getElementById("btnLoad").disabled = true;
   resetCharts();
 
-  if (!shakha) return;
+  if (!selectedDate) return;
 
   try {
-    const doc = await window.fsGetDoc(window.fsDoc(window.db, "nagars", nagar, "shakhas", shakha));
-    if (doc.exists()) {
-      const ganas = doc.data().ganas || [];
-      ganas.forEach(g => {
-        const opt = document.createElement("option");
-        opt.value = g; opt.textContent = g;
-        ganaEl.appendChild(opt);
-      });
-    }
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "shakhas"));
+    let ganas = [];
+    snap.forEach(doc => {
+      const data = doc.data();
+      if (data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug && data.date === selectedDate) {
+        if (data.ganas && Array.isArray(data.ganas)) {
+          ganas = data.ganas;
+        }
+      }
+    });
+    
+    ganas.sort().forEach(gana => {
+      const opt = document.createElement("option");
+      opt.value = gana;
+      opt.textContent = gana;
+      ganaEl.appendChild(opt);
+    });
+    
     ganaEl.disabled = false;
     document.getElementById("btnLoad").disabled = false;
   } catch(e) { console.error(e); }
@@ -398,26 +463,29 @@ async function onShakhaChange() {
 
 // ---- Load & aggregate analytics ----
 async function loadAnalytics() {
-  const nagar  = document.getElementById("selNagar").value;
-  const shakha = document.getElementById("selShakha").value;
-  const gana   = document.getElementById("selGana").value;
+  const nagarSlug = document.getElementById("selNagar").value;
+  const shakhaSlug = document.getElementById("selShakha").value;
+  const selectedDate = document.getElementById("selDate").value;
+  const gana = document.getElementById("selGana").value;
 
   resetCharts();
   document.getElementById("btnLoad").disabled = true;
   document.getElementById("btnLoad").textContent = "Loading…";
 
   try {
-    // Query feedbacks for this nagar + shakha
+    // Query feedback-requests for this nagar + shakha + date
     let q = window.fsQuery(
-      window.fsCollection(window.db, "feedbacks"),
-      window.fsWhere("nagar", "==", nagar),
-      window.fsWhere("shakha", "==", shakha)
+      window.fsCollection(window.db, "feedback-requests"),
+      window.fsWhere("nagarSlug", "==", nagarSlug),
+      window.fsWhere("shakhaSlug", "==", shakhaSlug),
+      window.fsWhere("date", "==", selectedDate)
     );
     if (gana !== "all") {
       q = window.fsQuery(
-        window.fsCollection(window.db, "feedbacks"),
-        window.fsWhere("nagar", "==", nagar),
-        window.fsWhere("shakha", "==", shakha),
+        window.fsCollection(window.db, "feedback-requests"),
+        window.fsWhere("nagarSlug", "==", nagarSlug),
+        window.fsWhere("shakhaSlug", "==", shakhaSlug),
+        window.fsWhere("date", "==", selectedDate),
         window.fsWhere("gana", "==", gana)
       );
     }
@@ -431,7 +499,7 @@ async function loadAnalytics() {
       return;
     }
 
-    renderAnalytics(docs, gana);
+    renderAnalytics(docs, gana, selectedDate);
 
   } catch(e) {
     console.error(e);
@@ -442,7 +510,7 @@ async function loadAnalytics() {
   }
 }
 
-function renderAnalytics(docs, selectedGana) {
+function renderAnalytics(docs, selectedGana, selectedDate) {
   // Collect all session keys across all docs
   const sessionKeys = new Set();
   docs.forEach(d => {
@@ -452,27 +520,6 @@ function renderAnalytics(docs, selectedGana) {
 
   // Friendly session labels
   const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-
-  // Group by date
-  const byDate = {};
-  docs.forEach(d => {
-    const date = d.date || "unknown";
-    if (!byDate[date]) byDate[date] = [];
-    byDate[date].push(d);
-  });
-  const dates = Object.keys(byDate).sort();
-
-  // Compute avg score per session per date
-  const trendData = sessions.map((sess, si) => ({
-    session: sess,
-    label: label(sess),
-    color: SESSION_COLORS[si % SESSION_COLORS.length],
-    points: dates.map(date => {
-      const group = byDate[date];
-      const vals = group.map(d => d.ratings?.[sess]).filter(v => v != null && v > 0);
-      return { date, avg: vals.length ? d3.mean(vals) : null, n: vals.length };
-    }).filter(p => p.avg != null)
-  }));
 
   // Summary stats
   const allRatings = [];
@@ -490,113 +537,18 @@ function renderAnalytics(docs, selectedGana) {
   // Update summary pills
   document.getElementById("summaryRow").style.display = "flex";
   document.getElementById("pillResponses").textContent = docs.length;
-  document.getElementById("pillSessions").textContent = dates.length;
+  document.getElementById("pillSessions").textContent = sessions.length;
   document.getElementById("pillAvg").textContent = overallAvg.toFixed(1);
   document.getElementById("pillTop").textContent = label(topSession);
 
-  // Draw trend chart
-  drawTrendChart(trendData, dates);
-
-  // Draw bar chart for latest date
-  const latestDate = dates[dates.length - 1];
-  const latestDocs = byDate[latestDate];
-  drawBarChart(latestDocs, sessions, label, latestDate, selectedGana);
+  // Draw bar chart
+  drawBarChart(docs, sessions, label, selectedDate, selectedGana);
 }
 
-// ---- Trend line chart ----
-function drawTrendChart(trendData, dates) {
-  document.getElementById("trendCard").style.display = "block";
-  const wrap = document.getElementById("trendWrap");
-  wrap.innerHTML = "";
-
-  const W = wrap.clientWidth || 800;
-  const margin = { top: 20, right: 20, bottom: 50, left: 44 };
-  const width  = W - margin.left - margin.right;
-  const height = 280 - margin.top - margin.bottom;
-
-  const parseDate = d3.timeParse("%Y-%m-%d");
-  const fmtDate   = d3.timeFormat("%d %b");
-
-  // Flatten all points for scale
-  const allPoints = trendData.flatMap(s => s.points);
-  if (allPoints.length === 0) return;
-
-  const xDomain = allPoints.map(p => parseDate(p.date)).filter(Boolean);
-  const x = d3.scaleTime().domain(d3.extent(xDomain)).range([0, width]);
-  const y = d3.scaleLinear().domain([1, 5]).range([height, 0]);
-
-  const svg = d3.select(wrap).append("svg")
-    .attr("width", W)
-    .attr("height", height + margin.top + margin.bottom);
-
-  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
-  // Grid
-  g.append("g").attr("class", "grid")
-    .call(d3.axisLeft(y).ticks(4).tickSize(-width).tickFormat(""));
-
-  // Axes
-  g.append("g").attr("class", "axis")
-    .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x).ticks(Math.min(dates.length, 6)).tickFormat(d => fmtDate(d)));
-
-  g.append("g").attr("class", "axis")
-    .call(d3.axisLeft(y).ticks(4).tickFormat(d => ["","😞","😐","🙂","😄","🤩"][d] || d));
-
-  const tooltip = document.getElementById("tooltip");
-
-  // Lines + dots per session
-  trendData.forEach(series => {
-    if (series.points.length === 0) return;
-
-    const line = d3.line()
-      .x(p => x(parseDate(p.date)))
-      .y(p => y(p.avg))
-      .curve(d3.curveMonotoneX);
-
-    g.append("path")
-      .datum(series.points)
-      .attr("fill", "none")
-      .attr("stroke", series.color)
-      .attr("stroke-width", 2.5)
-      .attr("stroke-linejoin", "round")
-      .attr("d", line);
-
-    g.selectAll(`.dot-${series.session}`)
-      .data(series.points)
-      .enter().append("circle")
-      .attr("cx", p => x(parseDate(p.date)))
-      .attr("cy", p => y(p.avg))
-      .attr("r", 5)
-      .attr("fill", series.color)
-      .attr("stroke", "white")
-      .attr("stroke-width", 2)
-      .style("cursor", "pointer")
-      .on("mouseover", function(event, p) {
-        tooltip.style.opacity = "1";
-        tooltip.innerHTML = `<strong>${series.label}</strong><br>${p.date}<br>Avg: ${p.avg.toFixed(2)} (${p.n} responses)`;
-      })
-      .on("mousemove", function(event) {
-        tooltip.style.left = (event.pageX + 12) + "px";
-        tooltip.style.top  = (event.pageY - 28) + "px";
-      })
-      .on("mouseout", () => { tooltip.style.opacity = "0"; });
-  });
-
-  // Legend
-  const legend = document.getElementById("trendLegend");
-  legend.innerHTML = trendData.map(s => `
-    <div class="legend-item">
-      <div class="legend-dot" style="background:${s.color}"></div>
-      ${s.label}
-    </div>
-  `).join('');
-}
-
-// ---- Bar chart (latest shakha, by session & gana) ----
+// ---- Bar chart (by session & gana) ----
 function drawBarChart(docs, sessions, labelFn, date, selectedGana) {
   document.getElementById("barCard").style.display = "block";
-  document.getElementById("barSubtitle").textContent = `Shakha date: ${date}`;
+  document.getElementById("barSubtitle").textContent = `Shakha date: ${new Date(date).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}`;
 
   const wrap = document.getElementById("barWrap");
   wrap.innerHTML = "";
@@ -696,10 +648,8 @@ function drawBarChart(docs, sessions, labelFn, date, selectedGana) {
 
 function resetCharts() {
   document.getElementById("summaryRow").style.display = "none";
-  document.getElementById("trendCard").style.display = "none";
   document.getElementById("barCard").style.display = "none";
   document.getElementById("emptyState").style.display = "none";
-  document.getElementById("trendWrap").innerHTML = "";
   document.getElementById("barWrap").innerHTML = "";
 }
 </script>
