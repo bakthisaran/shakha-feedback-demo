@@ -235,7 +235,7 @@
     <div class="filter-group">
       <span class="filter-label">Shakha Date</span>
       <select id="selDate" onchange="onDateChange()" disabled>
-        <option value="">Select Date…</option>
+        <option value="">All Dates</option>
       </select>
     </div>
     <div class="filter-group">
@@ -265,6 +265,14 @@
       <div class="pill-value" id="pillTop">—</div>
       <div class="pill-label">Top session</div>
     </div>
+  </div>
+
+  <!-- Line chart (all dates) -->
+  <div class="chart-card" id="lineCard" style="display:none">
+    <div class="chart-title">Session score trends over time</div>
+    <div class="chart-subtitle">Average score per session across all Shakha dates</div>
+    <div class="chart-wrap" id="lineWrap"></div>
+    <div class="legend" id="lineLegend"></div>
   </div>
 
   <!-- Bar chart (by session & gana) -->
@@ -395,7 +403,7 @@ async function onShakhaChange() {
   const nagarSlug = document.getElementById("selNagar").value;
   const shakhaSlug = document.getElementById("selShakha").value;
   const dateEl = document.getElementById("selDate");
-  dateEl.innerHTML = '<option value="">Select Date…</option>';
+  dateEl.innerHTML = '<option value="">All Dates</option>';
   dateEl.disabled = true;
   document.getElementById("selGana").innerHTML = '<option value="all">All Ganas</option>';
   document.getElementById("selGana").disabled = true;
@@ -417,7 +425,6 @@ async function onShakhaChange() {
     });
     
     const dates = Array.from(dateSet).sort().reverse();
-    console.log("Unique dates:", dates);
     
     dates.forEach(date => {
       const opt = document.createElement("option");
@@ -432,12 +439,14 @@ async function onShakhaChange() {
     });
     
     dateEl.disabled = false;
+    
+    // Load all-dates analytics automatically
+    await loadAllDatesAnalytics(nagarSlug, shakhaSlug);
+    
   } catch(e) { console.error(e); }
 }
 
 async function onDateChange() {
-  const nagarSlug = document.getElementById("selNagar").value;
-  const shakhaSlug = document.getElementById("selShakha").value;
   const selectedDate = document.getElementById("selDate").value;
   const ganaEl = document.getElementById("selGana");
   ganaEl.innerHTML = '<option value="all">All Ganas</option>';
@@ -445,7 +454,16 @@ async function onDateChange() {
   document.getElementById("btnLoad").disabled = true;
   resetCharts();
 
-  if (!selectedDate) return;
+  // If "All Dates" is selected, just hide the bar chart and gana selector
+  if (!selectedDate) {
+    ganaEl.disabled = true;
+    document.getElementById("btnLoad").disabled = true;
+    document.getElementById("barCard").style.display = "none";
+    return;
+  }
+
+  const nagarSlug = document.getElementById("selNagar").value;
+  const shakhaSlug = document.getElementById("selShakha").value;
 
   try {
     const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
@@ -487,7 +505,7 @@ async function loadAnalytics() {
   document.getElementById("btnLoad").textContent = "Loading…";
 
   try {
-    // Query feedbacks (using nagar and shakha fields, not slugs)
+    // Query feedbacks for a specific date
     let q = window.fsQuery(
       window.fsCollection(window.db, "feedbacks"),
       window.fsWhere("nagar", "==", nagarSlug),
@@ -513,7 +531,7 @@ async function loadAnalytics() {
       return;
     }
 
-    renderAnalytics(docs, gana, selectedDate);
+    renderDateAnalytics(docs, gana, selectedDate);
 
   } catch(e) {
     console.error(e);
@@ -525,6 +543,190 @@ async function loadAnalytics() {
 }
 
 function renderAnalytics(docs, selectedGana, selectedDate) {
+  // Collect all session keys across all docs
+  const sessionKeys = new Set();
+  docs.forEach(d => {
+    if (d.ratings) Object.keys(d.ratings).forEach(k => { if (d.ratings[k] != null) sessionKeys.add(k); });
+  });
+  const sessions = [...sessionKeys].sort();
+
+  // Friendly session labels
+  const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+  // Summary stats
+  const allRatings = [];
+  docs.forEach(d => { if (d.ratings) Object.values(d.ratings).forEach(v => { if (v > 0) allRatings.push(v); }); });
+  const overallAvg = allRatings.length ? d3.mean(allRatings) : 0;
+
+  // Top session
+  const sessionAvgs = sessions.map(s => {
+    const vals = docs.map(d => d.ratings?.[s]).filter(v => v != null && v > 0);
+    return { session: s, avg: vals.length ? d3.mean(vals) : 0 };
+  });
+  sessionAvgs.sort((a, b) => b.avg - a.avg);
+  const topSession = sessionAvgs[0]?.session || "—";
+
+  // Update summary pills
+  document.getElementById("summaryRow").style.display = "flex";
+  document.getElementById("pillResponses").textContent = docs.length;
+  document.getElementById("pillSessions").textContent = sessions.length;
+  document.getElementById("pillAvg").textContent = overallAvg.toFixed(1);
+  document.getElementById("pillTop").textContent = label(topSession);
+
+  // Draw bar chart
+  drawBarChart(docs, sessions, label, selectedDate, selectedGana);
+}
+
+// ---- Load all dates analytics ----
+async function loadAllDatesAnalytics(nagarSlug, shakhaSlug) {
+  try {
+    const q = window.fsQuery(
+      window.fsCollection(window.db, "feedbacks"),
+      window.fsWhere("nagar", "==", nagarSlug),
+      window.fsWhere("shakha", "==", shakhaSlug)
+    );
+
+    const snap = await window.fsGetDocs(q);
+    const docs = [];
+    snap.forEach(d => docs.push(d.data()));
+
+    if (docs.length === 0) {
+      document.getElementById("lineCard").style.display = "none";
+      return;
+    }
+
+    renderAllDatesAnalytics(docs);
+
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function renderAllDatesAnalytics(docs) {
+  // Collect all session keys
+  const sessionKeys = new Set();
+  docs.forEach(d => {
+    if (d.ratings) Object.keys(d.ratings).forEach(k => { if (d.ratings[k] != null) sessionKeys.add(k); });
+  });
+  const sessions = [...sessionKeys].sort();
+
+  const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+  // Group by date
+  const byDate = {};
+  docs.forEach(d => {
+    const date = d.date || "unknown";
+    if (!byDate[date]) byDate[date] = [];
+    byDate[date].push(d);
+  });
+  const dates = Object.keys(byDate).sort();
+
+  // Compute avg score per session per date
+  const trendData = sessions.map((sess, si) => ({
+    session: sess,
+    label: label(sess),
+    color: SESSION_COLORS[si % SESSION_COLORS.length],
+    points: dates.map(date => {
+      const group = byDate[date];
+      const vals = group.map(d => d.ratings?.[sess]).filter(v => v != null && v > 0);
+      return { date, avg: vals.length ? d3.mean(vals) : null, n: vals.length };
+    }).filter(p => p.avg != null)
+  }));
+
+  drawTrendChart(trendData, dates);
+}
+
+// ---- Trend line chart ----
+function drawTrendChart(trendData, dates) {
+  document.getElementById("lineCard").style.display = "block";
+  const wrap = document.getElementById("lineWrap");
+  wrap.innerHTML = "";
+
+  const W = wrap.clientWidth || 800;
+  const margin = { top: 20, right: 20, bottom: 50, left: 44 };
+  const width  = W - margin.left - margin.right;
+  const height = 280 - margin.top - margin.bottom;
+
+  const parseDate = d3.timeParse("%Y-%m-%d");
+  const fmtDate   = d3.timeFormat("%d %b");
+
+  // Flatten all points for scale
+  const allPoints = trendData.flatMap(s => s.points);
+  if (allPoints.length === 0) return;
+
+  const xDomain = allPoints.map(p => parseDate(p.date)).filter(Boolean);
+  const x = d3.scaleTime().domain(d3.extent(xDomain)).range([0, width]);
+  const y = d3.scaleLinear().domain([1, 5]).range([height, 0]);
+
+  const svg = d3.select(wrap).append("svg")
+    .attr("width", W)
+    .attr("height", height + margin.top + margin.bottom);
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Grid
+  g.append("g").attr("class", "grid")
+    .call(d3.axisLeft(y).ticks(4).tickSize(-width).tickFormat(""));
+
+  // Axes
+  g.append("g").attr("class", "axis")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(x).ticks(Math.min(dates.length, 6)).tickFormat(d => fmtDate(d)));
+
+  g.append("g").attr("class", "axis")
+    .call(d3.axisLeft(y).ticks(4).tickFormat(d => ["","😞","😐","🙂","😄","🤩"][d] || d));
+
+  const tooltip = document.getElementById("tooltip");
+
+  // Lines + dots per session
+  trendData.forEach(series => {
+    if (series.points.length === 0) return;
+
+    const line = d3.line()
+      .x(p => x(parseDate(p.date)))
+      .y(p => y(p.avg))
+      .curve(d3.curveMonotoneX);
+
+    g.append("path")
+      .datum(series.points)
+      .attr("fill", "none")
+      .attr("stroke", series.color)
+      .attr("stroke-width", 2.5)
+      .attr("stroke-linejoin", "round")
+      .attr("d", line);
+
+    g.selectAll(`.dot-${series.session}`)
+      .data(series.points)
+      .enter().append("circle")
+      .attr("cx", p => x(parseDate(p.date)))
+      .attr("cy", p => y(p.avg))
+      .attr("r", 5)
+      .attr("fill", series.color)
+      .attr("stroke", "white")
+      .attr("stroke-width", 2)
+      .style("cursor", "pointer")
+      .on("mouseover", function(event, p) {
+        tooltip.style.opacity = "1";
+        tooltip.innerHTML = `<strong>${series.label}</strong><br>${p.date}<br>Avg: ${p.avg.toFixed(2)} (${p.n} responses)`;
+      })
+      .on("mousemove", function(event) {
+        tooltip.style.left = (event.pageX + 12) + "px";
+        tooltip.style.top  = (event.pageY - 28) + "px";
+      })
+      .on("mouseout", () => { tooltip.style.opacity = "0"; });
+  });
+
+  // Legend
+  const legend = document.getElementById("lineLegend");
+  legend.innerHTML = trendData.map(s => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${s.color}"></div>
+      ${s.label}
+    </div>
+  `).join('');
+}
+
+function renderDateAnalytics(docs, selectedGana, selectedDate) {
   // Collect all session keys across all docs
   const sessionKeys = new Set();
   docs.forEach(d => {
@@ -655,6 +857,18 @@ function drawBarChart(docs, sessions, labelFn, date, selectedGana) {
           d3.select(this).attr("opacity", 0.85);
           tooltip.style.opacity = "0";
         });
+
+      // Add rating text in the middle of bar
+      sessGroup.append("text")
+        .attr("x", x1(gana) + x1.bandwidth() / 2)
+        .attr("y", y(val) + (height - y(val)) / 2)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .attr("font-size", "13px")
+        .attr("font-weight", "600")
+        .attr("fill", "white")
+        .attr("pointer-events", "none")
+        .text(`${val.toFixed(1)}/5`);
     });
   });
 
@@ -670,8 +884,10 @@ function drawBarChart(docs, sessions, labelFn, date, selectedGana) {
 
 function resetCharts() {
   document.getElementById("summaryRow").style.display = "none";
+  document.getElementById("lineCard").style.display = "none";
   document.getElementById("barCard").style.display = "none";
   document.getElementById("emptyState").style.display = "none";
+  document.getElementById("lineWrap").innerHTML = "";
   document.getElementById("barWrap").innerHTML = "";
 }
 </script>
