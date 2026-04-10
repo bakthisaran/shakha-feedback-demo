@@ -452,6 +452,7 @@ async function onDateChange() {
       const data = doc.data();
       if (data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug && data.date === selectedDate) {
         if (data.ganas) {
+          console.log("Gana doc data:", data.ganas);
           ganaSet.add(data.ganas);
         }
       }
