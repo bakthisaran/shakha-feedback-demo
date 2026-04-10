@@ -410,14 +410,22 @@ async function onShakhaChange() {
     snap.forEach(doc => {
       const data = doc.data();
       if (data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug) {
+        console.log("Shakha doc data:", data);
         dates.push(data.date);
       }
     });
     
+    console.log("Raw dates:", dates);
+    
     dates.sort().reverse().forEach(date => {
       const opt = document.createElement("option");
       opt.value = date;
-      opt.textContent = new Date(date).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+      // Format as dd-Mmm-yy (e.g., 27-Mar-26)
+      const d = new Date(date);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = d.toLocaleDateString('en-GB', { month: 'short' });
+      const year = String(d.getFullYear()).slice(-2);
+      opt.textContent = `${day}-${month}-${year}`;
       dateEl.appendChild(opt);
     });
     
@@ -548,7 +556,15 @@ function renderAnalytics(docs, selectedGana, selectedDate) {
 // ---- Bar chart (by session & gana) ----
 function drawBarChart(docs, sessions, labelFn, date, selectedGana) {
   document.getElementById("barCard").style.display = "block";
-  document.getElementById("barSubtitle").textContent = `Shakha date: ${new Date(date).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' })}`;
+  
+  // Format date as dd-Mmm-yy
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = d.toLocaleDateString('en-GB', { month: 'short' });
+  const year = String(d.getFullYear()).slice(-2);
+  const formattedDate = `${day}-${month}-${year}`;
+  
+  document.getElementById("barSubtitle").textContent = `Shakha date: ${formattedDate}`;
 
   const wrap = document.getElementById("barWrap");
   wrap.innerHTML = "";
