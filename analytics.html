@@ -451,8 +451,8 @@ async function onDateChange() {
     snap.forEach(doc => {
       const data = doc.data();
       if (data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug && data.date === selectedDate) {
-        if (data.gana) {
-          ganaSet.add(data.gana);
+        if (data.ganas) {
+          ganaSet.add(data.ganas);
         }
       }
     });
