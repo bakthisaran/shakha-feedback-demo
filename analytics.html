@@ -644,14 +644,16 @@ async function loadAllDatesAnalytics(nagarSlug, shakhaSlug) {
     const docs = [];
     snap.forEach(d => {
       const data = d.data();
+      console.log("data.date:", data.date);
       const normalized = normalizeDate(data.date);
+      console.log("data.date normalised:",  normalized);
       if (normalized) {
         // Store normalized date in the data for use in rendering
         data.normalizedDate = normalized;
         docs.push(data);
       }
     });
-
+    console.log("All feedback docs loaded bfore data normalisation:", snap.length);
     console.log("All feedback docs loaded:", docs.length);
 
     if (docs.length === 0) {
