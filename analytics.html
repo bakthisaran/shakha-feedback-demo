@@ -466,6 +466,7 @@ async function onShakhaChange() {
     });
     
     const dates = Array.from(dateSet).sort().reverse();
+    console.log("Available dates:", dates);
     
     dates.forEach(date => {
       const opt = document.createElement("option");
@@ -641,7 +642,17 @@ async function loadAllDatesAnalytics(nagarSlug, shakhaSlug) {
 
     const snap = await window.fsGetDocs(q);
     const docs = [];
-    snap.forEach(d => docs.push(d.data()));
+    snap.forEach(d => {
+      const data = d.data();
+      const normalized = normalizeDate(data.date);
+      if (normalized) {
+        // Store normalized date in the data for use in rendering
+        data.normalizedDate = normalized;
+        docs.push(data);
+      }
+    });
+
+    console.log("All feedback docs loaded:", docs.length);
 
     if (docs.length === 0) {
       document.getElementById("lineCard").style.display = "none";
@@ -665,14 +676,16 @@ function renderAllDatesAnalytics(docs) {
 
   const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-  // Group by normalized date
+  // Group by normalized date (already normalized in loadAllDatesAnalytics)
   const byDate = {};
   docs.forEach(d => {
-    const normalized = normalizeDate(d.date) || "unknown";
-    if (!byDate[normalized]) byDate[normalized] = [];
-    byDate[normalized].push(d);
+    const date = d.normalizedDate || normalizeDate(d.date) || "unknown";
+    if (!byDate[date]) byDate[date] = [];
+    byDate[date].push(d);
   });
   const dates = Object.keys(byDate).sort();
+
+  console.log("Grouped by dates:", dates);
 
   // Compute avg score per session per date
   const trendData = sessions.map((sess, si) => ({
