@@ -496,15 +496,20 @@ async function onDateChange() {
       const data = doc.data();
       const normalized = normalizeDate(data.date);
       if (normalized === selectedDate && data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug) {
+        console.log("Matching feedback-request doc:", data);
         // ganas is an array, so iterate through it
         if (data.ganas && Array.isArray(data.ganas)) {
+          console.log("Found ganas array:", data.ganas);
           data.ganas.forEach(gana => {
             ganaSet.add(gana);
           });
+        } else {
+          console.log("No ganas array found in doc");
         }
       }
     });
     
+    console.log("Final ganas set:", Array.from(ganaSet));
     const ganas = Array.from(ganaSet).sort();
     ganas.forEach(gana => {
       const opt = document.createElement("option");
