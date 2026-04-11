@@ -298,10 +298,28 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 
 <script>
-// ---- Config ----
-const ADMIN_EMAILS = [
-  "bakthisaran@gmail.com"
-];
+// ---- Date normalization ----
+function normalizeDate(dateStr) {
+  if (!dateStr) return null;
+  
+  // Try ISO format first (2026-04-10)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return dateStr;
+  }
+  
+  // Try "DD MMM YYYY" format (03 Apr 2026)
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+  } catch(e) {}
+  
+  return null;
+}
 
 const SESSION_COLORS = [
   "#FF6B1A", "#1D9E75", "#378ADD", "#D85A30",
@@ -418,8 +436,9 @@ async function onShakhaChange() {
     snap.forEach(doc => {
       const data = doc.data();
       if (data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug) {
-        if (data.date) {
-          dateSet.add(data.date);
+        const normalized = normalizeDate(data.date);
+        if (normalized) {
+          dateSet.add(normalized);
         }
       }
     });
@@ -470,7 +489,8 @@ async function onDateChange() {
     const ganaSet = new Set();
     snap.forEach(doc => {
       const data = doc.data();
-      if (data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug && data.date === selectedDate) {
+      const normalized = normalizeDate(data.date);
+      if (normalized === selectedDate && data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug) {
         // ganas is an array, so iterate through it
         if (data.ganas && Array.isArray(data.ganas)) {
           data.ganas.forEach(gana => {
@@ -505,26 +525,27 @@ async function loadAnalytics() {
   document.getElementById("btnLoad").textContent = "Loading…";
 
   try {
-    // Query feedbacks for a specific date
-    let q = window.fsQuery(
+    // Get all feedbacks first, then filter by normalized date
+    const q = window.fsQuery(
       window.fsCollection(window.db, "feedbacks"),
       window.fsWhere("nagar", "==", nagarSlug),
-      window.fsWhere("shakha", "==", shakhaSlug),
-      window.fsWhere("date", "==", selectedDate)
+      window.fsWhere("shakha", "==", shakhaSlug)
     );
-    if (gana !== "all") {
-      q = window.fsQuery(
-        window.fsCollection(window.db, "feedbacks"),
-        window.fsWhere("nagar", "==", nagarSlug),
-        window.fsWhere("shakha", "==", shakhaSlug),
-        window.fsWhere("date", "==", selectedDate),
-        window.fsWhere("gana", "==", gana)
-      );
-    }
 
     const snap = await window.fsGetDocs(q);
-    const docs = [];
-    snap.forEach(d => docs.push(d.data()));
+    let docs = [];
+    snap.forEach(d => {
+      const data = d.data();
+      const normalized = normalizeDate(data.date);
+      if (normalized === selectedDate) {
+        docs.push(data);
+      }
+    });
+
+    // Filter by gana if needed
+    if (gana !== "all") {
+      docs = docs.filter(d => d.gana === gana);
+    }
 
     if (docs.length === 0) {
       document.getElementById("emptyState").style.display = "block";
@@ -612,12 +633,12 @@ function renderAllDatesAnalytics(docs) {
 
   const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-  // Group by date
+  // Group by normalized date
   const byDate = {};
   docs.forEach(d => {
-    const date = d.date || "unknown";
-    if (!byDate[date]) byDate[date] = [];
-    byDate[date].push(d);
+    const normalized = normalizeDate(d.date) || "unknown";
+    if (!byDate[normalized]) byDate[normalized] = [];
+    byDate[normalized].push(d);
   });
   const dates = Object.keys(byDate).sort();
 
