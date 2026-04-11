@@ -313,6 +313,23 @@ function normalizeDate(dateStr) {
   }
   
   // Try "DD MMM YYYY" format (03 Apr 2026)
+  // Use a more explicit parser to handle this format
+  const monthMap = {
+    'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
+    'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+  };
+  
+  const match = dateStr.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
+  if (match) {
+    const day = String(match[1]).padStart(2, '0');
+    const month = monthMap[match[2]];
+    const year = match[3];
+    if (month) {
+      return `${year}-${month}-${day}`;
+    }
+  }
+  
+  // Fallback: try JavaScript Date parsing
   try {
     const d = new Date(dateStr);
     if (!isNaN(d.getTime())) {
@@ -535,7 +552,7 @@ async function loadAnalytics() {
   document.getElementById("btnLoad").textContent = "Loading…";
 
   try {
-    // Get all feedbacks first, then filter by normalized date
+    // Get all feedbacks for this nagar/shakha, then filter by normalized date
     const q = window.fsQuery(
       window.fsCollection(window.db, "feedbacks"),
       window.fsWhere("nagar", "==", nagarSlug),
@@ -547,15 +564,20 @@ async function loadAnalytics() {
     snap.forEach(d => {
       const data = d.data();
       const normalized = normalizeDate(data.date);
+      console.log("Feedback doc date:", data.date, "normalized:", normalized, "selectedDate:", selectedDate);
       if (normalized === selectedDate) {
         docs.push(data);
       }
     });
 
+    console.log("Docs after date filtering:", docs.length);
+
     // Filter by gana if needed
     if (gana !== "all") {
       docs = docs.filter(d => d.gana === gana);
     }
+
+    console.log("Docs after gana filtering:", docs.length);
 
     if (docs.length === 0) {
       document.getElementById("emptyState").style.display = "block";
