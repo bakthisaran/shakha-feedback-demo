@@ -224,6 +224,73 @@
   .empty-icon { font-size: 32px; margin-bottom: 10px; }
 
   .loading-state { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
+
+  /* ---- Tabs ---- */
+  .tabs {
+    display: flex; gap: 4px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 5px;
+    margin-bottom: 24px;
+  }
+  .tab-btn {
+    flex: 1; padding: 9px 16px; border-radius: 8px; border: none;
+    background: transparent; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; color: var(--muted);
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .tab-btn:hover { background: var(--bg); color: var(--deep); }
+  .tab-btn.active {
+    background: var(--saffron); color: white;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ---- Session scorecard table ---- */
+  .scorecard-table {
+    width: 100%; border-collapse: collapse; font-size: 13.5px;
+  }
+  .scorecard-table th {
+    font-size: 11px; font-weight: 500; color: var(--muted);
+    text-align: left; padding: 8px 12px; border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  .scorecard-table th.right { text-align: right; }
+  .scorecard-table td {
+    padding: 11px 12px; border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .scorecard-table td.right { text-align: right; }
+  .scorecard-table tr:last-child td { border-bottom: none; }
+  .scorecard-table tr:hover td { background: #faf6ef; }
+
+  .sess-name { font-weight: 500; color: var(--deep); }
+  .sess-badge {
+    display: inline-block; padding: 2px 7px; border-radius: 20px;
+    font-size: 11px; font-weight: 500; margin-left: 6px;
+  }
+  .badge-top { background: #fff3e0; color: #e65100; }
+  .badge-bot { background: #fce4ec; color: #b71c1c; }
+
+  .trend-arrow { font-size: 16px; font-weight: 700; }
+  .trend-up   { color: #2d7a4f; }
+  .trend-down { color: #c0392b; }
+  .trend-flat { color: var(--muted); }
+
+  /* Mini sparkline */
+  .sparkline { display: inline-block; vertical-align: middle; }
+
+  /* Consistency pill */
+  .consist-bar {
+    display: inline-block; height: 6px; border-radius: 3px;
+    background: var(--border); width: 80px; position: relative; vertical-align: middle;
+  }
+  .consist-fill {
+    position: absolute; left: 0; top: 0; height: 100%; border-radius: 3px;
+    background: var(--saffron);
+  }
+  .consist-label { font-size: 12px; color: var(--muted); margin-left: 6px; }
+
+  .no-data-row td { text-align: center; color: var(--muted); padding: 40px; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -304,20 +371,19 @@
     <div class="filter-hint" id="filterHint"></div>
   </div>
 
-  <!-- Summary pills -->
+  <!-- Summary pills (always visible once shakha selected) -->
   <div class="summary-row" id="summaryRow" style="display:none">
     <div class="summary-pill">
       <div class="pill-value" id="pillResponses">—</div>
       <div class="pill-label">Responses</div>
     </div>
-    <div class="summary-pill">
+    <div class="summary-pill" id="pillDatesPill">
       <div class="pill-value" id="pillDates">—</div>
       <div class="pill-label">Shakha dates</div>
     </div>
     <div class="summary-pill">
       <div class="pill-value" id="pillSessions">—</div>
       <div class="pill-label">Sessions rated</div>
-      <div class="pill-sub"></div>
     </div>
     <div class="summary-pill">
       <div class="pill-value" id="pillAvg">—</div>
@@ -331,29 +397,76 @@
     </div>
   </div>
 
-  <!-- Line chart (multi-date trend) -->
-  <div class="chart-card" id="lineCard" style="display:none">
-    <div class="chart-title">Session score trends over time</div>
-    <div class="chart-subtitle" id="lineSubtitle">Average score per session across all Shakha dates</div>
-    <div class="chart-wrap" id="lineWrap"></div>
-    <div class="legend" id="lineLegend"></div>
+  <!-- Tabs -->
+  <div class="tabs" id="tabBar" style="display:none">
+    <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+    <button class="tab-btn" onclick="switchTab('sessions')">Sessions</button>
   </div>
 
-  <!-- Bar chart (single date or gana drill-down) -->
-  <div class="chart-card" id="barCard" style="display:none">
-    <div class="chart-title">Scores by session &amp; gana</div>
-    <div class="chart-subtitle" id="barSubtitle"></div>
-    <div class="chart-wrap" id="barWrap"></div>
-    <div class="legend" id="barLegend"></div>
-  </div>
+  <!-- ══ Overview tab ══ -->
+  <div class="tab-panel active" id="tabOverview">
 
-  <!-- Empty state -->
-  <div id="emptyState" style="display:none" class="chart-card">
-    <div class="empty-state">
-      <div class="empty-icon">📭</div>
-      No feedback found for the selected filters. Try different options or check back after the next Shakha.
+    <!-- Line chart -->
+    <div class="chart-card" id="lineCard" style="display:none">
+      <div class="chart-title">Session score trends over time</div>
+      <div class="chart-subtitle" id="lineSubtitle">Average score per session across all Shakha dates</div>
+      <div class="chart-wrap" id="lineWrap"></div>
+      <div class="legend" id="lineLegend"></div>
     </div>
-  </div>
+
+    <!-- Bar chart -->
+    <div class="chart-card" id="barCard" style="display:none">
+      <div class="chart-title">Scores by session &amp; gana</div>
+      <div class="chart-subtitle" id="barSubtitle"></div>
+      <div class="chart-wrap" id="barWrap"></div>
+      <div class="legend" id="barLegend"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyState" style="display:none" class="chart-card">
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        No feedback found for the selected filters. Try different options or check back after the next Shakha.
+      </div>
+    </div>
+
+  </div><!-- /tabOverview -->
+
+  <!-- ══ Sessions tab ══ -->
+  <div class="tab-panel" id="tabSessions">
+
+    <!-- Session scorecard table -->
+    <div class="chart-card" id="scorecardCard" style="display:none">
+      <div class="chart-title">Session scorecard</div>
+      <div class="chart-subtitle">Average, range, trend and consistency per session across all dates</div>
+      <div style="overflow-x:auto">
+        <table class="scorecard-table" id="scorecardTable">
+          <thead>
+            <tr>
+              <th>Session</th>
+              <th class="right">Avg</th>
+              <th class="right">Best</th>
+              <th class="right">Worst</th>
+              <th class="right">vs prev date</th>
+              <th>Consistency</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody id="scorecardBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Sessions empty -->
+    <div id="sessionsEmpty" style="display:none" class="chart-card">
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        Load data first using the filters above.
+      </div>
+    </div>
+
+  </div><!-- /tabSessions -->
+
 </div>
 
 <div class="d3-tooltip" id="tooltip"></div>
@@ -553,7 +666,11 @@ async function loadAndShowSummary(nagarSlug, shakhaSlug, selDate, selGana) {
     });
     if (selDate) docs = docs.filter(d => d._normDate === selDate);
     if (selGana !== "all") docs = docs.filter(d => d.gana === selGana);
-    if (docs.length > 0) showSummary(docs);
+    if (docs.length > 0) {
+      showSummary(docs);
+      document.getElementById('tabBar').style.display = 'flex';
+      renderSessionScorecard(docs);
+    }
   } catch(e) { console.error(e); }
 }
 
@@ -665,7 +782,7 @@ function showSummary(docs) {
   document.getElementById("pillTopScore").textContent = topAvg > 0 ? `${topAvg.toFixed(1)}/5` : "";
   // Hide the dates pill when viewing a single date (it's redundant)
   const selectedDateFilter = document.getElementById("selDate").value;
-  const datesPill = document.getElementById("pillDates").closest(".summary-pill");
+  const datesPill = document.getElementById("pillDatesPill");
   if (selectedDateFilter) {
     datesPill.style.display = "none";
   } else {
@@ -685,6 +802,9 @@ function renderAnalytics(docs, selDate, selGana) {
 
   showSummary(docs);
 
+  // Show tab bar
+  document.getElementById('tabBar').style.display = 'flex';
+
   // Show trend chart when no specific date is selected (shows change over time)
   if (!selDate) {
     const ganaFilter = selGana !== "all" ? selGana : null;
@@ -694,6 +814,9 @@ function renderAnalytics(docs, selDate, selGana) {
   // Always show bar chart — for single date it's the primary view,
   // for all-dates it shows the overall breakdown
   renderBarChart(docs, sessions, label, selDate, selGana);
+
+  // Render session scorecard (needs all docs across dates for trend/variance)
+  renderSessionScorecard(docs);
 }
 
 // ---- Trend chart ----
@@ -921,13 +1044,144 @@ function drawBarChart(data, sessions, ganas, labelFn) {
   ).join('');
 }
 
+// ---- Tab switching ----
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && tab === 'overview') || (i === 1 && tab === 'sessions'));
+  });
+  document.getElementById('tabOverview').classList.toggle('active', tab === 'overview');
+  document.getElementById('tabSessions').classList.toggle('active', tab === 'sessions');
+}
+
+// ---- Session scorecard ----
+function renderSessionScorecard(docs) {
+  const scorecardCard = document.getElementById('scorecardCard');
+  const sessionsEmpty = document.getElementById('sessionsEmpty');
+  const tbody = document.getElementById('scorecardBody');
+  tbody.innerHTML = '';
+
+  if (!docs || docs.length === 0) {
+    scorecardCard.style.display = 'none';
+    sessionsEmpty.style.display = 'block';
+    return;
+  }
+
+  const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+  // Collect sessions
+  const sessionKeys = new Set();
+  docs.forEach(d => {
+    if (d.ratings) Object.keys(d.ratings).forEach(k => { if (d.ratings[k] != null) sessionKeys.add(k); });
+  });
+  const sessions = [...sessionKeys].sort();
+
+  // Group docs by date (sorted asc)
+  const byDate = {};
+  docs.forEach(d => {
+    const dt = d._normDate || 'unknown';
+    if (!byDate[dt]) byDate[dt] = [];
+    byDate[dt].push(d);
+  });
+  const sortedDates = Object.keys(byDate).sort();
+
+  // Build per-session stats
+  const sessionStats = sessions.map(sess => {
+    // All values across all dates
+    const allVals = docs.map(d => d.ratings?.[sess]).filter(v => v != null && v > 0);
+    const avg  = allVals.length ? d3.mean(allVals) : null;
+    const best = allVals.length ? d3.max(allVals)  : null;
+    const worst= allVals.length ? d3.min(allVals)  : null;
+
+    // Per-date averages (for sparkline + trend)
+    const dateAvgs = sortedDates.map(dt => {
+      const vals = byDate[dt].map(d => d.ratings?.[sess]).filter(v => v != null && v > 0);
+      return vals.length ? d3.mean(vals) : null;
+    }).filter(v => v != null);
+
+    // Std deviation → consistency score (0–1, higher = more consistent)
+    const stdDev = dateAvgs.length > 1 ? Math.sqrt(d3.mean(dateAvgs.map(v => Math.pow(v - d3.mean(dateAvgs), 2)))) : 0;
+    // Normalise: stdDev of 0 = 100% consistent, stdDev of 2 = 0% consistent
+    const consistency = Math.max(0, 1 - stdDev / 2);
+
+    // vs previous date: last date avg vs second-to-last date avg
+    const lastTwo = dateAvgs.slice(-2);
+    let vsPrev = null;
+    if (lastTwo.length === 2) vsPrev = lastTwo[1] - lastTwo[0];
+
+    return { sess, label: label(sess), avg, best, worst, dateAvgs, consistency, vsPrev };
+  }).filter(s => s.avg != null);
+
+  // Sort by avg desc
+  sessionStats.sort((a, b) => b.avg - a.avg);
+  const topSess  = sessionStats[0]?.sess;
+  const botSess  = sessionStats[sessionStats.length - 1]?.sess;
+
+  sessionStats.forEach((s, i) => {
+    const tr = document.createElement('tr');
+
+    // Trend direction based on last 2 data points
+    let trendHtml = '<span class="trend-arrow trend-flat">—</span>';
+    if (s.vsPrev !== null) {
+      if (s.vsPrev > 0.1)       trendHtml = '<span class="trend-arrow trend-up">↑</span>';
+      else if (s.vsPrev < -0.1) trendHtml = '<span class="trend-arrow trend-down">↓</span>';
+      else                       trendHtml = '<span class="trend-arrow trend-flat">→</span>';
+    }
+
+    // Badge
+    let badge = '';
+    if (s.sess === topSess) badge = '<span class="sess-badge badge-top">⭐ Top</span>';
+    else if (s.sess === botSess && sessionStats.length > 1) badge = '<span class="sess-badge badge-bot">⚠ Needs attention</span>';
+
+    // Consistency bar (0–100%)
+    const pct = Math.round(s.consistency * 100);
+    const consistColor = pct >= 75 ? '#2d7a4f' : pct >= 50 ? '#FF6B1A' : '#c0392b';
+    const consistHtml = `
+      <span class="consist-bar"><span class="consist-fill" style="width:${pct}%;background:${consistColor}"></span></span>
+      <span class="consist-label">${pct}%</span>`;
+
+    // Mini SVG sparkline
+    const spark = buildSparkline(s.dateAvgs, 80, 28);
+
+    tr.innerHTML = `
+      <td><span class="sess-name">${s.label}</span>${badge}</td>
+      <td class="right"><strong>${s.avg.toFixed(2)}</strong></td>
+      <td class="right">${s.best.toFixed(1)}</td>
+      <td class="right">${s.worst.toFixed(1)}</td>
+      <td class="right">${s.vsPrev !== null ? (s.vsPrev > 0 ? '+' : '') + s.vsPrev.toFixed(2) : '—'}</td>
+      <td>${consistHtml}</td>
+      <td>${spark}${trendHtml}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  scorecardCard.style.display = 'block';
+  sessionsEmpty.style.display = 'none';
+}
+
+function buildSparkline(values, w, h) {
+  if (values.length < 2) return '';
+  const min = 1, max = 5;
+  const xStep = w / (values.length - 1);
+  const yScale = v => h - ((v - min) / (max - min)) * h;
+  const pts = values.map((v, i) => `${(i * xStep).toFixed(1)},${yScale(v).toFixed(1)}`).join(' ');
+  return `<svg class="sparkline" width="${w}" height="${h}" style="margin-right:8px">
+    <polyline points="${pts}" fill="none" stroke="#FF6B1A" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${((values.length-1)*xStep).toFixed(1)}" cy="${yScale(values[values.length-1]).toFixed(1)}" r="2.5" fill="#FF6B1A"/>
+  </svg>`;
+}
+
 function resetCharts() {
   document.getElementById("summaryRow").style.display = "none";
+  document.getElementById("tabBar").style.display = "none";
   document.getElementById("lineCard").style.display = "none";
   document.getElementById("barCard").style.display = "none";
   document.getElementById("emptyState").style.display = "none";
+  document.getElementById("scorecardCard").style.display = "none";
+  document.getElementById("sessionsEmpty").style.display = "none";
   document.getElementById("lineWrap").innerHTML = "";
   document.getElementById("barWrap").innerHTML = "";
+  // Reset to overview tab
+  switchTab('overview');
 }
 </script>
 
