@@ -291,6 +291,49 @@
   .consist-label { font-size: 12px; color: var(--muted); margin-left: 6px; }
 
   .no-data-row td { text-align: center; color: var(--muted); padding: 40px; font-size: 14px; }
+
+  /* ---- Heatmap ---- */
+  .heatmap-wrap { overflow-x: auto; }
+  .heatmap-table { border-collapse: separate; border-spacing: 4px; font-size: 12px; }
+  .heatmap-table th {
+    font-size: 11px; font-weight: 500; color: var(--muted);
+    padding: 4px 8px; white-space: nowrap; text-align: center;
+  }
+  .heatmap-table th.row-header { text-align: left; min-width: 110px; }
+  .heatmap-cell {
+    width: 64px; height: 44px; border-radius: 8px;
+    text-align: center; vertical-align: middle;
+    font-size: 13px; font-weight: 600; color: white;
+    cursor: default; transition: transform 0.1s;
+  }
+  .heatmap-cell:hover { transform: scale(1.08); }
+  .heatmap-cell.empty { background: var(--border); color: var(--muted); font-size: 11px; font-weight: 400; }
+  .heatmap-row-label {
+    font-size: 12px; font-weight: 500; color: var(--deep);
+    padding: 0 10px 0 0; white-space: nowrap; vertical-align: middle;
+  }
+
+  /* ---- Gana ranking ---- */
+  .gana-rank-list { display: flex; flex-direction: column; gap: 10px; }
+  .gana-rank-row {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .gana-rank-pos {
+    font-family: 'Noto Serif', serif; font-size: 18px; font-weight: 600;
+    color: var(--muted); width: 24px; text-align: right; flex-shrink: 0;
+  }
+  .gana-rank-pos.gold   { color: #c8970a; }
+  .gana-rank-pos.silver { color: #888; }
+  .gana-rank-pos.bronze { color: #a0643a; }
+  .gana-rank-name { font-weight: 500; font-size: 14px; width: 120px; flex-shrink: 0; }
+  .gana-rank-bar-wrap { flex: 1; background: var(--border); border-radius: 4px; height: 10px; }
+  .gana-rank-bar { height: 100%; border-radius: 4px; background: var(--saffron); transition: width 0.4s; }
+  .gana-rank-score { font-size: 13px; font-weight: 600; color: var(--deep); width: 36px; text-align: right; flex-shrink: 0; }
+  .gana-rank-agree { font-size: 11px; color: var(--muted); width: 90px; text-align: right; flex-shrink: 0; }
+
+  /* Two-col layout for gana tab */
+  .gana-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+  @media (max-width: 600px) { .gana-two-col { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -401,6 +444,7 @@
   <div class="tabs" id="tabBar" style="display:none">
     <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
     <button class="tab-btn" onclick="switchTab('sessions')">Sessions</button>
+    <button class="tab-btn" onclick="switchTab('ganas')">Ganas</button>
   </div>
 
   <!-- ══ Overview tab ══ -->
@@ -466,6 +510,55 @@
     </div>
 
   </div><!-- /tabSessions -->
+
+  <!-- ══ Ganas tab ══ -->
+  <div class="tab-panel" id="tabGanas">
+
+    <!-- Heatmap -->
+    <div class="chart-card" id="heatmapCard" style="display:none">
+      <div class="chart-title">Score heatmap — session × gana</div>
+      <div class="chart-subtitle">Full picture at a glance. Colour = avg score (red → amber → green)</div>
+      <div class="heatmap-wrap" id="heatmapWrap"></div>
+    </div>
+
+    <!-- Gana ranking + agreement row -->
+    <div class="gana-two-col" id="ganaBottomRow" style="display:none">
+
+      <div class="chart-card" style="margin-bottom:0">
+        <div class="chart-title">Gana ranking</div>
+        <div class="chart-subtitle">Overall avg across all sessions</div>
+        <div class="gana-rank-list" id="ganaRankList"></div>
+      </div>
+
+      <div class="chart-card" style="margin-bottom:0">
+        <div class="chart-title">Gana agreement</div>
+        <div class="chart-subtitle">How closely ganas agree per session (lower gap = more consensus)</div>
+        <div style="overflow-x:auto">
+          <table class="scorecard-table" id="ganaAgreeTable">
+            <thead>
+              <tr>
+                <th>Session</th>
+                <th class="right">Spread</th>
+                <th class="right">Highest</th>
+                <th class="right">Lowest</th>
+              </tr>
+            </thead>
+            <tbody id="ganaAgreeBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ganas empty -->
+    <div id="ganasEmpty" style="display:none" class="chart-card">
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        Load data first using the filters above.
+      </div>
+    </div>
+
+  </div><!-- /tabGanas -->
 
 </div>
 
@@ -670,6 +763,7 @@ async function loadAndShowSummary(nagarSlug, shakhaSlug, selDate, selGana) {
       showSummary(docs);
       document.getElementById('tabBar').style.display = 'flex';
       renderSessionScorecard(docs);
+      renderGanasTab(docs);
     }
   } catch(e) { console.error(e); }
 }
@@ -817,6 +911,8 @@ function renderAnalytics(docs, selDate, selGana) {
 
   // Render session scorecard (needs all docs across dates for trend/variance)
   renderSessionScorecard(docs);
+  // Render ganas tab
+  renderGanasTab(docs);
 }
 
 // ---- Trend chart ----
@@ -1046,11 +1142,14 @@ function drawBarChart(data, sessions, ganas, labelFn) {
 
 // ---- Tab switching ----
 function switchTab(tab) {
+  const tabs = ['overview', 'sessions', 'ganas'];
   document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    b.classList.toggle('active', (i === 0 && tab === 'overview') || (i === 1 && tab === 'sessions'));
+    b.classList.toggle('active', tabs[i] === tab);
   });
-  document.getElementById('tabOverview').classList.toggle('active', tab === 'overview');
-  document.getElementById('tabSessions').classList.toggle('active', tab === 'sessions');
+  tabs.forEach(t => {
+    const el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.classList.toggle('active', t === tab);
+  });
 }
 
 // ---- Session scorecard ----
@@ -1170,6 +1269,177 @@ function buildSparkline(values, w, h) {
   </svg>`;
 }
 
+// ---- Ganas tab ----
+function renderGanasTab(docs) {
+  const heatmapCard   = document.getElementById('heatmapCard');
+  const ganaBottomRow = document.getElementById('ganaBottomRow');
+  const ganasEmpty    = document.getElementById('ganasEmpty');
+
+  if (!docs || docs.length === 0) {
+    heatmapCard.style.display = 'none';
+    ganaBottomRow.style.display = 'none';
+    ganasEmpty.style.display = 'block';
+    return;
+  }
+  ganasEmpty.style.display = 'none';
+
+  const label = k => k.replace(/_/g, ' ').replace(/\w/g, c => c.toUpperCase());
+
+  const sessionKeys = new Set();
+  docs.forEach(d => {
+    if (d.ratings) Object.keys(d.ratings).forEach(k => { if (d.ratings[k] != null) sessionKeys.add(k); });
+  });
+  const sessions = [...sessionKeys].sort();
+  const ganas = [...new Set(docs.map(d => d.gana).filter(Boolean))].sort();
+
+  // Build matrix: gana × session → avg
+  const matrix = {};
+  ganas.forEach(g => {
+    matrix[g] = {};
+    sessions.forEach(sess => {
+      const vals = docs.filter(d => d.gana === g).map(d => d.ratings?.[sess]).filter(v => v != null && v > 0);
+      matrix[g][sess] = vals.length ? d3.mean(vals) : null;
+    });
+  });
+
+  // ── Heatmap ──────────────────────────────────────────────────────────────
+  heatmapCard.style.display = 'block';
+  const wrap = document.getElementById('heatmapWrap');
+  wrap.innerHTML = '';
+
+  // Color scale: 1=red, 3=amber, 5=green
+  function heatColor(v) {
+    if (v == null) return null;
+    const stops = [
+      [1, [192, 57, 43]],
+      [2, [211, 84, 0]],
+      [3, [186, 117, 23]],
+      [4, [39, 174, 96]],
+      [5, [29, 158, 117]]
+    ];
+    let lo = stops[0], hi = stops[stops.length - 1];
+    for (let i = 0; i < stops.length - 1; i++) {
+      if (v >= stops[i][0] && v <= stops[i+1][0]) { lo = stops[i]; hi = stops[i+1]; break; }
+    }
+    const t = (v - lo[0]) / (hi[0] - lo[0]);
+    const r = Math.round(lo[1][0] + t * (hi[1][0] - lo[1][0]));
+    const g2 = Math.round(lo[1][1] + t * (hi[1][1] - lo[1][1]));
+    const b = Math.round(lo[1][2] + t * (hi[1][2] - lo[1][2]));
+    return `rgb(${r},${g2},${b})`;
+  }
+
+  const tbl = document.createElement('table');
+  tbl.className = 'heatmap-table';
+
+  // Header row: session names
+  const thead = tbl.createTHead();
+  const hrow = thead.insertRow();
+  const cornerTh = document.createElement('th');
+  cornerTh.className = 'row-header';
+  cornerTh.textContent = 'Gana \ Session';
+  hrow.appendChild(cornerTh);
+  sessions.forEach(sess => {
+    const th = document.createElement('th');
+    th.textContent = label(sess);
+    hrow.appendChild(th);
+  });
+
+  const tbody = tbl.createTBody();
+  ganas.forEach(gana => {
+    const row = tbody.insertRow();
+    const lbl = document.createElement('td');
+    lbl.className = 'heatmap-row-label';
+    lbl.textContent = gana;
+    row.appendChild(lbl);
+    sessions.forEach(sess => {
+      const td = document.createElement('td');
+      td.className = 'heatmap-cell';
+      const val = matrix[gana][sess];
+      if (val != null) {
+        td.style.background = heatColor(val);
+        td.textContent = val.toFixed(1);
+        td.title = `${gana} · ${label(sess)}: ${val.toFixed(2)}`;
+      } else {
+        td.classList.add('empty');
+        td.textContent = '–';
+      }
+      row.appendChild(td);
+    });
+  });
+
+  // Colour legend
+  const legendDiv = document.createElement('div');
+  legendDiv.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:14px;font-size:11px;color:var(--muted)';
+  const gradBar = document.createElement('div');
+  gradBar.style.cssText = 'flex:1;height:8px;border-radius:4px;background:linear-gradient(to right,rgb(192,57,43),rgb(186,117,23),rgb(29,158,117))';
+  legendDiv.innerHTML = '<span>1 (Low)</span>';
+  legendDiv.appendChild(gradBar);
+  legendDiv.innerHTML += '<span>5 (High)</span>';
+  legendDiv.insertBefore(document.createTextNode(''), legendDiv.firstChild);
+  // rebuild cleanly
+  legendDiv.innerHTML = '';
+  ['1 (Low)', '', '5 (High)'].forEach((t, i) => {
+    if (i === 1) legendDiv.appendChild(gradBar);
+    else { const s = document.createElement('span'); s.textContent = t; legendDiv.appendChild(s); }
+  });
+  wrap.appendChild(tbl);
+  wrap.appendChild(legendDiv);
+
+  // ── Gana ranking ─────────────────────────────────────────────────────────
+  ganaBottomRow.style.display = '';
+
+  const ganaAvgs = ganas.map(g => {
+    const vals = docs.filter(d => d.gana === g)
+      .flatMap(d => Object.values(d.ratings || {})).filter(v => v != null && v > 0);
+    return { gana: g, avg: vals.length ? d3.mean(vals) : null };
+  }).filter(g => g.avg != null).sort((a, b) => b.avg - a.avg);
+
+  const maxAvg = ganaAvgs[0]?.avg || 5;
+  const rankList = document.getElementById('ganaRankList');
+  rankList.innerHTML = '';
+  ganaAvgs.forEach((g, i) => {
+    const posClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+    const barPct = (g.avg / 5) * 100;
+    rankList.innerHTML += `
+      <div class="gana-rank-row">
+        <div class="gana-rank-pos ${posClass}">${medal}</div>
+        <div class="gana-rank-name">${g.gana}</div>
+        <div class="gana-rank-bar-wrap"><div class="gana-rank-bar" style="width:${barPct}%"></div></div>
+        <div class="gana-rank-score">${g.avg.toFixed(2)}</div>
+      </div>`;
+  });
+
+  // ── Gana agreement per session ────────────────────────────────────────────
+  const agreeBody = document.getElementById('ganaAgreeBody');
+  agreeBody.innerHTML = '';
+
+  const sessionAgreement = sessions.map(sess => {
+    const ganaAvgsSess = ganas.map(g => {
+      const vals = docs.filter(d => d.gana === g).map(d => d.ratings?.[sess]).filter(v => v != null && v > 0);
+      return { gana: g, avg: vals.length ? d3.mean(vals) : null };
+    }).filter(g => g.avg != null);
+
+    if (ganaAvgsSess.length < 2) return null;
+    const avgs = ganaAvgsSess.map(g => g.avg);
+    const spread = d3.max(avgs) - d3.min(avgs);
+    const highest = ganaAvgsSess.reduce((a, b) => a.avg > b.avg ? a : b);
+    const lowest  = ganaAvgsSess.reduce((a, b) => a.avg < b.avg ? a : b);
+    return { sess, spread, highest, lowest };
+  }).filter(Boolean).sort((a, b) => b.spread - a.spread);
+
+  sessionAgreement.forEach(s => {
+    const spreadColor = s.spread < 0.5 ? '#2d7a4f' : s.spread < 1.0 ? '#BA7517' : '#c0392b';
+    agreeBody.innerHTML += `
+      <tr>
+        <td>${label(s.sess)}</td>
+        <td class="right"><strong style="color:${spreadColor}">${s.spread.toFixed(2)}</strong></td>
+        <td class="right">${s.highest.gana} <span style="color:var(--muted);font-size:11px">(${s.highest.avg.toFixed(1)})</span></td>
+        <td class="right">${s.lowest.gana} <span style="color:var(--muted);font-size:11px">(${s.lowest.avg.toFixed(1)})</span></td>
+      </tr>`;
+  });
+}
+
 function resetCharts() {
   document.getElementById("summaryRow").style.display = "none";
   document.getElementById("tabBar").style.display = "none";
@@ -1178,6 +1448,9 @@ function resetCharts() {
   document.getElementById("emptyState").style.display = "none";
   document.getElementById("scorecardCard").style.display = "none";
   document.getElementById("sessionsEmpty").style.display = "none";
+  document.getElementById("heatmapCard").style.display = "none";
+  document.getElementById("ganaBottomRow").style.display = "none";
+  document.getElementById("ganasEmpty").style.display = "none";
   document.getElementById("lineWrap").innerHTML = "";
   document.getElementById("barWrap").innerHTML = "";
   // Reset to overview tab
