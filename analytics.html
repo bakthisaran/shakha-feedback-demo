@@ -86,10 +86,33 @@
     padding: 20px 24px;
     border: 1px solid var(--border);
     margin-bottom: 24px;
+  }
+
+  .filter-row {
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
     align-items: flex-end;
+  }
+
+  .filter-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0 4px;
+    position: relative;
+  }
+  .filter-divider-label {
+    position: absolute;
+    top: -9px;
+    left: 0;
+    background: var(--card);
+    padding: 0 8px 0 0;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 160px; }
@@ -118,6 +141,21 @@
   }
   .btn-load:hover { background: #e55a0f; }
   .btn-load:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* Filter hint */
+  .filter-hint {
+    display: none;
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: #fff8f2;
+    border-radius: 8px;
+    border: 1px solid #ffdcc7;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .filter-hint.visible { display: block; }
+  .filter-hint strong { color: var(--saffron); }
 
   /* ---- Summary pills ---- */
   .summary-row {
@@ -220,31 +258,46 @@
 
   <!-- Filters -->
   <div class="filters">
-    <div class="filter-group">
-      <span class="filter-label">Nagar</span>
-      <select id="selNagar" onchange="onNagarChange()">
-        <option value="">Select Nagar…</option>
-      </select>
+    <!-- Row 1: Nagar + Shakha (required) -->
+    <div class="filter-row">
+      <div class="filter-group">
+        <span class="filter-label">Nagar</span>
+        <select id="selNagar" onchange="onNagarChange()">
+          <option value="">Select Nagar…</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Shakha</span>
+        <select id="selShakha" onchange="onShakhaChange()" disabled>
+          <option value="">Select Shakha…</option>
+        </select>
+      </div>
     </div>
-    <div class="filter-group">
-      <span class="filter-label">Shakha</span>
-      <select id="selShakha" onchange="onShakhaChange()" disabled>
-        <option value="">Select Shakha…</option>
-      </select>
+
+    <!-- Divider: optional drill-down -->
+    <div class="filter-divider" id="drillDivider" style="display:none">
+      <span class="filter-divider-label">Optional filters — narrow down further</span>
     </div>
-    <div class="filter-group">
-      <span class="filter-label">Shakha Date</span>
-      <select id="selDate" onchange="onDateChange()" disabled>
-        <option value="">All Dates</option>
-      </select>
+
+    <!-- Row 2: Date + Gana (both optional, both independent) -->
+    <div class="filter-row" id="drillRow" style="display:none">
+      <div class="filter-group">
+        <span class="filter-label">Shakha Date <span style="font-weight:400;color:var(--muted)">(optional)</span></span>
+        <select id="selDate" onchange="updateLoadButton()">
+          <option value="">All Dates</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Gana <span style="font-weight:400;color:var(--muted)">(optional)</span></span>
+        <select id="selGana" onchange="updateLoadButton()">
+          <option value="all">All Ganas</option>
+        </select>
+      </div>
+      <button class="btn-load" id="btnLoad" onclick="loadAnalytics()">Load</button>
     </div>
-    <div class="filter-group">
-      <span class="filter-label">Gana</span>
-      <select id="selGana" disabled>
-        <option value="all">All Ganas</option>
-      </select>
-    </div>
-    <button class="btn-load" id="btnLoad" onclick="loadAnalytics()" disabled>Load</button>
+
+    <!-- Hint text -->
+    <div class="filter-hint" id="filterHint"></div>
   </div>
 
   <!-- Summary pills -->
@@ -267,15 +320,15 @@
     </div>
   </div>
 
-  <!-- Line chart (all dates) -->
+  <!-- Line chart (multi-date trend) -->
   <div class="chart-card" id="lineCard" style="display:none">
     <div class="chart-title">Session score trends over time</div>
-    <div class="chart-subtitle">Average score per session across all Shakha dates</div>
+    <div class="chart-subtitle" id="lineSubtitle">Average score per session across all Shakha dates</div>
     <div class="chart-wrap" id="lineWrap"></div>
     <div class="legend" id="lineLegend"></div>
   </div>
 
-  <!-- Bar chart (by session & gana) -->
+  <!-- Bar chart (single date or gana drill-down) -->
   <div class="chart-card" id="barCard" style="display:none">
     <div class="chart-title">Scores by session &amp; gana</div>
     <div class="chart-subtitle" id="barSubtitle"></div>
@@ -283,11 +336,11 @@
     <div class="legend" id="barLegend"></div>
   </div>
 
-  <!-- Empty / loading states -->
+  <!-- Empty state -->
   <div id="emptyState" style="display:none" class="chart-card">
     <div class="empty-state">
       <div class="empty-icon">📭</div>
-      No feedback found for the selected filters. Try a different Gana or check back after the next Shakha.
+      No feedback found for the selected filters. Try different options or check back after the next Shakha.
     </div>
   </div>
 </div>
@@ -306,41 +359,34 @@ const ADMIN_EMAILS = [
 // ---- Date normalization ----
 function normalizeDate(dateStr) {
   if (!dateStr) return null;
-  
-  // Try ISO format first (2026-04-10)
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-    return dateStr;
-  }
-  
-  // Try "DD MMM YYYY" format (03 Apr 2026)
-  // Use a more explicit parser to handle this format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+
   const monthMap = {
     'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06',
     'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
   };
-  
   const match = dateStr.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
   if (match) {
-    const day = String(match[1]).padStart(2, '0');
+    const day   = String(match[1]).padStart(2, '0');
     const month = monthMap[match[2]];
-    const year = match[3];
-    if (month) {
-      return `${year}-${month}-${day}`;
-    }
+    const year  = match[3];
+    if (month) return `${year}-${month}-${day}`;
   }
-  
-  // Fallback: try JavaScript Date parsing
   try {
     const d = new Date(dateStr);
     if (!isNaN(d.getTime())) {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
   } catch(e) {}
-  
   return null;
+}
+
+function fmtDisplayDate(iso) {
+  const d = new Date(iso);
+  const day   = String(d.getDate()).padStart(2, '0');
+  const month = d.toLocaleDateString('en-GB', { month: 'short' });
+  const year  = String(d.getFullYear()).slice(-2);
+  return `${day}-${month}-${year}`;
 }
 
 const SESSION_COLORS = [
@@ -386,17 +432,12 @@ async function loadNagars() {
     const nagars = {};
     snap.forEach(doc => {
       const data = doc.data();
-      const nagarSlug = data.nagarSlug;
-      if (!nagars[nagarSlug]) {
-        nagars[nagarSlug] = data.nagarName;
-      }
+      if (data.nagarSlug) nagars[data.nagarSlug] = data.nagarName;
     });
-    
     const sel = document.getElementById("selNagar");
     Object.entries(nagars).sort().forEach(([slug, name]) => {
       const opt = document.createElement("option");
-      opt.value = slug;
-      opt.textContent = name;
+      opt.value = slug; opt.textContent = name;
       sel.appendChild(opt);
     });
   } catch(e) { console.error(e); }
@@ -407,11 +448,7 @@ async function onNagarChange() {
   const shakhaEl = document.getElementById("selShakha");
   shakhaEl.innerHTML = '<option value="">Select Shakha…</option>';
   shakhaEl.disabled = true;
-  document.getElementById("selDate").innerHTML = '<option value="">Select Date…</option>';
-  document.getElementById("selDate").disabled = true;
-  document.getElementById("selGana").innerHTML = '<option value="all">All Ganas</option>';
-  document.getElementById("selGana").disabled = true;
-  document.getElementById("btnLoad").disabled = true;
+  hideDrillFilters();
   resetCharts();
 
   if (!nagarSlug) return;
@@ -421,18 +458,11 @@ async function onNagarChange() {
     const shakhas = {};
     snap.forEach(doc => {
       const data = doc.data();
-      if (data.nagarSlug === nagarSlug) {
-        shakhas[data.shakhaSlug] = {
-          name: data.shakhaName,
-          id: doc.id
-        };
-      }
+      if (data.nagarSlug === nagarSlug) shakhas[data.shakhaSlug] = data.shakhaName;
     });
-    
-    Object.entries(shakhas).sort().forEach(([slug, info]) => {
+    Object.entries(shakhas).sort().forEach(([slug, name]) => {
       const opt = document.createElement("option");
-      opt.value = slug;
-      opt.textContent = info.name;
+      opt.value = slug; opt.textContent = name;
       shakhaEl.appendChild(opt);
     });
     shakhaEl.disabled = false;
@@ -440,152 +470,123 @@ async function onNagarChange() {
 }
 
 async function onShakhaChange() {
-  const nagarSlug = document.getElementById("selNagar").value;
+  const nagarSlug  = document.getElementById("selNagar").value;
   const shakhaSlug = document.getElementById("selShakha").value;
-  const dateEl = document.getElementById("selDate");
-  dateEl.innerHTML = '<option value="">All Dates</option>';
-  dateEl.disabled = true;
-  document.getElementById("selGana").innerHTML = '<option value="all">All Ganas</option>';
-  document.getElementById("selGana").disabled = true;
-  document.getElementById("btnLoad").disabled = true;
+  hideDrillFilters();
   resetCharts();
 
   if (!shakhaSlug) return;
 
   try {
     const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
+
     const dateSet = new Set();
+    const ganaSet = new Set();
+
     snap.forEach(doc => {
       const data = doc.data();
-      if (data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug) {
-        const normalized = normalizeDate(data.date);
-        if (normalized) {
-          dateSet.add(normalized);
-        }
+      if (data.nagarSlug !== nagarSlug || data.shakhaSlug !== shakhaSlug) return;
+
+      const normalized = normalizeDate(data.date);
+      if (normalized) dateSet.add(normalized);
+
+      if (data.ganas && Array.isArray(data.ganas)) {
+        data.ganas.forEach(g => ganaSet.add(g));
       }
     });
-    
-    const dates = Array.from(dateSet).sort().reverse();
-    console.log("Available dates:", dates);
-    
-    dates.forEach(date => {
+
+    // Populate date dropdown
+    const dateEl = document.getElementById("selDate");
+    dateEl.innerHTML = '<option value="">All Dates</option>';
+    [...dateSet].sort().reverse().forEach(date => {
       const opt = document.createElement("option");
       opt.value = date;
-      // Format as dd-Mmm-yy (e.g., 27-Mar-26)
-      const d = new Date(date);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = d.toLocaleDateString('en-GB', { month: 'short' });
-      const year = String(d.getFullYear()).slice(-2);
-      opt.textContent = `${day}-${month}-${year}`;
+      opt.textContent = fmtDisplayDate(date);
       dateEl.appendChild(opt);
     });
-    
-    dateEl.disabled = false;
-    
-    // Load all-dates analytics automatically
-    await loadAllDatesAnalytics(nagarSlug, shakhaSlug);
-    
-  } catch(e) { console.error(e); }
-}
 
-async function onDateChange() {
-  const selectedDate = document.getElementById("selDate").value;
-  const ganaEl = document.getElementById("selGana");
-  ganaEl.innerHTML = '<option value="all">All Ganas</option>';
-  ganaEl.disabled = true;
-  document.getElementById("btnLoad").disabled = true;
-  resetCharts();
-
-  // If "All Dates" is selected, just hide the bar chart and gana selector
-  if (!selectedDate) {
-    ganaEl.disabled = true;
-    document.getElementById("btnLoad").disabled = true;
-    document.getElementById("barCard").style.display = "none";
-    return;
-  }
-
-  const nagarSlug = document.getElementById("selNagar").value;
-  const shakhaSlug = document.getElementById("selShakha").value;
-
-  try {
-    const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
-    const ganaSet = new Set();
-    snap.forEach(doc => {
-      const data = doc.data();
-      const normalized = normalizeDate(data.date);
-      if (normalized === selectedDate && data.nagarSlug === nagarSlug && data.shakhaSlug === shakhaSlug) {
-        console.log("Matching feedback-request doc:", data);
-        // ganas is an array, so iterate through it
-        if (data.ganas && Array.isArray(data.ganas)) {
-          console.log("Found ganas array:", data.ganas);
-          data.ganas.forEach(gana => {
-            ganaSet.add(gana);
-          });
-        } else {
-          console.log("No ganas array found in doc");
-        }
-      }
-    });
-    
-    console.log("Final ganas set:", Array.from(ganaSet));
-    const ganas = Array.from(ganaSet).sort();
-    ganas.forEach(gana => {
+    // Populate gana dropdown (from ALL dates)
+    const ganaEl = document.getElementById("selGana");
+    ganaEl.innerHTML = '<option value="all">All Ganas</option>';
+    [...ganaSet].sort().forEach(gana => {
       const opt = document.createElement("option");
-      opt.value = gana;
-      opt.textContent = gana;
+      opt.value = gana; opt.textContent = gana;
       ganaEl.appendChild(opt);
     });
-    
-    ganaEl.disabled = false;
-    document.getElementById("btnLoad").disabled = false;
+
+    // Show drill row
+    document.getElementById("drillDivider").style.display = "block";
+    document.getElementById("drillRow").style.display = "flex";
+    updateLoadButton();
+
   } catch(e) { console.error(e); }
 }
 
-// ---- Load & aggregate analytics ----
-async function loadAnalytics() {
-  const nagarSlug = document.getElementById("selNagar").value;
-  const shakhaSlug = document.getElementById("selShakha").value;
-  const selectedDate = document.getElementById("selDate").value;
+function hideDrillFilters() {
+  document.getElementById("drillDivider").style.display = "none";
+  document.getElementById("drillRow").style.display = "none";
+  document.getElementById("filterHint").classList.remove("visible");
+}
+
+function updateLoadButton() {
+  const date = document.getElementById("selDate").value;
   const gana = document.getElementById("selGana").value;
+
+  const hintEl = document.getElementById("filterHint");
+
+  let hintParts = [];
+  if (!date) hintParts.push("all dates");
+  else hintParts.push(`<strong>${fmtDisplayDate(date)}</strong>`);
+
+  if (gana === "all") hintParts.push("all ganas");
+  else hintParts.push(`<strong>${gana}</strong> gana`);
+
+  hintEl.innerHTML = `Will show: ${hintParts.join(", ")}. ${!date ? "Trend chart shown across time." : "Bar chart shown for selected date."}`;
+  hintEl.classList.add("visible");
+}
+
+// ---- Load analytics (flexible: any combo of date/gana) ----
+async function loadAnalytics() {
+  const nagarSlug  = document.getElementById("selNagar").value;
+  const shakhaSlug = document.getElementById("selShakha").value;
+  const selDate    = document.getElementById("selDate").value;    // "" = all
+  const selGana    = document.getElementById("selGana").value;    // "all" = all
 
   resetCharts();
   document.getElementById("btnLoad").disabled = true;
   document.getElementById("btnLoad").textContent = "Loading…";
 
   try {
-    // Get all feedbacks for this nagar/shakha, then filter by normalized date
     const q = window.fsQuery(
       window.fsCollection(window.db, "feedbacks"),
       window.fsWhere("nagar", "==", nagarSlug),
       window.fsWhere("shakha", "==", shakhaSlug)
     );
-
     const snap = await window.fsGetDocs(q);
+
     let docs = [];
     snap.forEach(d => {
       const data = d.data();
-      const normalized = normalizeDate(data.date);
-      console.log("Feedback doc date:", data.date, "normalized:", normalized, "selectedDate:", selectedDate);
-      if (normalized === selectedDate) {
-        docs.push(data);
-      }
+      data._normDate = normalizeDate(data.date);
+      docs.push(data);
     });
 
-    console.log("Docs after date filtering:", docs.length);
-
-    // Filter by gana if needed
-    if (gana !== "all") {
-      docs = docs.filter(d => d.gana === gana);
+    // Filter by date if selected
+    if (selDate) {
+      docs = docs.filter(d => d._normDate === selDate);
     }
 
-    console.log("Docs after gana filtering:", docs.length);
+    // Filter by gana if selected
+    if (selGana !== "all") {
+      docs = docs.filter(d => d.gana === selGana);
+    }
 
     if (docs.length === 0) {
       document.getElementById("emptyState").style.display = "block";
       return;
     }
 
-    renderDateAnalytics(docs, gana, selectedDate);
+    renderAnalytics(docs, selDate, selGana);
 
   } catch(e) {
     console.error(e);
@@ -596,15 +597,13 @@ async function loadAnalytics() {
   }
 }
 
-function renderAnalytics(docs, selectedGana, selectedDate) {
-  // Collect all session keys across all docs
+// ---- Render: decide which charts to show based on filter combo ----
+function renderAnalytics(docs, selDate, selGana) {
   const sessionKeys = new Set();
   docs.forEach(d => {
     if (d.ratings) Object.keys(d.ratings).forEach(k => { if (d.ratings[k] != null) sessionKeys.add(k); });
   });
   const sessions = [...sessionKeys].sort();
-
-  // Friendly session labels
   const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
   // Summary stats
@@ -612,7 +611,6 @@ function renderAnalytics(docs, selectedGana, selectedDate) {
   docs.forEach(d => { if (d.ratings) Object.values(d.ratings).forEach(v => { if (v > 0) allRatings.push(v); }); });
   const overallAvg = allRatings.length ? d3.mean(allRatings) : 0;
 
-  // Top session
   const sessionAvgs = sessions.map(s => {
     const vals = docs.map(d => d.ratings?.[s]).filter(v => v != null && v > 0);
     return { session: s, avg: vals.length ? d3.mean(vals) : 0 };
@@ -620,79 +618,37 @@ function renderAnalytics(docs, selectedGana, selectedDate) {
   sessionAvgs.sort((a, b) => b.avg - a.avg);
   const topSession = sessionAvgs[0]?.session || "—";
 
-  // Update summary pills
   document.getElementById("summaryRow").style.display = "flex";
   document.getElementById("pillResponses").textContent = docs.length;
   document.getElementById("pillSessions").textContent = sessions.length;
   document.getElementById("pillAvg").textContent = overallAvg.toFixed(1);
   document.getElementById("pillTop").textContent = label(topSession);
 
-  // Draw bar chart
-  drawBarChart(docs, sessions, label, selectedDate, selectedGana);
-}
-
-// ---- Load all dates analytics ----
-async function loadAllDatesAnalytics(nagarSlug, shakhaSlug) {
-  try {
-    const q = window.fsQuery(
-      window.fsCollection(window.db, "feedbacks"),
-      window.fsWhere("nagar", "==", nagarSlug),
-      window.fsWhere("shakha", "==", shakhaSlug)
-    );
-
-    const snap = await window.fsGetDocs(q);
-    const docs = [];
-    snap.forEach(d => {
-      const data = d.data();
-      console.log("data.date:", data.date);
-      const normalized = normalizeDate(data.date);
-      console.log("data.date normalised:",  normalized);
-      if (normalized) {
-        // Store normalized date in the data for use in rendering
-        data.normalizedDate = normalized;
-        docs.push(data);
-      }
-    });
-    console.log("All feedback docs loaded bfore data normalisation:", snap.length);
-    console.log("All feedback docs loaded:", docs.length);
-
-    if (docs.length === 0) {
-      document.getElementById("lineCard").style.display = "none";
-      return;
-    }
-
-    renderAllDatesAnalytics(docs);
-
-  } catch(e) {
-    console.error(e);
+  // Show trend chart when no specific date is selected (shows change over time)
+  if (!selDate) {
+    const ganaFilter = selGana !== "all" ? selGana : null;
+    renderTrendChart(docs, sessions, label, ganaFilter);
   }
+
+  // Always show bar chart — for single date it's the primary view,
+  // for all-dates it shows the overall breakdown
+  renderBarChart(docs, sessions, label, selDate, selGana);
 }
 
-function renderAllDatesAnalytics(docs) {
-  // Collect all session keys
-  const sessionKeys = new Set();
-  docs.forEach(d => {
-    if (d.ratings) Object.keys(d.ratings).forEach(k => { if (d.ratings[k] != null) sessionKeys.add(k); });
-  });
-  const sessions = [...sessionKeys].sort();
-
-  const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-
-  // Group by normalized date (already normalized in loadAllDatesAnalytics)
+// ---- Trend chart ----
+function renderTrendChart(docs, sessions, labelFn, ganaFilter) {
+  // Group by date
   const byDate = {};
   docs.forEach(d => {
-    const date = d.normalizedDate || normalizeDate(d.date) || "unknown";
+    const date = d._normDate || "unknown";
     if (!byDate[date]) byDate[date] = [];
     byDate[date].push(d);
   });
   const dates = Object.keys(byDate).sort();
 
-  console.log("Grouped by dates:", dates);
-
-  // Compute avg score per session per date
   const trendData = sessions.map((sess, si) => ({
     session: sess,
-    label: label(sess),
+    label: labelFn(sess),
     color: SESSION_COLORS[si % SESSION_COLORS.length],
     points: dates.map(date => {
       const group = byDate[date];
@@ -701,10 +657,42 @@ function renderAllDatesAnalytics(docs) {
     }).filter(p => p.avg != null)
   }));
 
+  const subtitle = ganaFilter
+    ? `Average score per session over time — ${ganaFilter} gana only`
+    : "Average score per session across all Shakha dates";
+  document.getElementById("lineSubtitle").textContent = subtitle;
+
   drawTrendChart(trendData, dates);
 }
 
-// ---- Trend line chart ----
+// ---- Bar chart ----
+function renderBarChart(docs, sessions, labelFn, selDate, selGana) {
+  let subtitle = "";
+  if (selDate && selGana !== "all") subtitle = `${fmtDisplayDate(selDate)} · ${selGana} gana`;
+  else if (selDate) subtitle = `Shakha date: ${fmtDisplayDate(selDate)}`;
+  else if (selGana !== "all") subtitle = `All dates combined · ${selGana} gana`;
+  else subtitle = "All dates combined · all ganas";
+
+  document.getElementById("barSubtitle").textContent = subtitle;
+
+  const ganas = selGana !== "all"
+    ? [selGana]
+    : [...new Set(docs.map(d => d.gana).filter(Boolean))].sort();
+
+  const data = sessions.map(sess => {
+    const entry = { session: sess, label: labelFn(sess) };
+    ganas.forEach(g => {
+      const vals = docs.filter(d => d.gana === g)
+        .map(d => d.ratings?.[sess]).filter(v => v != null && v > 0);
+      entry[g] = vals.length ? d3.mean(vals) : null;
+    });
+    return entry;
+  });
+
+  drawBarChart(data, sessions, ganas, labelFn);
+}
+
+// ---- D3: Trend line chart ----
 function drawTrendChart(trendData, dates) {
   document.getElementById("lineCard").style.display = "block";
   const wrap = document.getElementById("lineWrap");
@@ -718,7 +706,6 @@ function drawTrendChart(trendData, dates) {
   const parseDate = d3.timeParse("%Y-%m-%d");
   const fmtDate   = d3.timeFormat("%d %b");
 
-  // Flatten all points for scale
   const allPoints = trendData.flatMap(s => s.points);
   if (allPoints.length === 0) return;
 
@@ -729,49 +716,35 @@ function drawTrendChart(trendData, dates) {
   const svg = d3.select(wrap).append("svg")
     .attr("width", W)
     .attr("height", height + margin.top + margin.bottom);
-
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Grid
   g.append("g").attr("class", "grid")
     .call(d3.axisLeft(y).ticks(4).tickSize(-width).tickFormat(""));
-
-  // Axes
   g.append("g").attr("class", "axis")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x).ticks(Math.min(dates.length, 6)).tickFormat(d => fmtDate(d)));
-
   g.append("g").attr("class", "axis")
     .call(d3.axisLeft(y).ticks(4).tickFormat(d => ["","😞","😐","🙂","😄","🤩"][d] || d));
 
   const tooltip = document.getElementById("tooltip");
 
-  // Lines + dots per session
   trendData.forEach(series => {
     if (series.points.length === 0) return;
-
     const line = d3.line()
       .x(p => x(parseDate(p.date)))
       .y(p => y(p.avg))
       .curve(d3.curveMonotoneX);
 
-    g.append("path")
-      .datum(series.points)
-      .attr("fill", "none")
-      .attr("stroke", series.color)
-      .attr("stroke-width", 2.5)
-      .attr("stroke-linejoin", "round")
+    g.append("path").datum(series.points)
+      .attr("fill", "none").attr("stroke", series.color)
+      .attr("stroke-width", 2.5).attr("stroke-linejoin", "round")
       .attr("d", line);
 
     g.selectAll(`.dot-${series.session}`)
-      .data(series.points)
-      .enter().append("circle")
-      .attr("cx", p => x(parseDate(p.date)))
-      .attr("cy", p => y(p.avg))
-      .attr("r", 5)
-      .attr("fill", series.color)
-      .attr("stroke", "white")
-      .attr("stroke-width", 2)
+      .data(series.points).enter().append("circle")
+      .attr("cx", p => x(parseDate(p.date))).attr("cy", p => y(p.avg))
+      .attr("r", 5).attr("fill", series.color)
+      .attr("stroke", "white").attr("stroke-width", 2)
       .style("cursor", "pointer")
       .on("mouseover", function(event, p) {
         tooltip.style.opacity = "1";
@@ -784,81 +757,16 @@ function drawTrendChart(trendData, dates) {
       .on("mouseout", () => { tooltip.style.opacity = "0"; });
   });
 
-  // Legend
-  const legend = document.getElementById("lineLegend");
-  legend.innerHTML = trendData.map(s => `
-    <div class="legend-item">
-      <div class="legend-dot" style="background:${s.color}"></div>
-      ${s.label}
-    </div>
-  `).join('');
+  document.getElementById("lineLegend").innerHTML = trendData.map(s =>
+    `<div class="legend-item"><div class="legend-dot" style="background:${s.color}"></div>${s.label}</div>`
+  ).join('');
 }
 
-function renderDateAnalytics(docs, selectedGana, selectedDate) {
-  // Collect all session keys across all docs
-  const sessionKeys = new Set();
-  docs.forEach(d => {
-    if (d.ratings) Object.keys(d.ratings).forEach(k => { if (d.ratings[k] != null) sessionKeys.add(k); });
-  });
-  const sessions = [...sessionKeys].sort();
-
-  // Friendly session labels
-  const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-
-  // Summary stats
-  const allRatings = [];
-  docs.forEach(d => { if (d.ratings) Object.values(d.ratings).forEach(v => { if (v > 0) allRatings.push(v); }); });
-  const overallAvg = allRatings.length ? d3.mean(allRatings) : 0;
-
-  // Top session
-  const sessionAvgs = sessions.map(s => {
-    const vals = docs.map(d => d.ratings?.[s]).filter(v => v != null && v > 0);
-    return { session: s, avg: vals.length ? d3.mean(vals) : 0 };
-  });
-  sessionAvgs.sort((a, b) => b.avg - a.avg);
-  const topSession = sessionAvgs[0]?.session || "—";
-
-  // Update summary pills
-  document.getElementById("summaryRow").style.display = "flex";
-  document.getElementById("pillResponses").textContent = docs.length;
-  document.getElementById("pillSessions").textContent = sessions.length;
-  document.getElementById("pillAvg").textContent = overallAvg.toFixed(1);
-  document.getElementById("pillTop").textContent = label(topSession);
-
-  // Draw bar chart
-  drawBarChart(docs, sessions, label, selectedDate, selectedGana);
-}
-
-// ---- Bar chart (by session & gana) ----
-function drawBarChart(docs, sessions, labelFn, date, selectedGana) {
+// ---- D3: Bar chart ----
+function drawBarChart(data, sessions, ganas, labelFn) {
   document.getElementById("barCard").style.display = "block";
-  
-  // Format date as dd-Mmm-yy
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = d.toLocaleDateString('en-GB', { month: 'short' });
-  const year = String(d.getFullYear()).slice(-2);
-  const formattedDate = `${day}-${month}-${year}`;
-  
-  document.getElementById("barSubtitle").textContent = `Shakha date: ${formattedDate}`;
-
   const wrap = document.getElementById("barWrap");
   wrap.innerHTML = "";
-
-  const ganas = selectedGana === "all"
-    ? [...new Set(docs.map(d => d.gana).filter(Boolean))].sort()
-    : [selectedGana];
-
-  // Avg per gana per session
-  const data = sessions.map(sess => {
-    const entry = { session: sess, label: labelFn(sess) };
-    ganas.forEach(g => {
-      const vals = docs.filter(d => d.gana === g)
-        .map(d => d.ratings?.[sess]).filter(v => v != null && v > 0);
-      entry[g] = vals.length ? d3.mean(vals) : null;
-    });
-    return entry;
-  });
 
   const W = wrap.clientWidth || 800;
   const margin = { top: 20, right: 20, bottom: 70, left: 44 };
@@ -872,46 +780,32 @@ function drawBarChart(docs, sessions, labelFn, date, selectedGana) {
   const svg = d3.select(wrap).append("svg")
     .attr("width", W)
     .attr("height", height + margin.top + margin.bottom);
-
   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Grid
   g.append("g").attr("class", "grid")
     .call(d3.axisLeft(y).ticks(4).tickSize(-width).tickFormat(""));
-
-  // Axes
   g.append("g").attr("class", "axis")
     .attr("transform", `translate(0,${height})`)
     .call(d3.axisBottom(x0).tickFormat(labelFn))
     .selectAll("text")
-    .attr("transform", "rotate(-30)")
-    .style("text-anchor", "end")
-    .attr("dy", "0.5em")
-    .attr("dx", "-0.5em");
-
+    .attr("transform", "rotate(-30)").style("text-anchor", "end")
+    .attr("dy", "0.5em").attr("dx", "-0.5em");
   g.append("g").attr("class", "axis")
     .call(d3.axisLeft(y).ticks(4).tickFormat(d => ["","😞","😐","🙂","😄","🤩"][d] || d));
 
   const tooltip = document.getElementById("tooltip");
 
-  // Bars
   sessions.forEach(sess => {
-    const sessGroup = g.append("g")
-      .attr("transform", `translate(${x0(sess)},0)`);
-
+    const sessGroup = g.append("g").attr("transform", `translate(${x0(sess)},0)`);
     ganas.forEach((gana, gi) => {
       const val = data.find(d => d.session === sess)?.[gana];
       if (val == null) return;
 
       sessGroup.append("rect")
-        .attr("x", x1(gana))
-        .attr("y", y(val))
-        .attr("width", x1.bandwidth())
-        .attr("height", height - y(val))
-        .attr("rx", 4)
-        .attr("fill", GANA_COLORS[gi % GANA_COLORS.length])
-        .attr("opacity", 0.85)
-        .style("cursor", "pointer")
+        .attr("x", x1(gana)).attr("y", y(val))
+        .attr("width", x1.bandwidth()).attr("height", height - y(val))
+        .attr("rx", 4).attr("fill", GANA_COLORS[gi % GANA_COLORS.length])
+        .attr("opacity", 0.85).style("cursor", "pointer")
         .on("mouseover", function(event) {
           d3.select(this).attr("opacity", 1);
           tooltip.style.opacity = "1";
@@ -926,28 +820,19 @@ function drawBarChart(docs, sessions, labelFn, date, selectedGana) {
           tooltip.style.opacity = "0";
         });
 
-      // Add rating text in the middle of bar
       sessGroup.append("text")
         .attr("x", x1(gana) + x1.bandwidth() / 2)
         .attr("y", y(val) + (height - y(val)) / 2)
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .attr("font-size", "13px")
-        .attr("font-weight", "600")
-        .attr("fill", "white")
-        .attr("pointer-events", "none")
+        .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+        .attr("font-size", "13px").attr("font-weight", "600")
+        .attr("fill", "white").attr("pointer-events", "none")
         .text(`${val.toFixed(1)}/5`);
     });
   });
 
-  // Legend
-  const legend = document.getElementById("barLegend");
-  legend.innerHTML = ganas.map((g, i) => `
-    <div class="legend-item">
-      <div class="legend-dot" style="background:${GANA_COLORS[i % GANA_COLORS.length]}"></div>
-      ${g}
-    </div>
-  `).join('');
+  document.getElementById("barLegend").innerHTML = ganas.map((g, i) =>
+    `<div class="legend-item"><div class="legend-dot" style="background:${GANA_COLORS[i % GANA_COLORS.length]}"></div>${g}</div>`
+  ).join('');
 }
 
 function resetCharts() {
