@@ -663,7 +663,15 @@ function showSummary(docs) {
   document.getElementById("pillAvg").textContent = overallAvg.toFixed(1);
   document.getElementById("pillTop").textContent = label(topSession);
   document.getElementById("pillTopScore").textContent = topAvg > 0 ? `${topAvg.toFixed(1)}/5` : "";
-  document.getElementById("pillDates").textContent = uniqueDates.size || "—";
+  // Hide the dates pill when viewing a single date (it's redundant)
+  const selectedDateFilter = document.getElementById("selDate").value;
+  const datesPill = document.getElementById("pillDates").closest(".summary-pill");
+  if (selectedDateFilter) {
+    datesPill.style.display = "none";
+  } else {
+    datesPill.style.display = "";
+    document.getElementById("pillDates").textContent = uniqueDates.size || "—";
+  }
 }
 
 // ---- Render: decide which charts to show based on filter combo ----
@@ -773,9 +781,11 @@ function drawTrendChart(trendData, dates) {
 
   g.append("g").attr("class", "grid")
     .call(d3.axisLeft(y).ticks(4).tickSize(-width).tickFormat(""));
+  // Use actual shakha dates as tick values
+  const dateTicks = dates.map(d => parseDate(d)).filter(Boolean);
   g.append("g").attr("class", "axis")
     .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x).ticks(Math.min(dates.length, 6)).tickFormat(d => fmtDate(d)));
+    .call(d3.axisBottom(x).tickValues(dateTicks).tickFormat(d => fmtDate(d)));
   g.append("g").attr("class", "axis")
     .call(d3.axisLeft(y).ticks(4).tickFormat(d => ["","😞","😐","🙂","😄","🤩"][d] || d));
 
@@ -822,7 +832,7 @@ function drawBarChart(data, sessions, ganas, labelFn) {
   wrap.innerHTML = "";
 
   const W = wrap.clientWidth || 800;
-  const margin = { top: 20, right: 20, bottom: 70, left: 44 };
+  const margin = { top: 30, right: 20, bottom: 70, left: 44 };
   const width  = W - margin.left - margin.right;
   const height = 280 - margin.top - margin.bottom;
 
@@ -842,17 +852,28 @@ function drawBarChart(data, sessions, ganas, labelFn) {
     .call(d3.axisBottom(x0).tickFormat(labelFn))
     .selectAll("text")
     .attr("transform", "rotate(-30)").style("text-anchor", "end")
+    .attr("font-size", "13px")
     .attr("dy", "0.5em").attr("dx", "-0.5em");
   g.append("g").attr("class", "axis")
     .call(d3.axisLeft(y).ticks(4).tickFormat(d => ["","😞","😐","🙂","😄","🤩"][d] || d));
 
   const tooltip = document.getElementById("tooltip");
 
+  // Find the single highest value across all sessions & ganas
+  let bestVal = -Infinity, bestSess = null, bestGana = null;
+  sessions.forEach(sess => {
+    ganas.forEach(gana => {
+      const val = data.find(d => d.session === sess)?.[gana];
+      if (val != null && val > bestVal) { bestVal = val; bestSess = sess; bestGana = gana; }
+    });
+  });
+
   sessions.forEach(sess => {
     const sessGroup = g.append("g").attr("transform", `translate(${x0(sess)},0)`);
     ganas.forEach((gana, gi) => {
       const val = data.find(d => d.session === sess)?.[gana];
       if (val == null) return;
+      const isBest = (sess === bestSess && gana === bestGana);
 
       sessGroup.append("rect")
         .attr("x", x1(gana)).attr("y", y(val))
@@ -862,7 +883,7 @@ function drawBarChart(data, sessions, ganas, labelFn) {
         .on("mouseover", function(event) {
           d3.select(this).attr("opacity", 1);
           tooltip.style.opacity = "1";
-          tooltip.innerHTML = `<strong>${gana}</strong> — ${labelFn(sess)}<br>Avg: ${val.toFixed(2)}`;
+          tooltip.innerHTML = `<strong>${gana}</strong> — ${labelFn(sess)}<br>Avg: ${val.toFixed(2)}${isBest ? " ⭐ Best" : ""}`;
         })
         .on("mousemove", function(event) {
           tooltip.style.left = (event.pageX + 12) + "px";
@@ -880,6 +901,18 @@ function drawBarChart(data, sessions, ganas, labelFn) {
         .attr("font-size", "13px").attr("font-weight", "600")
         .attr("fill", "white").attr("pointer-events", "none")
         .text(`${val.toFixed(1)}`);
+
+      // Star above best bar
+      if (isBest) {
+        sessGroup.append("text")
+          .attr("x", x1(gana) + x1.bandwidth() / 2)
+          .attr("y", y(val) - 8)
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "auto")
+          .attr("font-size", "14px")
+          .attr("pointer-events", "none")
+          .text("⭐");
+      }
     });
   });
 
