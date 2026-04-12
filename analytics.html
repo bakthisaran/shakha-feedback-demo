@@ -167,7 +167,11 @@
     text-align: center;
   }
   .pill-value { font-family: 'Noto Serif', serif; font-size: 28px; font-weight: 600; color: var(--saffron); }
-  .pill-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .pill-value--sm { font-size: 18px; line-height: 1.2; margin-top: 2px; }
+  .pill-label { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .pill-sub { font-size: 11px; color: #b0a898; margin-top: 3px; min-height: 15px; }
+  .pill-top { background: linear-gradient(135deg, #fff8f3 0%, var(--card) 100%); border-color: #ffd4b8; }
+  .pill-top-score { font-family: 'Noto Serif', serif; font-size: 13px; font-weight: 600; color: var(--saffron); opacity: 0.75; min-height: 18px; }
 
   /* ---- Chart cards ---- */
   .chart-card {
@@ -304,18 +308,25 @@
   <div class="summary-row" id="summaryRow" style="display:none">
     <div class="summary-pill">
       <div class="pill-value" id="pillResponses">—</div>
-      <div class="pill-label">Total responses</div>
+      <div class="pill-label">Responses</div>
+    </div>
+    <div class="summary-pill">
+      <div class="pill-value" id="pillDates">—</div>
+      <div class="pill-label">Shakha dates</div>
     </div>
     <div class="summary-pill">
       <div class="pill-value" id="pillSessions">—</div>
-      <div class="pill-label">Sessions</div>
+      <div class="pill-label">Sessions rated</div>
+      <div class="pill-sub"></div>
     </div>
     <div class="summary-pill">
       <div class="pill-value" id="pillAvg">—</div>
       <div class="pill-label">Overall avg score</div>
+      <div class="pill-sub">out of 5</div>
     </div>
-    <div class="summary-pill">
-      <div class="pill-value" id="pillTop">—</div>
+    <div class="summary-pill pill-top">
+      <div class="pill-top-score" id="pillTopScore"></div>
+      <div class="pill-value pill-value--sm" id="pillTop">—</div>
       <div class="pill-label">Top session</div>
     </div>
   </div>
@@ -519,6 +530,30 @@ async function onShakhaChange() {
     document.getElementById("drillRow").style.display = "flex";
     updateLoadButton();
 
+    // Load and show summary stats immediately for all data (no filters yet)
+    await loadAndShowSummary(nagarSlug, shakhaSlug, "", "all");
+
+  } catch(e) { console.error(e); }
+}
+
+// ---- Fetch feedbacks and show summary (called on shakha select + after Load) ----
+async function loadAndShowSummary(nagarSlug, shakhaSlug, selDate, selGana) {
+  try {
+    const q = window.fsQuery(
+      window.fsCollection(window.db, "feedbacks"),
+      window.fsWhere("nagar", "==", nagarSlug),
+      window.fsWhere("shakha", "==", shakhaSlug)
+    );
+    const snap = await window.fsGetDocs(q);
+    let docs = [];
+    snap.forEach(d => {
+      const data = d.data();
+      data._normDate = normalizeDate(data.date);
+      docs.push(data);
+    });
+    if (selDate) docs = docs.filter(d => d._normDate === selDate);
+    if (selGana !== "all") docs = docs.filter(d => d.gana === selGana);
+    if (docs.length > 0) showSummary(docs);
   } catch(e) { console.error(e); }
 }
 
@@ -597,16 +632,16 @@ async function loadAnalytics() {
   }
 }
 
-// ---- Render: decide which charts to show based on filter combo ----
-function renderAnalytics(docs, selDate, selGana) {
+// ---- Shared summary computation ----
+function showSummary(docs) {
+  const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
   const sessionKeys = new Set();
   docs.forEach(d => {
     if (d.ratings) Object.keys(d.ratings).forEach(k => { if (d.ratings[k] != null) sessionKeys.add(k); });
   });
   const sessions = [...sessionKeys].sort();
-  const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-  // Summary stats
   const allRatings = [];
   docs.forEach(d => { if (d.ratings) Object.values(d.ratings).forEach(v => { if (v > 0) allRatings.push(v); }); });
   const overallAvg = allRatings.length ? d3.mean(allRatings) : 0;
@@ -617,12 +652,30 @@ function renderAnalytics(docs, selDate, selGana) {
   });
   sessionAvgs.sort((a, b) => b.avg - a.avg);
   const topSession = sessionAvgs[0]?.session || "—";
+  const topAvg     = sessionAvgs[0]?.avg || 0;
+
+  // Count unique dates
+  const uniqueDates = new Set(docs.map(d => d._normDate).filter(Boolean));
 
   document.getElementById("summaryRow").style.display = "flex";
   document.getElementById("pillResponses").textContent = docs.length;
   document.getElementById("pillSessions").textContent = sessions.length;
   document.getElementById("pillAvg").textContent = overallAvg.toFixed(1);
   document.getElementById("pillTop").textContent = label(topSession);
+  document.getElementById("pillTopScore").textContent = topAvg > 0 ? `${topAvg.toFixed(1)}/5` : "";
+  document.getElementById("pillDates").textContent = uniqueDates.size || "—";
+}
+
+// ---- Render: decide which charts to show based on filter combo ----
+function renderAnalytics(docs, selDate, selGana) {
+  const sessionKeys = new Set();
+  docs.forEach(d => {
+    if (d.ratings) Object.keys(d.ratings).forEach(k => { if (d.ratings[k] != null) sessionKeys.add(k); });
+  });
+  const sessions = [...sessionKeys].sort();
+  const label = k => k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+  showSummary(docs);
 
   // Show trend chart when no specific date is selected (shows change over time)
   if (!selDate) {
@@ -826,7 +879,7 @@ function drawBarChart(data, sessions, ganas, labelFn) {
         .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
         .attr("font-size", "13px").attr("font-weight", "600")
         .attr("fill", "white").attr("pointer-events", "none")
-        .text(`${val.toFixed(1)}/5`);
+        .text(`${val.toFixed(1)}`);
     });
   });
 
