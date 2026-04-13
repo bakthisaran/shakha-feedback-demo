@@ -334,6 +334,40 @@
   /* Two-col layout for gana tab */
   .gana-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
   @media (max-width: 600px) { .gana-two-col { grid-template-columns: 1fr; } }
+
+  /* ---- Chart info accordion ---- */
+  .chart-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+  .chart-header-text { flex: 1; }
+  .info-toggle {
+    flex-shrink: 0;
+    margin-top: 2px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 12px; font-weight: 700; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    line-height: 1;
+  }
+  .info-toggle:hover, .info-toggle.open {
+    border-color: var(--saffron); color: var(--saffron); background: #fff8f3;
+  }
+  .info-panel {
+    display: none;
+    background: #faf6ef;
+    border: 1px solid #ede5d8;
+    border-radius: 8px;
+    padding: 13px 16px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+  .info-panel.open { display: block; }
+  .info-panel strong { color: var(--deep); }
+  .info-panel ul { margin: 6px 0 0 16px; }
+  .info-panel li { margin-bottom: 4px; }
 </style>
 </head>
 <body>
@@ -516,8 +550,23 @@
 
     <!-- Heatmap -->
     <div class="chart-card" id="heatmapCard" style="display:none">
-      <div class="chart-title">Score heatmap — session × gana</div>
-      <div class="chart-subtitle">Full picture at a glance. Colour = avg score (red → amber → green)</div>
+      <div class="chart-header">
+        <div class="chart-header-text">
+          <div class="chart-title">Score heatmap — session × gana</div>
+          <div class="chart-subtitle">Full picture at a glance. Colour = avg score (red → amber → green)</div>
+        </div>
+        <button class="info-toggle" onclick="toggleInfo('heatmapInfo', this)" title="What does this mean?">?</button>
+      </div>
+      <div class="info-panel" id="heatmapInfo">
+        <strong>What you're looking at:</strong> Every session (columns) crossed with every gana (rows). Each cell shows the average rating that gana gave that session, colour-coded from red (low) to green (high).<br><br>
+        <strong>What to look for:</strong>
+        <ul>
+          <li><strong>A whole column is red</strong> — that session scored poorly across all ganas. Likely needs attention regardless of who you ask.</li>
+          <li><strong>A whole row is red</strong> — one gana rated everything low. Could reflect low engagement or a specific concern in that group.</li>
+          <li><strong>Mixed colours in a column</strong> — ganas disagreed on that session. Check the Gana Agreement card for the spread.</li>
+          <li><strong>Bright green cells</strong> — the strongest sessions and ganas. What made those work?</li>
+        </ul>
+      </div>
       <div class="heatmap-wrap" id="heatmapWrap"></div>
     </div>
 
@@ -525,14 +574,43 @@
     <div class="gana-two-col" id="ganaBottomRow" style="display:none">
 
       <div class="chart-card" style="margin-bottom:0">
-        <div class="chart-title">Gana ranking</div>
-        <div class="chart-subtitle">Overall avg across all sessions</div>
+        <div class="chart-header">
+          <div class="chart-header-text">
+            <div class="chart-title">Gana ranking</div>
+            <div class="chart-subtitle">Overall avg across all sessions</div>
+          </div>
+          <button class="info-toggle" onclick="toggleInfo('ganaRankInfo', this)" title="What does this mean?">?</button>
+        </div>
+        <div class="info-panel" id="ganaRankInfo">
+          <strong>What you're looking at:</strong> Each gana's average rating collapsed across every session and every date in the current filter.<br><br>
+          <strong>What to look for:</strong>
+          <ul>
+            <li><strong>Large gap between top and bottom</strong> — some ganas are systematically more positive or more critical than others. Worth exploring whether that reflects real experience differences or rating style.</li>
+            <li><strong>All ganas clustered closely</strong> — broad consensus on quality. The overall average is a reliable signal.</li>
+            <li><strong>Bottom-ranked gana</strong> — doesn't necessarily mean poor quality; they may just be a tougher crowd. Cross-reference with the heatmap to see if they rate specific sessions low.</li>
+          </ul>
+        </div>
         <div class="gana-rank-list" id="ganaRankList"></div>
       </div>
 
       <div class="chart-card" style="margin-bottom:0">
-        <div class="chart-title">Gana agreement</div>
-        <div class="chart-subtitle">How closely ganas agree per session (lower gap = more consensus)</div>
+        <div class="chart-header">
+          <div class="chart-header-text">
+            <div class="chart-title">Gana agreement</div>
+            <div class="chart-subtitle">How closely ganas agree per session (lower gap = more consensus)</div>
+          </div>
+          <button class="info-toggle" onclick="toggleInfo('ganaAgreeInfo', this)" title="What does this mean?">?</button>
+        </div>
+        <div class="info-panel" id="ganaAgreeInfo">
+          <strong>What you're looking at:</strong> For each session, the <em>spread</em> is the gap between the highest and lowest gana average. A small spread means ganas largely agreed; a large spread means they had very different experiences.<br><br>
+          <strong>Colour guide:</strong>
+          <ul>
+            <li><strong style="color:#2d7a4f">Green (below 0.5)</strong> — strong consensus. The score is a reliable read.</li>
+            <li><strong style="color:#BA7517">Amber (0.5–1.0)</strong> — moderate disagreement. Worth watching.</li>
+            <li><strong style="color:#c0392b">Red (above 1.0)</strong> — significant disagreement. The session landed very differently across ganas — dig into which ganas diverged and why.</li>
+          </ul>
+          The table also shows which gana rated highest and lowest so you can immediately see where the disagreement came from.
+        </div>
         <div style="overflow-x:auto">
           <table class="scorecard-table" id="ganaAgreeTable">
             <thead>
@@ -1438,6 +1516,13 @@ function renderGanasTab(docs) {
         <td class="right">${s.lowest.gana} <span style="color:var(--muted);font-size:11px">(${s.lowest.avg.toFixed(1)})</span></td>
       </tr>`;
   });
+}
+
+function toggleInfo(id, btn) {
+  const panel = document.getElementById(id);
+  const isOpen = panel.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  btn.textContent = isOpen ? '×' : '?';
 }
 
 function resetCharts() {
