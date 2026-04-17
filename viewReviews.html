@@ -60,36 +60,6 @@
     font-size: 13px; color: var(--error);
   }
 
-  /* ---- User bar ---- */
-  #userBar {
-    display: none; max-width: 960px; margin: 0 auto 20px;
-    padding: 10px 16px; background: var(--card);
-    border-radius: 10px; border: 1px solid var(--border);
-    font-size: 13px; color: var(--muted);
-    align-items: center; justify-content: space-between; gap: 12px;
-  }
-  .user-info { display: flex; align-items: center; gap: 10px; }
-  .user-email { color: var(--deep); font-weight: 500; }
-  .nav-links { display: flex; gap: 8px; align-items: center; }
-  .nav-link {
-    padding: 5px 12px; border-radius: 6px;
-    border: 1px solid var(--border); background: white;
-    font-family: 'DM Sans', sans-serif; font-size: 12px;
-    color: var(--muted); cursor: pointer; text-decoration: none;
-    transition: border-color 0.15s, color 0.15s;
-    white-space: nowrap;
-  }
-  .nav-link:hover { border-color: var(--saffron); color: var(--saffron); }
-  .nav-link.active { border-color: var(--saffron); color: var(--saffron); background: #fff5ee; }
-  .btn-signout {
-    padding: 5px 12px; border-radius: 6px;
-    border: 1px solid var(--border); background: white;
-    font-family: 'DM Sans', sans-serif; font-size: 12px;
-    color: var(--muted); cursor: pointer; transition: border-color 0.15s;
-    white-space: nowrap;
-  }
-  .btn-signout:hover { border-color: var(--error); color: var(--error); }
-
   /* ---- Main content ---- */
   #mainContent { display: none; max-width: 960px; margin: 0 auto; }
 
@@ -105,9 +75,7 @@
     border: 1px solid var(--border);
     margin-bottom: 24px;
   }
-  .filter-row {
-    display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
-  }
+  .filter-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
   .filter-row + .filter-row { margin-top: 12px; }
   .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
   .filter-label { font-size: 12px; font-weight: 500; color: var(--muted); }
@@ -151,17 +119,13 @@
   }
   .search-sort-bar.visible { display: flex; }
   .search-wrap { flex: 1; min-width: 200px; position: relative; }
-  .search-wrap input {
-    padding-left: 36px;
-  }
+  .search-wrap input { padding-left: 36px; }
   .search-icon {
     position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
     font-size: 15px; pointer-events: none; color: var(--muted);
   }
   .sort-select { width: auto; min-width: 180px; flex-shrink: 0; }
-  .results-count {
-    font-size: 13px; color: var(--muted); white-space: nowrap; flex-shrink: 0;
-  }
+  .results-count { font-size: 13px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
 
   /* ---- Summary bar ---- */
   .summary-bar {
@@ -177,11 +141,7 @@
   }
   .summary-bar.visible { display: flex; }
   .summ-item { display: flex; flex-direction: column; }
-  .summ-value {
-    font-family: 'Noto Serif', serif;
-    font-size: 22px; font-weight: 600; color: var(--saffron);
-    line-height: 1;
-  }
+  .summ-value { font-family: 'Noto Serif', serif; font-size: 22px; font-weight: 600; color: var(--saffron); line-height: 1; }
   .summ-label { font-size: 12px; color: var(--muted); margin-top: 3px; }
   .summ-divider { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
 
@@ -205,30 +165,23 @@
   .rc-identity { display: flex; flex-direction: column; gap: 3px; }
   .rc-name {
     font-weight: 600; font-size: 15px; color: var(--deep);
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   }
   .rc-gana-tag {
     display: inline-block; padding: 2px 9px; border-radius: 20px;
     background: #fff5ee; border: 1px solid #ffdcc4;
     font-size: 11px; font-weight: 500; color: var(--saffron);
   }
-  .rc-meta {
-    font-size: 12px; color: var(--muted); line-height: 1.6;
-  }
-  .rc-timestamp {
-    font-size: 12px; color: var(--muted); text-align: right;
-    white-space: nowrap; flex-shrink: 0;
-  }
+  .rc-meta { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .rc-timestamp { font-size: 12px; color: var(--muted); text-align: right; white-space: nowrap; flex-shrink: 0; }
   .rc-source-badge {
     display: inline-block; padding: 2px 7px; border-radius: 4px;
-    font-size: 10px; font-weight: 500; margin-left: 6px;
+    font-size: 10px; font-weight: 500;
     background: var(--bg); color: var(--muted); border: 1px solid var(--border);
   }
 
   /* Ratings row */
-  .rc-ratings {
-    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
-  }
+  .rc-ratings { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
   .rc-rating-chip {
     display: flex; align-items: center; gap: 6px;
     padding: 5px 11px; border-radius: 8px;
@@ -240,9 +193,7 @@
   .rc-rating-chip.highlight { background: #fff5ee; border-color: #ffdcc4; }
 
   /* Shikshak info */
-  .rc-shikshak-row {
-    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
-  }
+  .rc-shikshak-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
   .rc-shikshak-chip {
     font-size: 11px; color: var(--muted);
     background: var(--bg); border: 1px solid var(--border);
@@ -253,20 +204,18 @@
   /* Comment */
   .rc-comment {
     font-size: 14px; color: var(--deep);
-    line-height: 1.65;
-    padding: 12px 14px;
+    line-height: 1.65; padding: 12px 14px;
     background: #faf6ef;
     border-left: 3px solid var(--saffron);
     border-radius: 0 8px 8px 0;
   }
   .rc-comment.empty { display: none; }
-
   .rc-divider { height: 1px; background: var(--border); margin: 12px 0; }
+  .no-comment-note { font-size: 12px; color: var(--muted); font-style: italic; }
 
   /* ---- States ---- */
   .empty-state {
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: var(--card); border: 1px solid var(--border);
     border-radius: var(--radius);
     text-align: center; padding: 60px 20px;
     color: var(--muted); font-size: 14px;
@@ -287,23 +236,15 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ---- No comment badge ---- */
-  .no-comment-note {
-    font-size: 12px; color: var(--muted); font-style: italic;
-  }
-
-  /* Highlight match */
-  mark {
-    background: #fff3c4; border-radius: 2px; padding: 0 1px;
-  }
+  mark { background: #fff3c4; border-radius: 2px; padding: 0 1px; }
 
   @media (max-width: 600px) {
     .rc-header { flex-direction: column; }
     .rc-timestamp { text-align: left; }
     .summ-divider { display: none; }
-    .nav-links { gap: 4px; }
   }
 </style>
+<script src="nav.js"></script>
 </head>
 <body>
 
@@ -326,19 +267,6 @@
   </div>
 </div>
 
-<!-- User bar -->
-<div id="userBar">
-  <div class="user-info">
-    <span>Signed in as <span class="user-email" id="userEmail">—</span></span>
-  </div>
-  <div class="nav-links">
-    <a class="nav-link" href="analytics.html">📊 Analytics</a>
-    <a class="nav-link active" href="reviews.html">💬 Reviews</a>
-    <a class="nav-link" href="admin.html">⚙️ Admin</a>
-    <button class="btn-signout" onclick="signOut()">Sign out</button>
-  </div>
-</div>
-
 <!-- Main content -->
 <div id="mainContent">
   <div class="page-header">
@@ -348,7 +276,6 @@
 
   <!-- Filters -->
   <div class="filters">
-    <!-- Row 1: Nagar + Shakha -->
     <div class="filter-row">
       <div class="filter-group">
         <span class="filter-label">Nagar</span>
@@ -364,12 +291,10 @@
       </div>
     </div>
 
-    <!-- Divider -->
     <div class="filter-divider" id="drillDivider" style="display:none">
       <span class="filter-divider-label">Narrow down — all optional</span>
     </div>
 
-    <!-- Row 2: Date + Gana + Session + Load -->
     <div class="filter-row" id="drillRow" style="display:none">
       <div class="filter-group">
         <span class="filter-label">Shakha Date</span>
@@ -397,7 +322,7 @@
   <div class="search-sort-bar" id="searchSortBar">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="Search reviews by keyword, name, session…" oninput="applyClientFilters()">
+      <input type="text" id="searchInput" placeholder="Search by keyword, name, session…" oninput="applyClientFilters()">
     </div>
     <select class="sort-select" id="sortSelect" onchange="applyClientFilters()">
       <option value="newest">Newest first</option>
@@ -437,16 +362,12 @@
 </div>
 
 <script>
-// ── Config ────────────────────────────────────────────────────────────────
 const ADMIN_EMAILS = ["bakthisaran@gmail.com"];
+const EMOJI_MAP = { 1:"😞", 2:"😐", 3:"🙂", 4:"😄", 5:"🤩" };
 
-const EMOJI_MAP = { 1: "😞", 2: "😐", 3: "🙂", 4: "😄", 5: "🤩" };
+let allDocs = [];
+let nagarCache = {};
 
-// ── State ─────────────────────────────────────────────────────────────────
-let allDocs = [];        // raw fetched docs (after Nagar+Shakha filter)
-let nagarCache = {};     // nagarSlug → { nagarName, shakhas: { id → data } }
-
-// ── Auth ──────────────────────────────────────────────────────────────────
 window.signIn  = () => window._signIn();
 window.signOut = () => window._signOut();
 
@@ -454,20 +375,19 @@ window.onAuthStateChanged = function(user) {
   if (user && ADMIN_EMAILS.includes(user.email)) {
     document.getElementById("authGate").style.display = "none";
     document.getElementById("authDenied").style.display = "none";
-    document.getElementById("userBar").style.display = "flex";
-    document.getElementById("userEmail").textContent = user.email;
     document.getElementById("mainContent").style.display = "block";
+    renderNav(user);
     loadNagars();
   } else if (user) {
     document.getElementById("authGate").style.display = "block";
     document.getElementById("authDenied").style.display = "block";
-    document.getElementById("userBar").style.display = "none";
     document.getElementById("mainContent").style.display = "none";
+    destroyNav();
   } else {
     document.getElementById("authGate").style.display = "block";
     document.getElementById("authDenied").style.display = "none";
-    document.getElementById("userBar").style.display = "none";
     document.getElementById("mainContent").style.display = "none";
+    destroyNav();
   }
 };
 
@@ -475,18 +395,10 @@ window.onAuthStateChanged = function(user) {
 function normalizeDate(dateStr) {
   if (!dateStr) return null;
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  const monthMap = { Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06', Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12' };
+  const monthMap = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
   const match = dateStr.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
-  if (match) {
-    const day = String(match[1]).padStart(2,'0');
-    const month = monthMap[match[2]];
-    const year = match[3];
-    if (month) return `${year}-${month}-${day}`;
-  }
-  try {
-    const d = new Date(dateStr);
-    if (!isNaN(d.getTime())) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  } catch(e) {}
+  if (match) { const day=String(match[1]).padStart(2,'0'),month=monthMap[match[2]],year=match[3]; if(month) return `${year}-${month}-${day}`; }
+  try { const d=new Date(dateStr); if(!isNaN(d.getTime())) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; } catch(e){}
   return null;
 }
 
@@ -502,54 +414,36 @@ function fmtTimestamp(ts) {
   if (ts && typeof ts.toDate === 'function') d = ts.toDate();
   else d = new Date(ts);
   if (isNaN(d.getTime())) return '—';
-  const day   = String(d.getDate()).padStart(2,'0');
-  const month = d.toLocaleDateString('en-GB', { month: 'short' });
-  const yr    = String(d.getFullYear()).slice(-2);
-  const hh    = String(d.getHours()).padStart(2,'0');
-  const mm    = String(d.getMinutes()).padStart(2,'0');
-  return `${day} ${month} ${yr} ${hh}:${mm}`;
+  return `${String(d.getDate()).padStart(2,'0')} ${d.toLocaleDateString('en-GB',{month:'short'})} ${String(d.getFullYear()).slice(-2)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
-function labelKey(k) {
-  return k.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
-}
+function labelKey(k) { return k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
 
 function avgRating(ratings) {
   if (!ratings) return null;
-  const vals = Object.values(ratings).filter(v => v != null && v > 0);
-  return vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : null;
+  const vals = Object.values(ratings).filter(v=>v!=null&&v>0);
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
 }
 
-// ── Load Nagars from feedback-requests ───────────────────────────────────
+// ── Load Nagars ───────────────────────────────────────────────────────────
 async function loadNagars() {
   try {
-    const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
+    const snap = await window.fsGetDocs(window.fsCollection(window.db,"feedback-requests"));
     const nagars = {};
-    snap.forEach(doc => {
-      const data = doc.data();
-      if (data.nagarSlug) {
-        if (!nagars[data.nagarSlug]) nagars[data.nagarSlug] = data.nagarName || data.nagarSlug;
-      }
-    });
-
-    // Also build shakha cache
     nagarCache = {};
     snap.forEach(doc => {
       const data = doc.data();
-      const ns = data.nagarSlug;
-      if (!ns) return;
-      if (!nagarCache[ns]) nagarCache[ns] = { nagarName: data.nagarName || ns, shakhas: {} };
-      const sid = data.shakhaSlug || data.shakhaId;
-      if (sid && !nagarCache[ns].shakhas[sid]) {
-        nagarCache[ns].shakhas[sid] = { shakhaName: data.shakhaName || sid, shakhaSlug: data.shakhaSlug };
+      if (!data.nagarSlug) return;
+      nagars[data.nagarSlug] = data.nagarName || data.nagarSlug;
+      if (!nagarCache[data.nagarSlug]) nagarCache[data.nagarSlug] = { nagarName: data.nagarName || data.nagarSlug, shakhas: {} };
+      const sid = data.shakhaSlug;
+      if (sid && !nagarCache[data.nagarSlug].shakhas[sid]) {
+        nagarCache[data.nagarSlug].shakhas[sid] = { shakhaName: data.shakhaName || sid, shakhaSlug: sid };
       }
     });
-
     const sel = document.getElementById("selNagar");
-    Object.entries(nagars).sort().forEach(([slug, name]) => {
-      const opt = document.createElement("option");
-      opt.value = slug; opt.textContent = name;
-      sel.appendChild(opt);
+    Object.entries(nagars).sort().forEach(([slug,name]) => {
+      const opt = document.createElement("option"); opt.value=slug; opt.textContent=name; sel.appendChild(opt);
     });
   } catch(e) { console.error(e); }
 }
@@ -559,16 +453,11 @@ async function onNagarChange() {
   const shakhaEl  = document.getElementById("selShakha");
   shakhaEl.innerHTML = '<option value="">Select Shakha…</option>';
   shakhaEl.disabled = true;
-  hideDrillRow();
-  resetResults();
+  hideDrillRow(); resetResults();
   if (!nagarSlug) return;
-
   const shakhas = nagarCache[nagarSlug]?.shakhas || {};
-  Object.entries(shakhas).sort().forEach(([slug, data]) => {
-    const opt = document.createElement("option");
-    opt.value = slug;
-    opt.textContent = data.shakhaName || slug;
-    shakhaEl.appendChild(opt);
+  Object.entries(shakhas).sort().forEach(([slug,data]) => {
+    const opt = document.createElement("option"); opt.value=slug; opt.textContent=data.shakhaName||slug; shakhaEl.appendChild(opt);
   });
   shakhaEl.disabled = false;
 }
@@ -576,114 +465,84 @@ async function onNagarChange() {
 async function onShakhaChange() {
   const nagarSlug  = document.getElementById("selNagar").value;
   const shakhaSlug = document.getElementById("selShakha").value;
-  hideDrillRow();
-  resetResults();
+  hideDrillRow(); resetResults();
   if (!nagarSlug || !shakhaSlug) return;
-
-  // Load all feedback-requests for this shakha to get dates and ganas
   try {
-    const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
-    const dateSet = new Set();
-    const ganaSet = new Set();
-    const sessionSet = new Set();
-
+    const snap = await window.fsGetDocs(window.fsCollection(window.db,"feedback-requests"));
+    const dateSet=new Set(), ganaSet=new Set(), sessionSet=new Set();
     snap.forEach(doc => {
       const data = doc.data();
-      const matchSlug = data.shakhaSlug === shakhaSlug || data.shakhaId === `${nagarSlug}_${shakhaSlug}`;
-      if (data.nagarSlug !== nagarSlug || !matchSlug) return;
-      const nd = normalizeDate(typeof data.date === 'object' && data.date?.toDate ? data.date.toDate().toISOString().split('T')[0] : data.date);
+      if (data.nagarSlug!==nagarSlug || data.shakhaSlug!==shakhaSlug) return;
+      const nd = normalizeDate(data.date && typeof data.date==='object' && data.date.toDate ? data.date.toDate().toISOString().split('T')[0] : data.date);
       if (nd) dateSet.add(nd);
-      (data.ganas || []).forEach(g => ganaSet.add(g));
-      (data.sessions || []).forEach(s => sessionSet.add(s));
+      (data.ganas||[]).forEach(g=>ganaSet.add(g));
+      (data.sessions||[]).forEach(s=>sessionSet.add(s));
     });
 
     const dateEl = document.getElementById("selDate");
     dateEl.innerHTML = '<option value="">All Dates</option>';
     [...dateSet].sort().reverse().forEach(date => {
-      const opt = document.createElement("option");
-      opt.value = date; opt.textContent = fmtDisplayDate(date);
-      dateEl.appendChild(opt);
+      const opt=document.createElement("option"); opt.value=date; opt.textContent=fmtDisplayDate(date); dateEl.appendChild(opt);
     });
 
     const ganaEl = document.getElementById("selGana");
     ganaEl.innerHTML = '<option value="all">All Ganas</option>';
     [...ganaSet].sort().forEach(g => {
-      const opt = document.createElement("option");
-      opt.value = g; opt.textContent = g;
-      ganaEl.appendChild(opt);
+      const opt=document.createElement("option"); opt.value=g; opt.textContent=g; ganaEl.appendChild(opt);
     });
 
     const sessEl = document.getElementById("selSession");
     sessEl.innerHTML = '<option value="all">All Sessions</option>';
     [...sessionSet].sort().forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s; opt.textContent = s;
-      sessEl.appendChild(opt);
+      const opt=document.createElement("option"); opt.value=s; opt.textContent=s; sessEl.appendChild(opt);
     });
 
     document.getElementById("drillDivider").style.display = "block";
     document.getElementById("drillRow").style.display = "flex";
-
   } catch(e) { console.error(e); }
 }
 
-function onFilterChange() {
-  // nothing to do eagerly — Load button triggers it
-}
-
+function onFilterChange() { /* Load button triggers load */ }
 function hideDrillRow() {
   document.getElementById("drillDivider").style.display = "none";
   document.getElementById("drillRow").style.display = "none";
 }
 
-// ── Load reviews from Firestore ───────────────────────────────────────────
+// ── Load reviews ──────────────────────────────────────────────────────────
 async function loadReviews() {
   const nagarSlug  = document.getElementById("selNagar").value;
   const shakhaSlug = document.getElementById("selShakha").value;
-  if (!nagarSlug || !shakhaSlug) { alert("Please select a Nagar and Shakha first."); return; }
+  if (!nagarSlug||!shakhaSlug) { alert("Please select a Nagar and Shakha first."); return; }
 
   const btn = document.getElementById("btnLoad");
-  btn.disabled = true; btn.textContent = "Loading…";
+  btn.disabled=true; btn.textContent="Loading…";
   resetResults();
-  document.getElementById("reviewsWrap").innerHTML = `
+  document.getElementById("reviewsWrap").innerHTML=`
     <div class="loading-state">
-      <div class="loading-spinner"></div>
-      Fetching reviews…
+      <div class="loading-spinner"></div>Fetching reviews…
     </div>`;
 
   try {
     const q = window.fsQuery(
-      window.fsCollection(window.db, "feedbacks"),
-      window.fsWhere("nagar", "==", nagarSlug),
-      window.fsWhere("shakha", "==", shakhaSlug)
+      window.fsCollection(window.db,"feedbacks"),
+      window.fsWhere("nagar","==",nagarSlug),
+      window.fsWhere("shakha","==",shakhaSlug)
     );
     const snap = await window.fsGetDocs(q);
     allDocs = [];
     snap.forEach(d => {
       const data = d.data();
-      data._normDate = normalizeDate(
-        data.date && typeof data.date === 'object' && data.date.toDate
-          ? data.date.toDate().toISOString().split('T')[0]
-          : data.date
-      );
+      data._normDate = normalizeDate(data.date && typeof data.date==='object' && data.date.toDate ? data.date.toDate().toISOString().split('T')[0] : data.date);
       allDocs.push(data);
     });
-
     applyClientFilters();
   } catch(e) {
     console.error(e);
-    document.getElementById("reviewsWrap").innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">⚠️</div>
-        <div class="empty-title">Error loading reviews</div>
-        <p>${e.message}</p>
-      </div>`;
-  } finally {
-    btn.disabled = false; btn.textContent = "Load Reviews";
-  }
+    document.getElementById("reviewsWrap").innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Error loading reviews</div><p>${e.message}</p></div>`;
+  } finally { btn.disabled=false; btn.textContent="Load Reviews"; }
 }
 
-// ── Client-side filtering + sorting + rendering ───────────────────────────
+// ── Client-side filtering, sorting, rendering ─────────────────────────────
 function applyClientFilters() {
   const selDate    = document.getElementById("selDate").value;
   const selGana    = document.getElementById("selGana").value;
@@ -692,144 +551,100 @@ function applyClientFilters() {
   const sortBy     = document.getElementById("sortSelect").value;
 
   let docs = [...allDocs];
-
-  // Date filter
-  if (selDate) docs = docs.filter(d => d._normDate === selDate);
-
-  // Gana filter
-  if (selGana !== "all") docs = docs.filter(d => d.gana === selGana);
-
-  // Session filter — keep docs that have a rating for that session
-  if (selSession !== "all") {
-    const sessKey = selSession.toLowerCase().replace(/\s+/g, '_');
-    docs = docs.filter(d => d.ratings && d.ratings[sessKey] != null);
+  if (selDate) docs = docs.filter(d=>d._normDate===selDate);
+  if (selGana!=="all") docs = docs.filter(d=>d.gana===selGana);
+  if (selSession!=="all") {
+    const sessKey = selSession.toLowerCase().replace(/\s+/g,'_');
+    docs = docs.filter(d=>d.ratings&&d.ratings[sessKey]!=null);
   }
-
-  // Keyword search
   if (search) {
     docs = docs.filter(d => {
-      const blob = [
-        d.name, d.gana, d.overallComment,
-        d._normDate, d.bauddikhTitle, d.bauddikhShikshak,
-        d.shareerikVishay, d.shareerikShikshak,
-        ...Object.keys(d.ratings || {})
-      ].filter(Boolean).join(' ').toLowerCase();
+      const blob=[d.name,d.gana,d.overallComment,d._normDate,d.bauddikhTitle,d.bauddikhShikshak,d.shareerikVishay,d.shareerikShikshak,...Object.keys(d.ratings||{})].filter(Boolean).join(' ').toLowerCase();
       return blob.includes(search);
     });
   }
-
-  // Sort
-  docs.sort((a, b) => {
-    if (sortBy === 'newest') return tsMs(b.timestamp) - tsMs(a.timestamp);
-    if (sortBy === 'oldest') return tsMs(a.timestamp) - tsMs(b.timestamp);
-    if (sortBy === 'highest') return (avgRating(b.ratings) || 0) - (avgRating(a.ratings) || 0);
-    if (sortBy === 'lowest')  return (avgRating(a.ratings) || 0) - (avgRating(b.ratings) || 0);
-    if (sortBy === 'hascomment') {
-      const ac = a.overallComment ? 1 : 0;
-      const bc = b.overallComment ? 1 : 0;
-      return bc - ac || tsMs(b.timestamp) - tsMs(a.timestamp);
-    }
+  docs.sort((a,b) => {
+    if (sortBy==='newest') return tsMs(b.timestamp)-tsMs(a.timestamp);
+    if (sortBy==='oldest') return tsMs(a.timestamp)-tsMs(b.timestamp);
+    if (sortBy==='highest') return (avgRating(b.ratings)||0)-(avgRating(a.ratings)||0);
+    if (sortBy==='lowest')  return (avgRating(a.ratings)||0)-(avgRating(b.ratings)||0);
+    if (sortBy==='hascomment') { const ac=a.overallComment?1:0,bc=b.overallComment?1:0; return bc-ac||tsMs(b.timestamp)-tsMs(a.timestamp); }
     return 0;
   });
-
   renderSummary(docs);
   renderReviews(docs, search, selSession);
 }
 
 function tsMs(ts) {
   if (!ts) return 0;
-  if (typeof ts.toDate === 'function') return ts.toDate().getTime();
-  return new Date(ts).getTime() || 0;
+  if (typeof ts.toDate==='function') return ts.toDate().getTime();
+  return new Date(ts).getTime()||0;
 }
 
 function renderSummary(docs) {
-  if (docs.length === 0) {
-    document.getElementById("summaryBar").classList.remove("visible");
-    document.getElementById("searchSortBar").classList.remove("visible");
-    return;
-  }
-
-  const withComment = docs.filter(d => d.overallComment && d.overallComment.trim()).length;
-  const allRatings  = docs.flatMap(d => Object.values(d.ratings || {}).filter(v => v != null && v > 0));
+  if (docs.length===0) { document.getElementById("summaryBar").classList.remove("visible"); document.getElementById("searchSortBar").classList.remove("visible"); return; }
+  const withComment = docs.filter(d=>d.overallComment&&d.overallComment.trim()).length;
+  const allRatings  = docs.flatMap(d=>Object.values(d.ratings||{}).filter(v=>v!=null&&v>0));
   const avg = allRatings.length ? (allRatings.reduce((a,b)=>a+b,0)/allRatings.length).toFixed(2) : '—';
-  const uniqueDates = new Set(docs.map(d => d._normDate).filter(Boolean));
-
-  document.getElementById("summTotal").textContent = docs.length;
-  document.getElementById("summWithComment").textContent = withComment;
-  document.getElementById("summAvg").textContent = avg;
-  document.getElementById("summDates").textContent = uniqueDates.size;
+  const uniqueDates = new Set(docs.map(d=>d._normDate).filter(Boolean));
+  document.getElementById("summTotal").textContent      = docs.length;
+  document.getElementById("summWithComment").textContent= withComment;
+  document.getElementById("summAvg").textContent        = avg;
+  document.getElementById("summDates").textContent      = uniqueDates.size;
   document.getElementById("summaryBar").classList.add("visible");
   document.getElementById("searchSortBar").classList.add("visible");
 }
 
 function renderReviews(docs, search, selSession) {
   const wrap = document.getElementById("reviewsWrap");
-  document.getElementById("resultsCount").textContent = `${docs.length} review${docs.length !== 1 ? 's' : ''}`;
-
-  if (docs.length === 0) {
-    wrap.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📭</div>
-        <div class="empty-title">No reviews found</div>
-        <p>Try adjusting your filters or search term.</p>
-      </div>`;
+  document.getElementById("resultsCount").textContent = `${docs.length} review${docs.length!==1?'s':''}`;
+  if (docs.length===0) {
+    wrap.innerHTML=`<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">No reviews found</div><p>Try adjusting your filters or search term.</p></div>`;
     return;
   }
-
-  wrap.innerHTML = docs.map(d => buildCard(d, search, selSession)).join('');
+  wrap.innerHTML = docs.map(d=>buildCard(d,search,selSession)).join('');
 }
 
 function buildCard(d, search, selSession) {
-  const name      = d.name || 'Anonymous';
-  const gana      = d.gana || '—';
-  const ts        = fmtTimestamp(d.timestamp);
-  const dateStr   = fmtDisplayDate(d._normDate);
-  const source    = d.source || null;
-  const comment   = d.overallComment ? d.overallComment.trim() : '';
-  const ratings   = d.ratings || {};
-  const sessionFilter = selSession !== 'all' ? selSession.toLowerCase().replace(/\s+/g,'_') : null;
+  const name     = d.name||'Anonymous';
+  const gana     = d.gana||'—';
+  const ts       = fmtTimestamp(d.timestamp);
+  const dateStr  = fmtDisplayDate(d._normDate);
+  const source   = d.source||null;
+  const comment  = d.overallComment?d.overallComment.trim():'';
+  const ratings  = d.ratings||{};
+  const sessionFilter = selSession!=='all' ? selSession.toLowerCase().replace(/\s+/g,'_') : null;
 
-  // Ratings chips — highlight the selected session if filtered
-  const ratingKeys = Object.keys(ratings).filter(k => ratings[k] != null && ratings[k] > 0);
-  // If session filter active, show that session first
+  const ratingKeys = Object.keys(ratings).filter(k=>ratings[k]!=null&&ratings[k]>0);
   const sortedKeys = sessionFilter
-    ? [sessionFilter, ...ratingKeys.filter(k => k !== sessionFilter)].filter(k => ratingKeys.includes(k) || k === sessionFilter)
+    ? [sessionFilter,...ratingKeys.filter(k=>k!==sessionFilter)].filter(k=>ratingKeys.includes(k))
     : ratingKeys;
 
   const ratingsHtml = sortedKeys.map(k => {
-    const val = ratings[k];
-    if (val == null) return '';
-    const isHighlight = sessionFilter && k === sessionFilter;
-    const emoji = EMOJI_MAP[val] || val;
-    return `<div class="rc-rating-chip${isHighlight ? ' highlight' : ''}">
-      <span class="emoji">${emoji}</span>
+    const val=ratings[k]; if(val==null) return '';
+    const isHighlight=sessionFilter&&k===sessionFilter;
+    return `<div class="rc-rating-chip${isHighlight?' highlight':''}">
+      <span class="emoji">${EMOJI_MAP[val]||val}</span>
       <span class="session-name">${labelKey(k)}</span>
       <strong>${val}/5</strong>
     </div>`;
   }).join('');
 
-  // Shikshak info
-  const shikshakChips = [];
-  if (d.bauddikhTitle)    shikshakChips.push(`<span class="rc-shikshak-chip">Bauddikh: <strong>${d.bauddikhTitle}</strong></span>`);
-  if (d.bauddikhShikshak) shikshakChips.push(`<span class="rc-shikshak-chip">Shikshak: <strong>${d.bauddikhShikshak}</strong></span>`);
-  if (d.shareerikVishay)  shikshakChips.push(`<span class="rc-shikshak-chip">Shareerik: <strong>${d.shareerikVishay}</strong></span>`);
-  if (d.shareerikShikshak)shikshakChips.push(`<span class="rc-shikshak-chip">Shikshak: <strong>${d.shareerikShikshak}</strong></span>`);
-  const shikshakHtml = shikshakChips.length
-    ? `<div class="rc-shikshak-row">${shikshakChips.join('')}</div>`
-    : '';
+  const shikshakChips=[];
+  if (d.bauddikhTitle)     shikshakChips.push(`<span class="rc-shikshak-chip">Bauddikh: <strong>${d.bauddikhTitle}</strong></span>`);
+  if (d.bauddikhShikshak)  shikshakChips.push(`<span class="rc-shikshak-chip">Shikshak: <strong>${d.bauddikhShikshak}</strong></span>`);
+  if (d.shareerikVishay)   shikshakChips.push(`<span class="rc-shikshak-chip">Shareerik: <strong>${d.shareerikVishay}</strong></span>`);
+  if (d.shareerikShikshak) shikshakChips.push(`<span class="rc-shikshak-chip">Shikshak: <strong>${d.shareerikShikshak}</strong></span>`);
+  const shikshakHtml = shikshakChips.length ? `<div class="rc-shikshak-row">${shikshakChips.join('')}</div>` : '';
 
-  // Highlight search term in comment and name
   const hl = (text) => {
-    if (!search || !text) return escHtml(text || '');
-    const re = new RegExp(`(${escRe(search)})`, 'gi');
-    return escHtml(text).replace(re, '<mark>$1</mark>');
+    if (!search||!text) return escHtml(text||'');
+    return escHtml(text).replace(new RegExp(`(${escRe(search)})`,'gi'),'<mark>$1</mark>');
   };
 
   const commentHtml = comment
     ? `<div class="rc-comment">${hl(comment)}</div>`
-    : `<div class="rc-comment empty"></div><span class="no-comment-note">No written comment</span>`;
-
-  const sourceBadge = source ? `<span class="rc-source-badge">${source}</span>` : '';
+    : `<span class="no-comment-note">No written comment</span>`;
 
   return `
     <div class="review-card">
@@ -837,37 +652,30 @@ function buildCard(d, search, selSession) {
         <div class="rc-identity">
           <div class="rc-name">
             ${hl(name)}
-            <span class="rc-gana-tag">${gana}</span>
-            ${sourceBadge}
+            <span class="rc-gana-tag">${escHtml(gana)}</span>
+            ${source?`<span class="rc-source-badge">${source}</span>`:''}
           </div>
-          <div class="rc-meta">
-            Shakha date: <strong>${dateStr}</strong>
-            · Shakha: <strong>${escHtml(d.shakhaName || '—')}</strong>
-          </div>
+          <div class="rc-meta">Shakha date: <strong>${dateStr}</strong> · <strong>${escHtml(d.shakhaName||'—')}</strong></div>
         </div>
         <div class="rc-timestamp">🕐 ${ts}</div>
       </div>
       ${shikshakHtml}
       <div class="rc-ratings">${ratingsHtml}</div>
-      ${ratingKeys.length > 0 && comment ? '<div class="rc-divider"></div>' : ''}
+      ${ratingKeys.length>0&&comment?'<div class="rc-divider"></div>':''}
       ${commentHtml}
     </div>`;
 }
 
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function escRe(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escRe(str)   { return str.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 
 function resetResults() {
-  allDocs = [];
-  document.getElementById("reviewsWrap").innerHTML = '';
+  allDocs=[];
+  document.getElementById("reviewsWrap").innerHTML='';
   document.getElementById("summaryBar").classList.remove("visible");
   document.getElementById("searchSortBar").classList.remove("visible");
-  document.getElementById("resultsCount").textContent = '';
-  document.getElementById("searchInput").value = '';
+  document.getElementById("resultsCount").textContent='';
+  if (document.getElementById("searchInput")) document.getElementById("searchInput").value='';
 }
 </script>
 
@@ -889,22 +697,11 @@ const firebaseConfig = {
   measurementId: "G-PFR8EEQQQF"
 };
 
-const app      = initializeApp(firebaseConfig);
-const db       = getFirestore(app);
-const auth     = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-window.db           = db;
-window.fsCollection = collection;
-window.fsDoc        = doc;
-window.fsGetDoc     = getDoc;
-window.fsGetDocs    = getDocs;
-window.fsQuery      = query;
-window.fsWhere      = where;
-
-window._signIn  = () => signInWithPopup(auth, provider).catch(e => console.error(e));
+const app=initializeApp(firebaseConfig), db=getFirestore(app), auth=getAuth(app), provider=new GoogleAuthProvider();
+window.db=db; window.fsCollection=collection; window.fsDoc=doc; window.fsGetDoc=getDoc;
+window.fsGetDocs=getDocs; window.fsQuery=query; window.fsWhere=where;
+window._signIn  = () => signInWithPopup(auth,provider).catch(e=>console.error(e));
 window._signOut = () => signOut(auth);
-
 onAuthStateChanged(auth, user => window.onAuthStateChanged(user));
 </script>
 </body>
