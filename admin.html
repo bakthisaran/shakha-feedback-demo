@@ -41,15 +41,8 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 12px 32px rgba(0,0,0,0.08);
   }
   .auth-icon { font-size: 36px; margin-bottom: 12px; }
-  .auth-title {
-    font-family: 'Noto Serif', serif;
-    font-size: 20px; font-weight: 600;
-    color: var(--deep); margin-bottom: 6px;
-  }
-  .auth-subtitle {
-    font-size: 14px; color: var(--muted);
-    margin-bottom: 28px; line-height: 1.5;
-  }
+  .auth-title { font-family: 'Noto Serif', serif; font-size: 20px; font-weight: 600; color: var(--deep); margin-bottom: 6px; }
+  .auth-subtitle { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
   .btn-google {
     display: flex; align-items: center; justify-content: center;
     gap: 10px; width: 100%; padding: 13px 20px;
@@ -65,31 +58,6 @@
     background: #fdf0ee; border-radius: 8px;
     font-size: 13px; color: var(--error);
   }
-
-  /* ---- User bar ---- */
-  #userBar {
-    display: none;
-    max-width: 720px;
-    margin: 0 auto 20px;
-    padding: 10px 16px;
-    background: var(--card);
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    font-size: 13px;
-    color: var(--muted);
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .user-email { color: var(--deep); font-weight: 500; }
-  .btn-signout {
-    padding: 5px 12px; border-radius: 6px;
-    border: 1px solid var(--border); background: white;
-    font-family: 'DM Sans', sans-serif; font-size: 12px;
-    color: var(--muted); cursor: pointer; transition: border-color 0.15s;
-    white-space: nowrap;
-  }
-  .btn-signout:hover { border-color: var(--error); color: var(--error); }
 
   /* ---- Page header ---- */
   .page-header { max-width: 720px; margin: 0 auto 24px; display: none; }
@@ -108,67 +76,36 @@
     gap: 4px;
   }
   .tab-btn {
-    flex: 1;
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: none;
-    background: transparent;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--muted);
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    text-align: center;
+    flex: 1; padding: 10px 16px; border-radius: 8px; border: none;
+    background: transparent; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; color: var(--muted);
+    cursor: pointer; transition: background 0.15s, color 0.15s; text-align: center;
   }
   .tab-btn:hover { color: var(--deep); }
-  .tab-btn.active {
-    background: var(--saffron);
-    color: white;
-  }
+  .tab-btn.active { background: var(--saffron); color: white; }
   .tab-btn .tab-icon { margin-right: 6px; }
 
   /* ---- Main form areas ---- */
   #configWrap, #feedbackWrap {
-    display: none;
-    max-width: 720px;
-    margin: 0 auto;
-    flex-direction: column;
-    gap: var(--section-gap);
+    display: none; max-width: 720px; margin: 0 auto;
+    flex-direction: column; gap: var(--section-gap);
   }
 
   /* ---- Shared section styles ---- */
-  .section {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 24px;
-    border: 1px solid var(--border);
-  }
+  .section { background: var(--card); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); }
   .section-title {
-    font-family: 'Noto Serif', serif;
-    font-size: 16px; font-weight: 600;
-    color: var(--saffron);
-    margin-bottom: 18px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
+    font-family: 'Noto Serif', serif; font-size: 16px; font-weight: 600;
+    color: var(--saffron); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
   }
   .field { margin-bottom: 16px; }
   .field:last-child { margin-bottom: 0; }
-  label {
-    display: block; font-size: 13px;
-    font-weight: 500; color: var(--muted); margin-bottom: 6px;
-  }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
   input[type="text"], input[type="date"], select {
-    width: 100%; padding: 10px 13px;
-    border-radius: 8px; border: 1.5px solid var(--border);
-    font-family: 'DM Sans', sans-serif; font-size: 14px;
-    background: white; color: var(--deep);
-    outline: none; transition: border-color 0.15s;
-    appearance: none;
+    width: 100%; padding: 10px 13px; border-radius: 8px; border: 1.5px solid var(--border);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; background: white; color: var(--deep);
+    outline: none; transition: border-color 0.15s; appearance: none;
   }
-  input[type="text"]:focus, input[type="date"]:focus, select:focus {
-    border-color: var(--saffron);
-  }
+  input[type="text"]:focus, input[type="date"]:focus, select:focus { border-color: var(--saffron); }
   select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a7e6e' d='M1 1l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 13px center; padding-right: 36px; }
   select:disabled { background-color: #f5f0e8; color: var(--muted); }
   .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
@@ -178,12 +115,9 @@
   /* Gana picker */
   .gana-picker { display: flex; flex-wrap: wrap; gap: 8px; }
   .gana-pill {
-    padding: 7px 16px; border-radius: 20px;
-    border: 1.5px solid var(--border); background: white;
-    font-family: 'DM Sans', sans-serif; font-size: 13px;
-    font-weight: 500; color: var(--muted); cursor: pointer;
-    transition: border-color 0.15s, background 0.15s, color 0.15s;
-    user-select: none;
+    padding: 7px 16px; border-radius: 20px; border: 1.5px solid var(--border); background: white;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--muted);
+    cursor: pointer; transition: border-color 0.15s, background 0.15s, color 0.15s; user-select: none;
   }
   .gana-pill:hover { border-color: var(--saffron); color: var(--saffron); }
   .gana-pill.selected { border-color: var(--saffron); background: #fff5ee; color: var(--saffron); }
@@ -191,63 +125,36 @@
   /* Sessions */
   .session-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .session-check {
-    display: flex; align-items: center; gap: 9px;
-    padding: 10px 13px; border-radius: 8px;
+    display: flex; align-items: center; gap: 9px; padding: 10px 13px; border-radius: 8px;
     border: 1.5px solid var(--border); cursor: pointer;
     transition: border-color 0.15s, background 0.15s; user-select: none;
   }
   .session-check:hover { border-color: var(--saffron); }
   .session-check.checked { border-color: var(--saffron); background: #fff5ee; }
-  .session-check input[type="checkbox"] {
-    width: 16px; height: 16px;
-    accent-color: var(--saffron); cursor: pointer; flex-shrink: 0;
-  }
+  .session-check input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--saffron); cursor: pointer; flex-shrink: 0; }
   .session-check span { font-size: 14px; font-weight: 500; }
 
   /* Gana data blocks */
   .gana-data-section { margin-top: 20px; }
-  .gana-block {
-    margin-bottom: 16px; padding: 16px;
-    background: #faf8f4; border-radius: 10px; border: 1px solid var(--border);
-  }
+  .gana-block { margin-bottom: 16px; padding: 16px; background: #faf8f4; border-radius: 10px; border: 1px solid var(--border); }
   .gana-block:last-child { margin-bottom: 0; }
-  .gana-block-title {
-    font-size: 13px; font-weight: 500; color: var(--deep);
-    margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
-  }
+  .gana-block-title { font-size: 13px; font-weight: 500; color: var(--deep); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
   .gana-block-title span { color: var(--saffron); }
 
   /* Config mode selector */
-  .config-selector {
-    background: var(--card);
-    border-radius: var(--radius);
-    padding: 20px 24px;
-    border: 1px solid var(--border);
-  }
-  .config-selector-title {
-    font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 12px;
-  }
-  .config-mode-row {
-    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-  }
+  .config-selector { background: var(--card); border-radius: var(--radius); padding: 20px 24px; border: 1px solid var(--border); }
+  .config-selector-title { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 12px; }
+  .config-mode-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .config-mode-row select { flex: 1; min-width: 0; }
   .btn-new-shakha {
-    padding: 10px 16px; border-radius: 8px;
-    border: 1.5px solid var(--saffron); background: white;
-    font-family: 'DM Sans', sans-serif; font-size: 14px;
-    font-weight: 500; color: var(--saffron); cursor: pointer;
-    white-space: nowrap; transition: background 0.15s;
-    flex-shrink: 0;
+    padding: 10px 16px; border-radius: 8px; border: 1.5px solid var(--saffron); background: white;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--saffron);
+    cursor: pointer; white-space: nowrap; transition: background 0.15s; flex-shrink: 0;
   }
   .btn-new-shakha:hover { background: #fff5ee; }
 
-  /* Mode badge shown in form sections */
-  .mode-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 12px; border-radius: 20px;
-    font-size: 12px; font-weight: 500;
-    margin-bottom: 16px;
-  }
+  /* Mode badge */
+  .mode-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; margin-bottom: 16px; }
   .mode-badge.editing { background: #e8f5ee; color: var(--success); border: 1px solid #b8e2cb; }
   .mode-badge.creating { background: #fff5ee; color: var(--saffron); border: 1px solid #ffdcc4; }
 
@@ -255,89 +162,43 @@
   .slug-lock-row { display: flex; gap: 8px; align-items: flex-start; }
   .slug-lock-row input { flex: 1; }
   .btn-unlock {
-    margin-top: 2px; padding: 10px 11px; border-radius: 8px;
-    border: 1.5px solid var(--border); background: white;
-    font-size: 14px; cursor: pointer; line-height: 1;
-    transition: border-color 0.15s; flex-shrink: 0;
-    color: var(--muted);
+    margin-top: 2px; padding: 10px 11px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: white; font-size: 14px; cursor: pointer; line-height: 1;
+    transition: border-color 0.15s; flex-shrink: 0; color: var(--muted);
   }
   .btn-unlock:hover { border-color: var(--saffron); color: var(--saffron); }
   .slug-locked { background: #f5f0e8 !important; color: var(--muted) !important; }
-  .slug-warning {
-    display: none; margin-top: 6px; padding: 8px 10px;
-    background: #fffbea; border: 1px solid #f0d060;
-    border-radius: 6px; font-size: 12px; color: #7a6010; line-height: 1.5;
-  }
+  .slug-warning { display: none; margin-top: 6px; padding: 8px 10px; background: #fffbea; border: 1px solid #f0d060; border-radius: 6px; font-size: 12px; color: #7a6010; line-height: 1.5; }
 
   /* Info banner */
-  .info-banner {
-    padding: 14px 16px;
-    background: #fff8f3;
-    border: 1px solid #ffdcc4;
-    border-radius: 10px;
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
+  .info-banner { padding: 14px 16px; background: #fff8f3; border: 1px solid #ffdcc4; border-radius: 10px; font-size: 13px; color: var(--muted); line-height: 1.6; }
   .info-banner strong { color: var(--deep); }
 
   /* Shakha summary card */
-  #shakhaInfoCard {
-    display: none;
-    padding: 14px 16px;
-    background: #f0faf4;
-    border: 1px solid #b8e2cb;
-    border-radius: 10px;
-    margin-top: 12px;
-    font-size: 13px;
-    color: var(--deep);
-    line-height: 1.7;
-  }
+  #shakhaInfoCard { display: none; padding: 14px 16px; background: #f0faf4; border: 1px solid #b8e2cb; border-radius: 10px; margin-top: 12px; font-size: 13px; color: var(--deep); line-height: 1.7; }
   .shakha-info-row { display: flex; gap: 6px; }
   .shakha-info-label { color: var(--muted); min-width: 60px; }
   .shakha-info-ganas { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
-  .shakha-info-gana-tag {
-    padding: 3px 10px; border-radius: 12px;
-    background: #fff5ee; border: 1px solid #ffdcc4;
-    font-size: 12px; color: var(--saffron); font-weight: 500;
-  }
+  .shakha-info-gana-tag { padding: 3px 10px; border-radius: 12px; background: #fff5ee; border: 1px solid #ffdcc4; font-size: 12px; color: var(--saffron); font-weight: 500; }
 
   /* Preview */
-  .preview-box {
-    background: #1a1207; border-radius: var(--radius);
-    padding: 20px 24px; color: #e8dfc8;
-    font-family: monospace; font-size: 12px;
-    line-height: 1.7; white-space: pre-wrap;
-    word-break: break-all; max-height: 300px; overflow-y: auto;
-  }
+  .preview-box { background: #1a1207; border-radius: var(--radius); padding: 20px 24px; color: #e8dfc8; font-family: monospace; font-size: 12px; line-height: 1.7; white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; }
   .preview-label { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
-  .url-preview {
-    background: #f0ebe0; border-radius: 8px;
-    padding: 12px 14px; font-family: monospace;
-    font-size: 13px; color: var(--deep);
-    word-break: break-all; border: 1px solid var(--border);
-  }
+  .url-preview { background: #f0ebe0; border-radius: 8px; padding: 12px 14px; font-family: monospace; font-size: 13px; color: var(--deep); word-break: break-all; border: 1px solid var(--border); }
   .btn-submit {
-    width: 100%; padding: 14px; border-radius: 10px;
-    border: none; background: var(--saffron); color: white;
-    font-family: 'DM Sans', sans-serif; font-size: 16px;
-    font-weight: 500; cursor: pointer;
+    width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--saffron); color: white;
+    font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; cursor: pointer;
     transition: background 0.15s, transform 0.1s; margin-top: 8px;
   }
   .btn-submit:hover { background: #e55a0f; }
   .btn-submit:active { transform: scale(0.98); }
   .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
-  .btn-submit.secondary {
-    background: white; color: var(--saffron);
-    border: 1.5px solid var(--saffron); margin-top: 4px;
-  }
+  .btn-submit.secondary { background: white; color: var(--saffron); border: 1.5px solid var(--saffron); margin-top: 4px; }
   .btn-submit.secondary:hover { background: #fff5ee; }
 
   .toast {
-    position: fixed; bottom: 24px; left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    padding: 13px 24px; border-radius: 10px;
-    font-size: 14px; font-weight: 500;
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    padding: 13px 24px; border-radius: 10px; font-size: 14px; font-weight: 500;
     transition: transform 0.3s ease; z-index: 100; white-space: nowrap;
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
@@ -351,6 +212,7 @@
     .tab-btn { padding: 10px 8px; }
   }
 </style>
+<script src="nav.js"></script>
 </head>
 <body>
 
@@ -369,16 +231,8 @@
       </svg>
       Sign in with Google
     </button>
-    <div class="auth-denied" id="authDenied">
-      Your account is not authorised for admin access. Please contact the Nagar admin.
-    </div>
+    <div class="auth-denied" id="authDenied">Your account is not authorised for admin access. Please contact the Nagar admin.</div>
   </div>
-</div>
-
-<!-- User bar -->
-<div id="userBar">
-  <span>Signed in as <span class="user-email" id="userEmail">—</span></span>
-  <button class="btn-signout" onclick="signOut()">Sign out</button>
 </div>
 
 <!-- Page header -->
@@ -399,12 +253,9 @@
 
 <!-- ===================== TAB 1: CONFIGURATION ===================== -->
 <div id="configWrap">
-
   <div class="info-banner">
     <strong>Configuration.</strong> Load an existing Shakha to edit, or create a new one. Changes are saved back to Firestore.
   </div>
-
-  <!-- Load / New selector -->
   <div class="config-selector">
     <div class="config-selector-title">Select an existing Shakha to edit, or start fresh</div>
     <div class="config-mode-row">
@@ -418,7 +269,6 @@
     </div>
   </div>
 
-  <!-- Nagar -->
   <div class="section" id="configFormSections" style="display:none">
     <div id="configModeBadge" class="mode-badge creating">✦ New Shakha</div>
     <div class="section-title">Nagar</div>
@@ -458,14 +308,12 @@
     </div>
   </div>
 
-  <!-- Ganas -->
   <div class="section" id="configGanaSection" style="display:none">
     <div class="section-title">Ganas at this Shakha</div>
     <div class="hint" style="margin-bottom:12px">Select all Ganas present at this Shakha.</div>
     <div class="gana-picker" id="configGanaPicker"></div>
   </div>
 
-  <!-- Save -->
   <div class="section" id="configSaveSection" style="display:none">
     <div class="section-title">Preview &amp; Save</div>
     <div class="preview-label">Firestore path</div>
@@ -478,12 +326,10 @@
 
 <!-- ===================== TAB 2: FEEDBACK SETUP ===================== -->
 <div id="feedbackWrap">
-
   <div class="info-banner">
     <strong>Per-Shakha day setup.</strong> Select the Nagar and Shakha, then define the date, sessions, and Gana-level details for this feedback request.
   </div>
 
-  <!-- Select Nagar & Shakha -->
   <div class="section">
     <div class="section-title">Select Nagar &amp; Shakha</div>
     <div class="two-col">
@@ -500,22 +346,14 @@
         </select>
       </div>
     </div>
-    <!-- Shakha summary -->
     <div id="shakhaInfoCard">
-      <div class="shakha-info-row">
-        <span class="shakha-info-label">Shakha:</span>
-        <span id="siShakhaName">—</span>
-      </div>
-      <div class="shakha-info-row">
-        <span class="shakha-info-label">Nagar:</span>
-        <span id="siNagarName">—</span>
-      </div>
-      <div style="margin-top:6px; font-size:12px; color:var(--muted)">Ganas at this Shakha:</div>
+      <div class="shakha-info-row"><span class="shakha-info-label">Shakha:</span><span id="siShakhaName">—</span></div>
+      <div class="shakha-info-row"><span class="shakha-info-label">Nagar:</span><span id="siNagarName">—</span></div>
+      <div style="margin-top:6px;font-size:12px;color:var(--muted)">Ganas at this Shakha:</div>
       <div class="shakha-info-ganas" id="siGanas"></div>
     </div>
   </div>
 
-  <!-- Date -->
   <div class="section">
     <div class="section-title">Shakha Date</div>
     <div class="field">
@@ -525,12 +363,9 @@
     </div>
   </div>
 
-  <!-- Sessions -->
   <div class="section">
     <div class="section-title">Sessions to Collect Feedback For</div>
     <div class="session-grid" id="fbSessionGrid"></div>
-
-    <!-- Gana-level session details -->
     <div class="gana-data-section" id="fbGanaDataSection" style="display:none">
       <div class="divider"></div>
       <div class="section-title" style="margin-bottom:14px">Session Details per Gana</div>
@@ -538,7 +373,6 @@
     </div>
   </div>
 
-  <!-- Preview & Save -->
   <div class="section">
     <div class="section-title">Preview &amp; Save</div>
     <div class="preview-label">Firestore path</div>
@@ -554,23 +388,17 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ---- Constants ----
 const ADMIN_EMAILS = ["bakthisaran@gmail.com"];
 const ALL_GANAS = ["Shishu","Baal","Baalika","Kishore","Kishori","Tarun","Taruni","Yuva","Yuvati","Jyeshtha","Jyeshthaa"];
-const ALL_SESSIONS = ["Achar Paddhati","Shareerik","Bauddikh","Geet","Subashchit","Ghosh","Prarthana"];
+const ALL_SESSIONS = ["Achar Paddhati","Subashchit","Shareerik","Khel","Bauddikh","Ghosh","Prarthana"];
 const DETAIL_SESSIONS = {
-  "Bauddikh":  [{ key: "bauddikhTitle",    label: "Topic / Title" }, { key: "bauddikhShikshak",  label: "Shikshak" }],
-  "Shareerik": [{ key: "shareerikVishay",  label: "Vishay" },        { key: "shareerikShikshak", label: "Shikshak" }]
+  "Bauddikh":  [{key:"bauddikhTitle",label:"Topic / Title"},{key:"bauddikhShikshak",label:"Shikshak"}],
+  "Shareerik": [{key:"shareerikVishay",label:"Vishay"},{key:"shareerikShikshak",label:"Shikshak"}]
 };
 
-// ---- State ----
 let configGanas = new Set();
-let fbGanas = [];               // from loaded Shakha doc
-let fbSelectedSessions = new Set();
-let fbLoadedShakha = null;      // the full Shakha doc from Firestore
-let nagarCache = {};            // nagarSlug -> { nagarName, shakhas: {shakhaSlug -> doc} }
+let fbGanas = [], fbSelectedSessions = new Set(), fbLoadedShakha = null, nagarCache = {};
 
-// ---- Auth ----
 window.signIn  = () => window._signIn();
 window.signOut = () => window._signOut();
 
@@ -578,10 +406,9 @@ window.onAuthStateChanged = async function(user) {
   if (user && ADMIN_EMAILS.includes(user.email)) {
     document.getElementById("authGate").style.display = "none";
     document.getElementById("authDenied").style.display = "none";
-    document.getElementById("userBar").style.display = "flex";
-    document.getElementById("userEmail").textContent = user.email;
     document.getElementById("pageHeader").style.display = "block";
     document.getElementById("tabBar").style.display = "flex";
+    renderNav(user);
     switchTab('config');
     await loadNagarsFromFirestore();
   } else if (user) {
@@ -596,424 +423,203 @@ window.onAuthStateChanged = async function(user) {
 };
 
 function hideApp() {
-  document.getElementById("userBar").style.display = "none";
+  destroyNav();
   document.getElementById("pageHeader").style.display = "none";
   document.getElementById("tabBar").style.display = "none";
   document.getElementById("configWrap").style.display = "none";
   document.getElementById("feedbackWrap").style.display = "none";
 }
 
-// ---- Tab switching ----
 function switchTab(tab) {
-  document.getElementById("tab-config").classList.toggle("active", tab === "config");
-  document.getElementById("tab-feedback").classList.toggle("active", tab === "feedback");
-  document.getElementById("configWrap").style.display = tab === "config" ? "flex" : "none";
-  document.getElementById("feedbackWrap").style.display = tab === "feedback" ? "flex" : "none";
+  document.getElementById("tab-config").classList.toggle("active", tab==="config");
+  document.getElementById("tab-feedback").classList.toggle("active", tab==="feedback");
+  document.getElementById("configWrap").style.display = tab==="config" ? "flex" : "none";
+  document.getElementById("feedbackWrap").style.display = tab==="feedback" ? "flex" : "none";
 }
 
-// =========================================================
-// TAB 1 — CONFIGURATION
-// =========================================================
-
-let configMode = 'new'; // 'new' | 'edit'
+// ── Config tab ─────────────────────────────────────────────────────────────
+let configMode = 'new';
 
 function showConfigSections() {
-  ['configFormSections','configShakhaSection','configGanaSection','configSaveSection'].forEach(id => {
-    document.getElementById(id).style.display = 'block';
-  });
+  ['configFormSections','configShakhaSection','configGanaSection','configSaveSection'].forEach(id=>document.getElementById(id).style.display='block');
 }
-
 function setConfigMode(mode) {
-  configMode = mode;
-  const badge = document.getElementById('configModeBadge');
-  if (mode === 'edit') {
-    badge.className = 'mode-badge editing';
-    badge.textContent = '✎ Editing existing Shakha';
-  } else {
-    badge.className = 'mode-badge creating';
-    badge.textContent = '✦ New Shakha';
-  }
+  configMode=mode;
+  const badge=document.getElementById('configModeBadge');
+  if(mode==='edit'){badge.className='mode-badge editing';badge.textContent='✎ Editing existing Shakha';}
+  else{badge.className='mode-badge creating';badge.textContent='✦ New Shakha';}
 }
-
 function lockSlug(which) {
-  const input = document.getElementById(which + 'Slug');
-  const btn   = document.getElementById(which + 'SlugUnlockBtn');
-  const warn  = document.getElementById(which + 'SlugWarning');
-  input.readOnly = true;
-  input.classList.add('slug-locked');
-  btn.textContent = '🔒';
-  warn.style.display = 'none';
+  const input=document.getElementById(which+'Slug'),btn=document.getElementById(which+'SlugUnlockBtn'),warn=document.getElementById(which+'SlugWarning');
+  input.readOnly=true;input.classList.add('slug-locked');btn.textContent='🔒';warn.style.display='none';
 }
-
 function unlockSlug(which) {
-  const input = document.getElementById(which + 'Slug');
-  const btn   = document.getElementById(which + 'SlugUnlockBtn');
-  const warn  = document.getElementById(which + 'SlugWarning');
-  input.readOnly = false;
-  input.classList.remove('slug-locked');
-  input.dataset.manual = '1';
-  btn.textContent = '🔓';
-  if (configMode === 'edit') warn.style.display = 'block';
-  input.focus();
+  const input=document.getElementById(which+'Slug'),btn=document.getElementById(which+'SlugUnlockBtn'),warn=document.getElementById(which+'SlugWarning');
+  input.readOnly=false;input.classList.remove('slug-locked');input.dataset.manual='1';btn.textContent='🔓';
+  if(configMode==='edit') warn.style.display='block';input.focus();
 }
-
-// Populate the Nagar dropdown in the Config tab from nagarCache
 function populateConfigNagarDropdown() {
-  const sel = document.getElementById('configNagarSelect');
-  const current = sel.value;
-  sel.innerHTML = '<option value="">— Select Nagar —</option>';
-  Object.entries(nagarCache).forEach(([slug, data]) => {
-    const opt = document.createElement('option');
-    opt.value = slug;
-    opt.textContent = data.nagarName || slug;
-    sel.appendChild(opt);
-  });
-  if (current) sel.value = current;
+  const sel=document.getElementById('configNagarSelect'),current=sel.value;
+  sel.innerHTML='<option value="">— Select Nagar —</option>';
+  Object.entries(nagarCache).forEach(([slug,data])=>{const opt=document.createElement('option');opt.value=slug;opt.textContent=data.nagarName||slug;sel.appendChild(opt);});
+  if(current) sel.value=current;
 }
-
 function onConfigNagarChange() {
-  const nagarSlug = document.getElementById('configNagarSelect').value;
-  const shakhasSel = document.getElementById('configShakhaSelect');
-  shakhasSel.innerHTML = '<option value="">— Select Shakha —</option>';
-  shakhasSel.disabled = !nagarSlug;
-  if (!nagarSlug) return;
-  const shakhas = nagarCache[nagarSlug]?.shakhas || {};
-  Object.entries(shakhas).forEach(([shakhaId, data]) => {
-    const opt = document.createElement('option');
-    opt.value = shakhaId;
-    opt.textContent = data.shakhaName || shakhaId;
-    shakhasSel.appendChild(opt);
-  });
+  const nagarSlug=document.getElementById('configNagarSelect').value;
+  const shakhasSel=document.getElementById('configShakhaSelect');
+  shakhasSel.innerHTML='<option value="">— Select Shakha —</option>';shakhasSel.disabled=!nagarSlug;
+  if(!nagarSlug) return;
+  const shakhas=nagarCache[nagarSlug]?.shakhas||{};
+  Object.entries(shakhas).forEach(([shakhaId,data])=>{const opt=document.createElement('option');opt.value=shakhaId;opt.textContent=data.shakhaName||shakhaId;shakhasSel.appendChild(opt);});
 }
-
 function onConfigShakhaLoad() {
-  const nagarSlug = document.getElementById('configNagarSelect').value;
-  const shakhaId  = document.getElementById('configShakhaSelect').value;
-  if (!shakhaId) return;
-  const data = nagarCache[nagarSlug]?.shakhas?.[shakhaId];
-  if (!data) return;
-
-  // Populate fields
-  document.getElementById('nagarName').value  = data.nagarName  || '';
-  document.getElementById('nagarSlug').value  = data.nagarSlug  || '';
-  document.getElementById('shakhaName').value = data.shakhaName || '';
-  document.getElementById('shakhaSlug').value = data.shakhaSlug || '';
-
-  // Lock slugs & clear manual flags
-  delete document.getElementById('nagarSlug').dataset.manual;
-  delete document.getElementById('shakhaSlug').dataset.manual;
-  lockSlug('nagar');
-  lockSlug('shakha');
-
-  // Restore ganas
-  configGanas = new Set(data.ganas || []);
-  renderConfigGanaPicker();
-
-  setConfigMode('edit');
-  showConfigSections();
-  updateConfigPreview();
+  const nagarSlug=document.getElementById('configNagarSelect').value,shakhaId=document.getElementById('configShakhaSelect').value;
+  if(!shakhaId) return;
+  const data=nagarCache[nagarSlug]?.shakhas?.[shakhaId]; if(!data) return;
+  document.getElementById('nagarName').value=data.nagarName||'';document.getElementById('nagarSlug').value=data.nagarSlug||'';
+  document.getElementById('shakhaName').value=data.shakhaName||'';document.getElementById('shakhaSlug').value=data.shakhaSlug||'';
+  delete document.getElementById('nagarSlug').dataset.manual;delete document.getElementById('shakhaSlug').dataset.manual;
+  lockSlug('nagar');lockSlug('shakha');
+  configGanas=new Set(data.ganas||[]);renderConfigGanaPicker();
+  setConfigMode('edit');showConfigSections();updateConfigPreview();
 }
-
 function resetConfigForm() {
-  // Clear dropdowns
-  document.getElementById('configNagarSelect').value = '';
-  document.getElementById('configShakhaSelect').innerHTML = '<option value="">— Select Shakha —</option>';
-  document.getElementById('configShakhaSelect').disabled = true;
-
-  // Clear fields
-  ['nagarName','nagarSlug','shakhaName','shakhaSlug'].forEach(id => {
-    const el = document.getElementById(id);
-    el.value = '';
-    delete el.dataset.manual;
-  });
-
-  // Unlock slugs (new record, free to type)
-  ['nagar','shakha'].forEach(which => {
-    const input = document.getElementById(which + 'Slug');
-    const btn   = document.getElementById(which + 'SlugUnlockBtn');
-    const warn  = document.getElementById(which + 'SlugWarning');
-    input.readOnly = false;
-    input.classList.remove('slug-locked');
-    btn.textContent = '🔒'; // still shows lock icon but field is editable — cosmetic
-    warn.style.display = 'none';
-  });
-
-  configGanas = new Set();
-  renderConfigGanaPicker();
-  setConfigMode('new');
-  showConfigSections();
-  updateConfigPreview();
+  document.getElementById('configNagarSelect').value='';
+  document.getElementById('configShakhaSelect').innerHTML='<option value="">— Select Shakha —</option>';
+  document.getElementById('configShakhaSelect').disabled=true;
+  ['nagarName','nagarSlug','shakhaName','shakhaSlug'].forEach(id=>{const el=document.getElementById(id);el.value='';delete el.dataset.manual;});
+  ['nagar','shakha'].forEach(which=>{const input=document.getElementById(which+'Slug'),btn=document.getElementById(which+'SlugUnlockBtn'),warn=document.getElementById(which+'SlugWarning');input.readOnly=false;input.classList.remove('slug-locked');btn.textContent='🔒';warn.style.display='none';});
+  configGanas=new Set();renderConfigGanaPicker();setConfigMode('new');showConfigSections();updateConfigPreview();
 }
-
 function renderConfigGanaPicker() {
-  document.getElementById("configGanaPicker").innerHTML = ALL_GANAS.map(g => `
-    <button class="gana-pill ${configGanas.has(g) ? 'selected' : ''}"
-      onclick="toggleConfigGana('${g}')">${g}</button>
-  `).join('');
+  document.getElementById("configGanaPicker").innerHTML=ALL_GANAS.map(g=>`<button class="gana-pill ${configGanas.has(g)?'selected':''}" onclick="toggleConfigGana('${g}')">${g}</button>`).join('');
 }
-
-function toggleConfigGana(g) {
-  if (configGanas.has(g)) configGanas.delete(g);
-  else configGanas.add(g);
-  renderConfigGanaPicker();
-  updateConfigPreview();
-}
-
-function slugify(str) {
-  return str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-}
-
+function toggleConfigGana(g) { if(configGanas.has(g)) configGanas.delete(g); else configGanas.add(g); renderConfigGanaPicker();updateConfigPreview(); }
+function slugify(str) { return str.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''); }
 function updateConfigSlugs() {
-  const ns = document.getElementById("nagarSlug");
-  if (!ns.dataset.manual && !ns.readOnly) ns.value = slugify(document.getElementById("nagarName").value.trim());
-  const ss = document.getElementById("shakhaSlug");
-  if (!ss.dataset.manual && !ss.readOnly) ss.value = slugify(document.getElementById("shakhaName").value.trim()).substring(0, 20);
+  const ns=document.getElementById("nagarSlug"); if(!ns.dataset.manual&&!ns.readOnly) ns.value=slugify(document.getElementById("nagarName").value.trim());
+  const ss=document.getElementById("shakhaSlug"); if(!ss.dataset.manual&&!ss.readOnly) ss.value=slugify(document.getElementById("shakhaName").value.trim()).substring(0,20);
   updateConfigPreview();
 }
-
-document.getElementById("nagarSlug").addEventListener("input", function() { this.dataset.manual = "1"; updateConfigPreview(); });
-document.getElementById("shakhaSlug").addEventListener("input", function() { this.dataset.manual = "1"; updateConfigPreview(); });
-
+document.getElementById("nagarSlug").addEventListener("input",function(){this.dataset.manual="1";updateConfigPreview();});
+document.getElementById("shakhaSlug").addEventListener("input",function(){this.dataset.manual="1";updateConfigPreview();});
 function buildConfigDoc() {
-  const nagarSlug  = document.getElementById("nagarSlug").value.trim();
-  const shakhaSlug = document.getElementById("shakhaSlug").value.trim();
-  return {
-    nagarName:  document.getElementById("nagarName").value.trim(),
-    nagarSlug,
-    shakhaName: document.getElementById("shakhaName").value.trim(),
-    shakhaSlug,
-    shakhaId:   nagarSlug && shakhaSlug ? `${nagarSlug}_${shakhaSlug}` : "",
-    ganas: [...configGanas]
-  };
+  const nagarSlug=document.getElementById("nagarSlug").value.trim(),shakhaSlug=document.getElementById("shakhaSlug").value.trim();
+  return {nagarName:document.getElementById("nagarName").value.trim(),nagarSlug,shakhaName:document.getElementById("shakhaName").value.trim(),shakhaSlug,shakhaId:nagarSlug&&shakhaSlug?`${nagarSlug}_${shakhaSlug}`:"",ganas:[...configGanas]};
 }
-
 function updateConfigPreview() {
-  const ns = document.getElementById("nagarSlug").value.trim() || "<nagar>";
-  const ss = document.getElementById("shakhaSlug").value.trim() || "<shakha>";
-  document.getElementById("configFirestorePath").textContent = `shakhas/${ns}_${ss}`;
-  document.getElementById("configDocPreview").textContent = JSON.stringify(buildConfigDoc(), null, 2);
+  const ns=document.getElementById("nagarSlug").value.trim()||"<nagar>",ss=document.getElementById("shakhaSlug").value.trim()||"<shakha>";
+  document.getElementById("configFirestorePath").textContent=`shakhas/${ns}_${ss}`;
+  document.getElementById("configDocPreview").textContent=JSON.stringify(buildConfigDoc(),null,2);
 }
-
 async function saveConfig() {
-  const doc = buildConfigDoc();
-  if (!doc.nagarSlug || !doc.shakhaSlug) { showToast("Fill in Nagar and Shakha slugs", "error"); return; }
-  if (!doc.nagarName)  { showToast("Enter a Nagar name", "error"); return; }
-  if (!doc.shakhaName) { showToast("Enter a Shakha name", "error"); return; }
-  if (configGanas.size === 0) { showToast("Select at least one Gana", "error"); return; }
-  const btn = document.getElementById("configSaveBtn");
-  btn.disabled = true; btn.textContent = "Saving…";
+  const doc=buildConfigDoc();
+  if(!doc.nagarSlug||!doc.shakhaSlug){showToast("Fill in Nagar and Shakha slugs","error");return;}
+  if(!doc.nagarName){showToast("Enter a Nagar name","error");return;}
+  if(!doc.shakhaName){showToast("Enter a Shakha name","error");return;}
+  if(configGanas.size===0){showToast("Select at least one Gana","error");return;}
+  const btn=document.getElementById("configSaveBtn"); btn.disabled=true;btn.textContent="Saving…";
   try {
-    const nagarRef = window.firestoreDoc(window.db, "nagars", doc.nagarSlug);
-    await window.firestoreSetDoc(nagarRef, { nagarName: doc.nagarName, nagarSlug: doc.nagarSlug }, { merge: true });
-    const shakhaRef = window.firestoreDoc(window.db, "shakhas", doc.shakhaId);
-    await window.firestoreSetDoc(shakhaRef, doc, { merge: true });
-    showToast("Shakha configuration saved!", "success");
-    await loadNagarsFromFirestore();
-    // If we just saved, switch to edit mode and lock slugs
-    setConfigMode('edit');
-    lockSlug('nagar');
-    lockSlug('shakha');
-  } catch(err) {
-    console.error(err);
-    showToast("Error: " + err.message, "error");
-  } finally {
-    btn.disabled = false; btn.textContent = "Save Shakha Configuration";
-  }
+    const nagarRef=window.firestoreDoc(window.db,"nagars",doc.nagarSlug);
+    await window.firestoreSetDoc(nagarRef,{nagarName:doc.nagarName,nagarSlug:doc.nagarSlug},{merge:true});
+    const shakhaRef=window.firestoreDoc(window.db,"shakhas",doc.shakhaId);
+    await window.firestoreSetDoc(shakhaRef,doc,{merge:true});
+    showToast("Shakha configuration saved!","success");
+    await loadNagarsFromFirestore();setConfigMode('edit');lockSlug('nagar');lockSlug('shakha');
+  } catch(err){console.error(err);showToast("Error: "+err.message,"error");}
+  finally{btn.disabled=false;btn.textContent="Save Shakha Configuration";}
 }
 
-// =========================================================
-// TAB 2 — FEEDBACK SETUP
-// =========================================================
-
+// ── Feedback tab ───────────────────────────────────────────────────────────
 async function loadNagarsFromFirestore() {
   try {
-    // Load all nagars
-    const nagarSnap = await window.firestoreGetDocs(
-      window.firestoreCollection(window.db, "nagars")
-    );
-    nagarCache = {};
-    const sel = document.getElementById("fbNagarSelect");
-    sel.innerHTML = '<option value="">— Select Nagar —</option>';
-
-    nagarSnap.docs.forEach(d => {
-      const data = d.data();
-      nagarCache[d.id] = { nagarName: data.nagarName || d.id, shakhas: {} };
-      const opt = document.createElement("option");
-      opt.value = d.id;
-      opt.textContent = data.nagarName || d.id;
-      sel.appendChild(opt);
-    });
-
-    // Load all shakhas into the cache (one read, flat collection)
-    const shakhaSnap = await window.firestoreGetDocs(
-      window.firestoreCollection(window.db, "shakhas")
-    );
-    shakhaSnap.docs.forEach(d => {
-      const data = d.data();
-      const ns = data.nagarSlug;
-      if (ns && nagarCache[ns]) {
-        nagarCache[ns].shakhas[d.id] = data;
-      }
-    });
-    // Also refresh the Config tab dropdowns
+    const nagarSnap=await window.firestoreGetDocs(window.firestoreCollection(window.db,"nagars"));
+    nagarCache={};
+    const sel=document.getElementById("fbNagarSelect");
+    sel.innerHTML='<option value="">— Select Nagar —</option>';
+    nagarSnap.docs.forEach(d=>{const data=d.data();nagarCache[d.id]={nagarName:data.nagarName||d.id,shakhas:{}};const opt=document.createElement("option");opt.value=d.id;opt.textContent=data.nagarName||d.id;sel.appendChild(opt);});
+    const shakhaSnap=await window.firestoreGetDocs(window.firestoreCollection(window.db,"shakhas"));
+    shakhaSnap.docs.forEach(d=>{const data=d.data();const ns=data.nagarSlug;if(ns&&nagarCache[ns]) nagarCache[ns].shakhas[d.id]=data;});
     populateConfigNagarDropdown();
-  } catch(err) {
-    console.error("Could not load Nagars:", err);
-  }
+  } catch(err){console.error("Could not load Nagars:",err);}
 }
-
 function onFbNagarChange() {
-  const nagarSlug = document.getElementById("fbNagarSelect").value;
-  const shakhasSel = document.getElementById("fbShakhaSelect");
-  shakhasSel.innerHTML = '<option value="">— Select Shakha —</option>';
-  shakhasSel.disabled = !nagarSlug;
-  document.getElementById("shakhaInfoCard").style.display = "none";
-  fbLoadedShakha = null; fbGanas = []; fbSelectedSessions.clear();
-  renderFbSessionGrid(); renderFbGanaDataSection(); updateFeedbackPreview();
-  if (!nagarSlug) return;
-  const shakhas = nagarCache[nagarSlug]?.shakhas || {};
-  // Keys are nagarSlug_shakhaSlug (the composite doc ID)
-  Object.entries(shakhas).forEach(([shakhaId, data]) => {
-    const opt = document.createElement("option");
-    opt.value = shakhaId;
-    opt.textContent = data.shakhaName || shakhaId;
-    shakhasSel.appendChild(opt);
-  });
+  const nagarSlug=document.getElementById("fbNagarSelect").value,shakhasSel=document.getElementById("fbShakhaSelect");
+  shakhasSel.innerHTML='<option value="">— Select Shakha —</option>';shakhasSel.disabled=!nagarSlug;
+  document.getElementById("shakhaInfoCard").style.display="none";
+  fbLoadedShakha=null;fbGanas=[];fbSelectedSessions.clear();
+  renderFbSessionGrid();renderFbGanaDataSection();updateFeedbackPreview();
+  if(!nagarSlug) return;
+  const shakhas=nagarCache[nagarSlug]?.shakhas||{};
+  Object.entries(shakhas).forEach(([shakhaId,data])=>{const opt=document.createElement("option");opt.value=shakhaId;opt.textContent=data.shakhaName||shakhaId;shakhasSel.appendChild(opt);});
 }
-
 function onFbShakhaChange() {
-  const nagarSlug  = document.getElementById("fbNagarSelect").value;
-  const shakhaId   = document.getElementById("fbShakhaSelect").value;  // this is nagarSlug_shakhaSlug
-  document.getElementById("shakhaInfoCard").style.display = "none";
-  fbLoadedShakha = null; fbGanas = []; fbSelectedSessions.clear();
-  if (!nagarSlug || !shakhaId) { renderFbSessionGrid(); renderFbGanaDataSection(); updateFeedbackPreview(); return; }
-  const doc = nagarCache[nagarSlug]?.shakhas?.[shakhaId];
-  if (!doc) return;
-  fbLoadedShakha = { ...doc };
-  fbGanas = doc.ganas || [];
-  document.getElementById("siShakhaName").textContent = doc.shakhaName || shakhaId;
-  document.getElementById("siNagarName").textContent  = doc.nagarName  || nagarSlug;
-  document.getElementById("siGanas").innerHTML = fbGanas.map(g =>
-    `<span class="shakha-info-gana-tag">${g}</span>`
-  ).join('');
-  document.getElementById("shakhaInfoCard").style.display = "block";
-  fbSelectedSessions.clear();
-  renderFbSessionGrid();
-  renderFbGanaDataSection();
-  updateFeedbackPreview();
+  const nagarSlug=document.getElementById("fbNagarSelect").value,shakhaId=document.getElementById("fbShakhaSelect").value;
+  document.getElementById("shakhaInfoCard").style.display="none";
+  fbLoadedShakha=null;fbGanas=[];fbSelectedSessions.clear();
+  if(!nagarSlug||!shakhaId){renderFbSessionGrid();renderFbGanaDataSection();updateFeedbackPreview();return;}
+  const doc=nagarCache[nagarSlug]?.shakhas?.[shakhaId]; if(!doc) return;
+  fbLoadedShakha={...doc};fbGanas=doc.ganas||[];
+  document.getElementById("siShakhaName").textContent=doc.shakhaName||shakhaId;
+  document.getElementById("siNagarName").textContent=doc.nagarName||nagarSlug;
+  document.getElementById("siGanas").innerHTML=fbGanas.map(g=>`<span class="shakha-info-gana-tag">${g}</span>`).join('');
+  document.getElementById("shakhaInfoCard").style.display="block";
+  fbSelectedSessions.clear();renderFbSessionGrid();renderFbGanaDataSection();updateFeedbackPreview();
 }
-
 function renderFbSessionGrid() {
-  document.getElementById("fbSessionGrid").innerHTML = ALL_SESSIONS.map(s => `
-    <label class="session-check ${fbSelectedSessions.has(s) ? 'checked' : ''}" id="fbsc-${slugify(s)}">
-      <input type="checkbox" ${fbSelectedSessions.has(s) ? 'checked' : ''}
-        onchange="toggleFbSession('${s}', this.checked)">
-      <span>${s}</span>
-    </label>
-  `).join('');
+  document.getElementById("fbSessionGrid").innerHTML=ALL_SESSIONS.map(s=>`<label class="session-check ${fbSelectedSessions.has(s)?'checked':''}" id="fbsc-${slugify(s)}"><input type="checkbox" ${fbSelectedSessions.has(s)?'checked':''} onchange="toggleFbSession('${s}',this.checked)"><span>${s}</span></label>`).join('');
 }
-
-function toggleFbSession(session, checked) {
-  if (checked) fbSelectedSessions.add(session);
-  else fbSelectedSessions.delete(session);
-  const label = document.getElementById("fbsc-" + slugify(session));
-  if (label) label.classList.toggle("checked", checked);
-  renderFbGanaDataSection();
-  updateFeedbackPreview();
+function toggleFbSession(session,checked) {
+  if(checked) fbSelectedSessions.add(session); else fbSelectedSessions.delete(session);
+  const label=document.getElementById("fbsc-"+slugify(session)); if(label) label.classList.toggle("checked",checked);
+  renderFbGanaDataSection();updateFeedbackPreview();
 }
-
 function renderFbGanaDataSection() {
-  const detailSessions = [...fbSelectedSessions].filter(s => DETAIL_SESSIONS[s]);
-  const section = document.getElementById("fbGanaDataSection");
-  if (detailSessions.length === 0 || fbGanas.length === 0) { section.style.display = "none"; return; }
-  section.style.display = "block";
-  document.getElementById("fbGanaDataBlocks").innerHTML = fbGanas.map(gana => `
-    <div class="gana-block">
-      <div class="gana-block-title">Gana: <span>${gana}</span></div>
-      ${detailSessions.map(session => `
-        <div style="margin-bottom:12px">
-          <div style="font-size:12px;color:var(--muted);font-weight:500;margin-bottom:8px">${session}</div>
-          <div class="two-col">
-            ${DETAIL_SESSIONS[session].map(field => `
-              <div>
-                <label>${field.label}</label>
-                <input type="text" id="fbgd-${slugify(gana)}-${field.key}"
-                  placeholder="${field.label}" oninput="updateFeedbackPreview()">
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `).join('');
+  const detailSessions=[...fbSelectedSessions].filter(s=>DETAIL_SESSIONS[s]);
+  const section=document.getElementById("fbGanaDataSection");
+  if(detailSessions.length===0||fbGanas.length===0){section.style.display="none";return;}
+  section.style.display="block";
+  document.getElementById("fbGanaDataBlocks").innerHTML=fbGanas.map(gana=>`<div class="gana-block"><div class="gana-block-title">Gana: <span>${gana}</span></div>${detailSessions.map(session=>`<div style="margin-bottom:12px"><div style="font-size:12px;color:var(--muted);font-weight:500;margin-bottom:8px">${session}</div><div class="two-col">${DETAIL_SESSIONS[session].map(field=>`<div><label>${field.label}</label><input type="text" id="fbgd-${slugify(gana)}-${field.key}" placeholder="${field.label}" oninput="updateFeedbackPreview()"></div>`).join('')}</div></div>`).join('')}</div>`).join('');
 }
-
 function buildFbDoc() {
-  const nagarSlug  = fbLoadedShakha?.nagarSlug  || document.getElementById("fbNagarSelect").value;
-  const shakhaSlug = fbLoadedShakha?.shakhaSlug || document.getElementById("fbShakhaSelect").value;
-  const shakhaId   = fbLoadedShakha?.shakhaId   || `${nagarSlug}_${shakhaSlug}`;
-  const date = document.getElementById("fbdate").value;
-  const sessions   = [...fbSelectedSessions];
-  const detailSessions = sessions.filter(s => DETAIL_SESSIONS[s]);
-  const ganaData = {};
-  fbGanas.forEach(gana => {
-    ganaData[gana] = {};
-    detailSessions.forEach(session => {
-      DETAIL_SESSIONS[session].forEach(field => {
-        const el = document.getElementById(`fbgd-${slugify(gana)}-${field.key}`);
-        if (el) ganaData[gana][field.key] = el.value.trim();
-      });
-    });
-  });
-  return {
-    nagarName:  fbLoadedShakha?.nagarName  || nagarSlug,
-    shakhaName: fbLoadedShakha?.shakhaName || shakhaSlug,
-    nagarSlug, shakhaSlug, shakhaId, date,
-    ganas: fbGanas, sessions, ganaData
-  };
+  const nagarSlug=fbLoadedShakha?.nagarSlug||document.getElementById("fbNagarSelect").value;
+  const shakhaSlug=fbLoadedShakha?.shakhaSlug||document.getElementById("fbShakhaSelect").value;
+  const shakhaId=fbLoadedShakha?.shakhaId||`${nagarSlug}_${shakhaSlug}`;
+  const date=document.getElementById("fbdate").value;
+  const sessions=[...fbSelectedSessions];
+  const detailSessions=sessions.filter(s=>DETAIL_SESSIONS[s]);
+  const ganaData={};
+  fbGanas.forEach(gana=>{ganaData[gana]={};detailSessions.forEach(session=>{DETAIL_SESSIONS[session].forEach(field=>{const el=document.getElementById(`fbgd-${slugify(gana)}-${field.key}`);if(el) ganaData[gana][field.key]=el.value.trim();});});});
+  return {nagarName:fbLoadedShakha?.nagarName||nagarSlug,shakhaName:fbLoadedShakha?.shakhaName||shakhaSlug,nagarSlug,shakhaSlug,shakhaId,date,ganas:fbGanas,sessions,ganaData};
 }
-
 function updateFeedbackPreview() {
-  const nagarSlug  = fbLoadedShakha?.nagarSlug  || document.getElementById("fbNagarSelect").value  || "<nagar>";
-  const shakhaSlug = fbLoadedShakha?.shakhaSlug || document.getElementById("fbShakhaSelect").value || "<shakha>";
-  const shakhaId   = (nagarSlug !== "<nagar>" && shakhaSlug !== "<shakha>") ? `${nagarSlug}_${shakhaSlug}` : `${nagarSlug}_${shakhaSlug}`;
-  const date       = document.getElementById("fbdate").value || "<date>";
-  const requestId  = `${shakhaId}_${date}`;
-  document.getElementById("fbFirestorePath").textContent = `feedback-requests/${requestId}`;
-  document.getElementById("fbSampleUrl").textContent = `?nagar=${nagarSlug}&shakha=${shakhaSlug}&date=${date}&qr=1`;
-  document.getElementById("fbDocPreview").textContent = JSON.stringify(buildFbDoc(), null, 2);
+  const nagarSlug=fbLoadedShakha?.nagarSlug||document.getElementById("fbNagarSelect").value||"<nagar>";
+  const shakhaSlug=fbLoadedShakha?.shakhaSlug||document.getElementById("fbShakhaSelect").value||"<shakha>";
+  const date=document.getElementById("fbdate").value||"<date>";
+  const requestId=`${nagarSlug}_${shakhaSlug}_${date}`;
+  document.getElementById("fbFirestorePath").textContent=`feedback-requests/${requestId}`;
+  document.getElementById("fbSampleUrl").textContent=`?nagar=${nagarSlug}&shakha=${shakhaSlug}&date=${date}&qr=1`;
+  document.getElementById("fbDocPreview").textContent=JSON.stringify(buildFbDoc(),null,2);
 }
-
 async function saveFeedbackSetup() {
-  const nagarSlug  = fbLoadedShakha?.nagarSlug;
-  const shakhaSlug = fbLoadedShakha?.shakhaSlug;
-  const shakhaId   = fbLoadedShakha?.shakhaId;
-  const date       = document.getElementById("fbdate").value;
-  if (!nagarSlug || !shakhaSlug)   { showToast("Select a Nagar and Shakha", "error"); return; }
-  if (!date)                        { showToast("Select a Shakha date", "error"); return; }
-  if (fbSelectedSessions.size === 0){ showToast("Select at least one session", "error"); return; }
-  const btn = document.getElementById("fbSaveBtn");
-  btn.disabled = true; btn.textContent = "Saving…";
+  const nagarSlug=fbLoadedShakha?.nagarSlug,shakhaSlug=fbLoadedShakha?.shakhaSlug,shakhaId=fbLoadedShakha?.shakhaId;
+  const date=document.getElementById("fbdate").value;
+  if(!nagarSlug||!shakhaSlug){showToast("Select a Nagar and Shakha","error");return;}
+  if(!date){showToast("Select a Shakha date","error");return;}
+  if(fbSelectedSessions.size===0){showToast("Select at least one session","error");return;}
+  const btn=document.getElementById("fbSaveBtn");btn.disabled=true;btn.textContent="Saving…";
   try {
-    // feedback-requests/{nagarSlug}_{shakhaSlug}_{date}
-    const requestId = `${shakhaId}_${date}`;
-    const ref = window.firestoreDoc(window.db, "feedback-requests", requestId);
-    await window.firestoreSetDoc(ref, buildFbDoc());
-    showToast("Feedback request saved!", "success");
-  } catch(err) {
-    console.error(err);
-    showToast("Error: " + err.message, "error");
-  } finally {
-    btn.disabled = false; btn.textContent = "Save Feedback Request";
-  }
+    const requestId=`${shakhaId}_${date}`;
+    const ref=window.firestoreDoc(window.db,"feedback-requests",requestId);
+    await window.firestoreSetDoc(ref,buildFbDoc());
+    showToast("Feedback request saved!","success");
+  } catch(err){console.error(err);showToast("Error: "+err.message,"error");}
+  finally{btn.disabled=false;btn.textContent="Save Feedback Request";}
 }
 
-// ---- Shared ----
-function showToast(msg, type) {
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.className = `toast ${type}`;
-  requestAnimationFrame(() => t.classList.add("show"));
-  setTimeout(() => t.classList.remove("show"), 3500);
+function showToast(msg,type) {
+  const t=document.getElementById("toast");t.textContent=msg;t.className=`toast ${type}`;
+  requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>t.classList.remove("show"),3500);
 }
 </script>
 
@@ -1035,25 +641,13 @@ const firebaseConfig = {
   measurementId: "G-PFR8EEQQQF"
 };
 
-const app  = initializeApp(firebaseConfig);
-const db   = getFirestore(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-window.db                    = db;
-window.firestoreDoc          = doc;
-window.firestoreSetDoc       = setDoc;
-window.firestoreCollection   = collection;
-window.firestoreGetDocs      = getDocs;
-window.firestoreQuery        = query;
-window.firestoreWhere        = where;
-
-window._signIn  = () => signInWithPopup(auth, provider).catch(err => {
-  console.error(err); window.showToast("Sign-in failed: " + err.message, "error");
-});
+const app=initializeApp(firebaseConfig),db=getFirestore(app),auth=getAuth(app),provider=new GoogleAuthProvider();
+window.db=db; window.firestoreDoc=doc; window.firestoreSetDoc=setDoc;
+window.firestoreCollection=collection; window.firestoreGetDocs=getDocs;
+window.firestoreQuery=query; window.firestoreWhere=where;
+window._signIn  = () => signInWithPopup(auth,provider).catch(err=>{console.error(err);window.showToast("Sign-in failed: "+err.message,"error");});
 window._signOut = () => signOut(auth);
-
-onAuthStateChanged(auth, (user) => window.onAuthStateChanged(user));
+onAuthStateChanged(auth, user => window.onAuthStateChanged(user));
 </script>
 </body>
 </html>
