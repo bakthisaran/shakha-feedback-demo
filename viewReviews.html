@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shakha Reviews</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600&family=DM+Sans:wght@400;500&display=swap');
+
+  :root {
+    --saffron: #FF6B1A;
+    --deep: #1a1207;
+    --bg: #f5f0e8;
+    --card: #fffdf8;
+    --muted: #8a7e6e;
+    --border: #e8e0d0;
+    --success: #2d7a4f;
+    --error: #c0392b;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    padding: 32px 16px 64px;
+    color: var(--deep);
+  }
+
+  /* ---- Auth gate ---- */
+  #authGate {
+    display: none;
+    max-width: 360px;
+    margin: 80px auto 0;
+    text-align: center;
+  }
+  .auth-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 40px 32px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 12px 32px rgba(0,0,0,0.08);
+  }
+  .auth-icon { font-size: 36px; margin-bottom: 12px; }
+  .auth-title { font-family: 'Noto Serif', serif; font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .auth-subtitle { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+  .btn-google {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 13px 20px; border-radius: 10px;
+    border: 1.5px solid var(--border); background: white;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    color: var(--deep); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .btn-google:hover { border-color: #aaa; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .google-logo { width: 18px; height: 18px; flex-shrink: 0; }
+  .auth-denied {
+    display: none; margin-top: 16px; padding: 12px;
+    background: #fdf0ee; border-radius: 8px;
+    font-size: 13px; color: var(--error);
+  }
+
+  /* ---- User bar ---- */
+  #userBar {
+    display: none; max-width: 960px; margin: 0 auto 20px;
+    padding: 10px 16px; background: var(--card);
+    border-radius: 10px; border: 1px solid var(--border);
+    font-size: 13px; color: var(--muted);
+    align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .user-info { display: flex; align-items: center; gap: 10px; }
+  .user-email { color: var(--deep); font-weight: 500; }
+  .nav-links { display: flex; gap: 8px; align-items: center; }
+  .nav-link {
+    padding: 5px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: white;
+    font-family: 'DM Sans', sans-serif; font-size: 12px;
+    color: var(--muted); cursor: pointer; text-decoration: none;
+    transition: border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .nav-link:hover { border-color: var(--saffron); color: var(--saffron); }
+  .nav-link.active { border-color: var(--saffron); color: var(--saffron); background: #fff5ee; }
+  .btn-signout {
+    padding: 5px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: white;
+    font-family: 'DM Sans', sans-serif; font-size: 12px;
+    color: var(--muted); cursor: pointer; transition: border-color 0.15s;
+    white-space: nowrap;
+  }
+  .btn-signout:hover { border-color: var(--error); color: var(--error); }
+
+  /* ---- Main content ---- */
+  #mainContent { display: none; max-width: 960px; margin: 0 auto; }
+
+  .page-header { margin-bottom: 28px; }
+  .page-title { font-family: 'Noto Serif', serif; font-size: 26px; font-weight: 600; }
+  .page-subtitle { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+  /* ---- Filters ---- */
+  .filters {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .filter-row {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+  }
+  .filter-row + .filter-row { margin-top: 12px; }
+  .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
+  .filter-label { font-size: 12px; font-weight: 500; color: var(--muted); }
+  .filter-divider {
+    width: 100%; height: 1px; background: var(--border); margin: 14px 0 2px;
+    position: relative;
+  }
+  .filter-divider-label {
+    position: absolute; top: -9px; left: 0;
+    background: var(--card); padding: 0 8px 0 0;
+    font-size: 11px; font-weight: 500; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  select, input[type="text"] {
+    padding: 9px 12px; border-radius: 8px;
+    border: 1.5px solid var(--border);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    background: white; color: var(--deep);
+    outline: none; transition: border-color 0.15s; cursor: pointer;
+    width: 100%;
+  }
+  select:focus, input[type="text"]:focus { border-color: var(--saffron); }
+  select:disabled { background: #f5f5f5; color: #bbb; cursor: not-allowed; }
+
+  .btn-load {
+    padding: 10px 22px; border-radius: 8px; border: none;
+    background: var(--saffron); color: white;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background 0.15s; white-space: nowrap; align-self: flex-end;
+    flex-shrink: 0;
+  }
+  .btn-load:hover { background: #e55a0f; }
+  .btn-load:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* Search + sort bar */
+  .search-sort-bar {
+    display: none;
+    align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .search-sort-bar.visible { display: flex; }
+  .search-wrap { flex: 1; min-width: 200px; position: relative; }
+  .search-wrap input {
+    padding-left: 36px;
+  }
+  .search-icon {
+    position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+    font-size: 15px; pointer-events: none; color: var(--muted);
+  }
+  .sort-select { width: auto; min-width: 180px; flex-shrink: 0; }
+  .results-count {
+    font-size: 13px; color: var(--muted); white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* ---- Summary bar ---- */
+  .summary-bar {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 24px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: center;
+  }
+  .summary-bar.visible { display: flex; }
+  .summ-item { display: flex; flex-direction: column; }
+  .summ-value {
+    font-family: 'Noto Serif', serif;
+    font-size: 22px; font-weight: 600; color: var(--saffron);
+    line-height: 1;
+  }
+  .summ-label { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .summ-divider { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
+
+  /* ---- Review cards ---- */
+  #reviewsWrap { display: flex; flex-direction: column; gap: 16px; }
+
+  .review-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    transition: box-shadow 0.15s;
+  }
+  .review-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+
+  .rc-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .rc-identity { display: flex; flex-direction: column; gap: 3px; }
+  .rc-name {
+    font-weight: 600; font-size: 15px; color: var(--deep);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .rc-gana-tag {
+    display: inline-block; padding: 2px 9px; border-radius: 20px;
+    background: #fff5ee; border: 1px solid #ffdcc4;
+    font-size: 11px; font-weight: 500; color: var(--saffron);
+  }
+  .rc-meta {
+    font-size: 12px; color: var(--muted); line-height: 1.6;
+  }
+  .rc-timestamp {
+    font-size: 12px; color: var(--muted); text-align: right;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .rc-source-badge {
+    display: inline-block; padding: 2px 7px; border-radius: 4px;
+    font-size: 10px; font-weight: 500; margin-left: 6px;
+    background: var(--bg); color: var(--muted); border: 1px solid var(--border);
+  }
+
+  /* Ratings row */
+  .rc-ratings {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+  }
+  .rc-rating-chip {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 11px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    font-size: 12px; font-weight: 500; color: var(--deep);
+  }
+  .rc-rating-chip .session-name { color: var(--muted); font-weight: 400; }
+  .rc-rating-chip .emoji { font-size: 15px; }
+  .rc-rating-chip.highlight { background: #fff5ee; border-color: #ffdcc4; }
+
+  /* Shikshak info */
+  .rc-shikshak-row {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+  }
+  .rc-shikshak-chip {
+    font-size: 11px; color: var(--muted);
+    background: var(--bg); border: 1px solid var(--border);
+    padding: 3px 10px; border-radius: 6px;
+  }
+  .rc-shikshak-chip strong { color: var(--deep); }
+
+  /* Comment */
+  .rc-comment {
+    font-size: 14px; color: var(--deep);
+    line-height: 1.65;
+    padding: 12px 14px;
+    background: #faf6ef;
+    border-left: 3px solid var(--saffron);
+    border-radius: 0 8px 8px 0;
+  }
+  .rc-comment.empty { display: none; }
+
+  .rc-divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+  /* ---- States ---- */
+  .empty-state {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: center; padding: 60px 20px;
+    color: var(--muted); font-size: 14px;
+  }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-title { font-family: 'Noto Serif', serif; font-size: 18px; color: var(--deep); margin-bottom: 8px; }
+
+  .loading-state {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: center; padding: 48px; color: var(--muted); font-size: 14px;
+  }
+  .loading-spinner {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 3px solid var(--border); border-top-color: var(--saffron);
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---- No comment badge ---- */
+  .no-comment-note {
+    font-size: 12px; color: var(--muted); font-style: italic;
+  }
+
+  /* Highlight match */
+  mark {
+    background: #fff3c4; border-radius: 2px; padding: 0 1px;
+  }
+
+  @media (max-width: 600px) {
+    .rc-header { flex-direction: column; }
+    .rc-timestamp { text-align: left; }
+    .summ-divider { display: none; }
+    .nav-links { gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Auth gate -->
+<div id="authGate">
+  <div class="auth-card">
+    <div class="auth-icon">💬</div>
+    <div class="auth-title">Shakha Reviews</div>
+    <div class="auth-subtitle">Sign in with an approved account to view feedback reviews.</div>
+    <button class="btn-google" onclick="signIn()">
+      <svg class="google-logo" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+        <path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/>
+        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/>
+      </svg>
+      Sign in with Google
+    </button>
+    <div class="auth-denied" id="authDenied">Your account is not authorised. Please contact the Nagar admin.</div>
+  </div>
+</div>
+
+<!-- User bar -->
+<div id="userBar">
+  <div class="user-info">
+    <span>Signed in as <span class="user-email" id="userEmail">—</span></span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="analytics.html">📊 Analytics</a>
+    <a class="nav-link active" href="reviews.html">💬 Reviews</a>
+    <a class="nav-link" href="admin.html">⚙️ Admin</a>
+    <button class="btn-signout" onclick="signOut()">Sign out</button>
+  </div>
+</div>
+
+<!-- Main content -->
+<div id="mainContent">
+  <div class="page-header">
+    <div class="page-title">Feedback Reviews</div>
+    <div class="page-subtitle">Browse and search written feedback from Shakha participants</div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <!-- Row 1: Nagar + Shakha -->
+    <div class="filter-row">
+      <div class="filter-group">
+        <span class="filter-label">Nagar</span>
+        <select id="selNagar" onchange="onNagarChange()">
+          <option value="">Select Nagar…</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Shakha</span>
+        <select id="selShakha" onchange="onShakhaChange()" disabled>
+          <option value="">Select Shakha…</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="filter-divider" id="drillDivider" style="display:none">
+      <span class="filter-divider-label">Narrow down — all optional</span>
+    </div>
+
+    <!-- Row 2: Date + Gana + Session + Load -->
+    <div class="filter-row" id="drillRow" style="display:none">
+      <div class="filter-group">
+        <span class="filter-label">Shakha Date</span>
+        <select id="selDate" onchange="onFilterChange()">
+          <option value="">All Dates</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Gana</span>
+        <select id="selGana" onchange="onFilterChange()">
+          <option value="all">All Ganas</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Session</span>
+        <select id="selSession" onchange="onFilterChange()">
+          <option value="all">All Sessions</option>
+        </select>
+      </div>
+      <button class="btn-load" id="btnLoad" onclick="loadReviews()">Load Reviews</button>
+    </div>
+  </div>
+
+  <!-- Search + Sort bar -->
+  <div class="search-sort-bar" id="searchSortBar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search reviews by keyword, name, session…" oninput="applyClientFilters()">
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="applyClientFilters()">
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first</option>
+      <option value="highest">Highest rated first</option>
+      <option value="lowest">Lowest rated first</option>
+      <option value="hascomment">Has comment first</option>
+    </select>
+    <span class="results-count" id="resultsCount"></span>
+  </div>
+
+  <!-- Summary bar -->
+  <div class="summary-bar" id="summaryBar">
+    <div class="summ-item">
+      <div class="summ-value" id="summTotal">—</div>
+      <div class="summ-label">Total responses</div>
+    </div>
+    <div class="summ-divider"></div>
+    <div class="summ-item">
+      <div class="summ-value" id="summWithComment">—</div>
+      <div class="summ-label">With comments</div>
+    </div>
+    <div class="summ-divider"></div>
+    <div class="summ-item">
+      <div class="summ-value" id="summAvg">—</div>
+      <div class="summ-label">Overall avg score</div>
+    </div>
+    <div class="summ-divider"></div>
+    <div class="summ-item">
+      <div class="summ-value" id="summDates">—</div>
+      <div class="summ-label">Shakha dates</div>
+    </div>
+  </div>
+
+  <!-- Reviews list -->
+  <div id="reviewsWrap"></div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────
+const ADMIN_EMAILS = ["bakthisaran@gmail.com"];
+
+const EMOJI_MAP = { 1: "😞", 2: "😐", 3: "🙂", 4: "😄", 5: "🤩" };
+
+// ── State ─────────────────────────────────────────────────────────────────
+let allDocs = [];        // raw fetched docs (after Nagar+Shakha filter)
+let nagarCache = {};     // nagarSlug → { nagarName, shakhas: { id → data } }
+
+// ── Auth ──────────────────────────────────────────────────────────────────
+window.signIn  = () => window._signIn();
+window.signOut = () => window._signOut();
+
+window.onAuthStateChanged = function(user) {
+  if (user && ADMIN_EMAILS.includes(user.email)) {
+    document.getElementById("authGate").style.display = "none";
+    document.getElementById("authDenied").style.display = "none";
+    document.getElementById("userBar").style.display = "flex";
+    document.getElementById("userEmail").textContent = user.email;
+    document.getElementById("mainContent").style.display = "block";
+    loadNagars();
+  } else if (user) {
+    document.getElementById("authGate").style.display = "block";
+    document.getElementById("authDenied").style.display = "block";
+    document.getElementById("userBar").style.display = "none";
+    document.getElementById("mainContent").style.display = "none";
+  } else {
+    document.getElementById("authGate").style.display = "block";
+    document.getElementById("authDenied").style.display = "none";
+    document.getElementById("userBar").style.display = "none";
+    document.getElementById("mainContent").style.display = "none";
+  }
+};
+
+// ── Date helpers ──────────────────────────────────────────────────────────
+function normalizeDate(dateStr) {
+  if (!dateStr) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  const monthMap = { Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06', Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12' };
+  const match = dateStr.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
+  if (match) {
+    const day = String(match[1]).padStart(2,'0');
+    const month = monthMap[match[2]];
+    const year = match[3];
+    if (month) return `${year}-${month}-${day}`;
+  }
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  } catch(e) {}
+  return null;
+}
+
+function fmtDisplayDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return `${String(d.getDate()).padStart(2,'0')} ${d.toLocaleDateString('en-GB',{month:'short'})} ${String(d.getFullYear()).slice(-2)}`;
+}
+
+function fmtTimestamp(ts) {
+  if (!ts) return '—';
+  let d;
+  if (ts && typeof ts.toDate === 'function') d = ts.toDate();
+  else d = new Date(ts);
+  if (isNaN(d.getTime())) return '—';
+  const day   = String(d.getDate()).padStart(2,'0');
+  const month = d.toLocaleDateString('en-GB', { month: 'short' });
+  const yr    = String(d.getFullYear()).slice(-2);
+  const hh    = String(d.getHours()).padStart(2,'0');
+  const mm    = String(d.getMinutes()).padStart(2,'0');
+  return `${day} ${month} ${yr} ${hh}:${mm}`;
+}
+
+function labelKey(k) {
+  return k.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function avgRating(ratings) {
+  if (!ratings) return null;
+  const vals = Object.values(ratings).filter(v => v != null && v > 0);
+  return vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : null;
+}
+
+// ── Load Nagars from feedback-requests ───────────────────────────────────
+async function loadNagars() {
+  try {
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
+    const nagars = {};
+    snap.forEach(doc => {
+      const data = doc.data();
+      if (data.nagarSlug) {
+        if (!nagars[data.nagarSlug]) nagars[data.nagarSlug] = data.nagarName || data.nagarSlug;
+      }
+    });
+
+    // Also build shakha cache
+    nagarCache = {};
+    snap.forEach(doc => {
+      const data = doc.data();
+      const ns = data.nagarSlug;
+      if (!ns) return;
+      if (!nagarCache[ns]) nagarCache[ns] = { nagarName: data.nagarName || ns, shakhas: {} };
+      const sid = data.shakhaSlug || data.shakhaId;
+      if (sid && !nagarCache[ns].shakhas[sid]) {
+        nagarCache[ns].shakhas[sid] = { shakhaName: data.shakhaName || sid, shakhaSlug: data.shakhaSlug };
+      }
+    });
+
+    const sel = document.getElementById("selNagar");
+    Object.entries(nagars).sort().forEach(([slug, name]) => {
+      const opt = document.createElement("option");
+      opt.value = slug; opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  } catch(e) { console.error(e); }
+}
+
+async function onNagarChange() {
+  const nagarSlug = document.getElementById("selNagar").value;
+  const shakhaEl  = document.getElementById("selShakha");
+  shakhaEl.innerHTML = '<option value="">Select Shakha…</option>';
+  shakhaEl.disabled = true;
+  hideDrillRow();
+  resetResults();
+  if (!nagarSlug) return;
+
+  const shakhas = nagarCache[nagarSlug]?.shakhas || {};
+  Object.entries(shakhas).sort().forEach(([slug, data]) => {
+    const opt = document.createElement("option");
+    opt.value = slug;
+    opt.textContent = data.shakhaName || slug;
+    shakhaEl.appendChild(opt);
+  });
+  shakhaEl.disabled = false;
+}
+
+async function onShakhaChange() {
+  const nagarSlug  = document.getElementById("selNagar").value;
+  const shakhaSlug = document.getElementById("selShakha").value;
+  hideDrillRow();
+  resetResults();
+  if (!nagarSlug || !shakhaSlug) return;
+
+  // Load all feedback-requests for this shakha to get dates and ganas
+  try {
+    const snap = await window.fsGetDocs(window.fsCollection(window.db, "feedback-requests"));
+    const dateSet = new Set();
+    const ganaSet = new Set();
+    const sessionSet = new Set();
+
+    snap.forEach(doc => {
+      const data = doc.data();
+      const matchSlug = data.shakhaSlug === shakhaSlug || data.shakhaId === `${nagarSlug}_${shakhaSlug}`;
+      if (data.nagarSlug !== nagarSlug || !matchSlug) return;
+      const nd = normalizeDate(typeof data.date === 'object' && data.date?.toDate ? data.date.toDate().toISOString().split('T')[0] : data.date);
+      if (nd) dateSet.add(nd);
+      (data.ganas || []).forEach(g => ganaSet.add(g));
+      (data.sessions || []).forEach(s => sessionSet.add(s));
+    });
+
+    const dateEl = document.getElementById("selDate");
+    dateEl.innerHTML = '<option value="">All Dates</option>';
+    [...dateSet].sort().reverse().forEach(date => {
+      const opt = document.createElement("option");
+      opt.value = date; opt.textContent = fmtDisplayDate(date);
+      dateEl.appendChild(opt);
+    });
+
+    const ganaEl = document.getElementById("selGana");
+    ganaEl.innerHTML = '<option value="all">All Ganas</option>';
+    [...ganaSet].sort().forEach(g => {
+      const opt = document.createElement("option");
+      opt.value = g; opt.textContent = g;
+      ganaEl.appendChild(opt);
+    });
+
+    const sessEl = document.getElementById("selSession");
+    sessEl.innerHTML = '<option value="all">All Sessions</option>';
+    [...sessionSet].sort().forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s; opt.textContent = s;
+      sessEl.appendChild(opt);
+    });
+
+    document.getElementById("drillDivider").style.display = "block";
+    document.getElementById("drillRow").style.display = "flex";
+
+  } catch(e) { console.error(e); }
+}
+
+function onFilterChange() {
+  // nothing to do eagerly — Load button triggers it
+}
+
+function hideDrillRow() {
+  document.getElementById("drillDivider").style.display = "none";
+  document.getElementById("drillRow").style.display = "none";
+}
+
+// ── Load reviews from Firestore ───────────────────────────────────────────
+async function loadReviews() {
+  const nagarSlug  = document.getElementById("selNagar").value;
+  const shakhaSlug = document.getElementById("selShakha").value;
+  if (!nagarSlug || !shakhaSlug) { alert("Please select a Nagar and Shakha first."); return; }
+
+  const btn = document.getElementById("btnLoad");
+  btn.disabled = true; btn.textContent = "Loading…";
+  resetResults();
+  document.getElementById("reviewsWrap").innerHTML = `
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      Fetching reviews…
+    </div>`;
+
+  try {
+    const q = window.fsQuery(
+      window.fsCollection(window.db, "feedbacks"),
+      window.fsWhere("nagar", "==", nagarSlug),
+      window.fsWhere("shakha", "==", shakhaSlug)
+    );
+    const snap = await window.fsGetDocs(q);
+    allDocs = [];
+    snap.forEach(d => {
+      const data = d.data();
+      data._normDate = normalizeDate(
+        data.date && typeof data.date === 'object' && data.date.toDate
+          ? data.date.toDate().toISOString().split('T')[0]
+          : data.date
+      );
+      allDocs.push(data);
+    });
+
+    applyClientFilters();
+  } catch(e) {
+    console.error(e);
+    document.getElementById("reviewsWrap").innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-title">Error loading reviews</div>
+        <p>${e.message}</p>
+      </div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = "Load Reviews";
+  }
+}
+
+// ── Client-side filtering + sorting + rendering ───────────────────────────
+function applyClientFilters() {
+  const selDate    = document.getElementById("selDate").value;
+  const selGana    = document.getElementById("selGana").value;
+  const selSession = document.getElementById("selSession").value;
+  const search     = document.getElementById("searchInput").value.trim().toLowerCase();
+  const sortBy     = document.getElementById("sortSelect").value;
+
+  let docs = [...allDocs];
+
+  // Date filter
+  if (selDate) docs = docs.filter(d => d._normDate === selDate);
+
+  // Gana filter
+  if (selGana !== "all") docs = docs.filter(d => d.gana === selGana);
+
+  // Session filter — keep docs that have a rating for that session
+  if (selSession !== "all") {
+    const sessKey = selSession.toLowerCase().replace(/\s+/g, '_');
+    docs = docs.filter(d => d.ratings && d.ratings[sessKey] != null);
+  }
+
+  // Keyword search
+  if (search) {
+    docs = docs.filter(d => {
+      const blob = [
+        d.name, d.gana, d.overallComment,
+        d._normDate, d.bauddikhTitle, d.bauddikhShikshak,
+        d.shareerikVishay, d.shareerikShikshak,
+        ...Object.keys(d.ratings || {})
+      ].filter(Boolean).join(' ').toLowerCase();
+      return blob.includes(search);
+    });
+  }
+
+  // Sort
+  docs.sort((a, b) => {
+    if (sortBy === 'newest') return tsMs(b.timestamp) - tsMs(a.timestamp);
+    if (sortBy === 'oldest') return tsMs(a.timestamp) - tsMs(b.timestamp);
+    if (sortBy === 'highest') return (avgRating(b.ratings) || 0) - (avgRating(a.ratings) || 0);
+    if (sortBy === 'lowest')  return (avgRating(a.ratings) || 0) - (avgRating(b.ratings) || 0);
+    if (sortBy === 'hascomment') {
+      const ac = a.overallComment ? 1 : 0;
+      const bc = b.overallComment ? 1 : 0;
+      return bc - ac || tsMs(b.timestamp) - tsMs(a.timestamp);
+    }
+    return 0;
+  });
+
+  renderSummary(docs);
+  renderReviews(docs, search, selSession);
+}
+
+function tsMs(ts) {
+  if (!ts) return 0;
+  if (typeof ts.toDate === 'function') return ts.toDate().getTime();
+  return new Date(ts).getTime() || 0;
+}
+
+function renderSummary(docs) {
+  if (docs.length === 0) {
+    document.getElementById("summaryBar").classList.remove("visible");
+    document.getElementById("searchSortBar").classList.remove("visible");
+    return;
+  }
+
+  const withComment = docs.filter(d => d.overallComment && d.overallComment.trim()).length;
+  const allRatings  = docs.flatMap(d => Object.values(d.ratings || {}).filter(v => v != null && v > 0));
+  const avg = allRatings.length ? (allRatings.reduce((a,b)=>a+b,0)/allRatings.length).toFixed(2) : '—';
+  const uniqueDates = new Set(docs.map(d => d._normDate).filter(Boolean));
+
+  document.getElementById("summTotal").textContent = docs.length;
+  document.getElementById("summWithComment").textContent = withComment;
+  document.getElementById("summAvg").textContent = avg;
+  document.getElementById("summDates").textContent = uniqueDates.size;
+  document.getElementById("summaryBar").classList.add("visible");
+  document.getElementById("searchSortBar").classList.add("visible");
+}
+
+function renderReviews(docs, search, selSession) {
+  const wrap = document.getElementById("reviewsWrap");
+  document.getElementById("resultsCount").textContent = `${docs.length} review${docs.length !== 1 ? 's' : ''}`;
+
+  if (docs.length === 0) {
+    wrap.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">No reviews found</div>
+        <p>Try adjusting your filters or search term.</p>
+      </div>`;
+    return;
+  }
+
+  wrap.innerHTML = docs.map(d => buildCard(d, search, selSession)).join('');
+}
+
+function buildCard(d, search, selSession) {
+  const name      = d.name || 'Anonymous';
+  const gana      = d.gana || '—';
+  const ts        = fmtTimestamp(d.timestamp);
+  const dateStr   = fmtDisplayDate(d._normDate);
+  const source    = d.source || null;
+  const comment   = d.overallComment ? d.overallComment.trim() : '';
+  const ratings   = d.ratings || {};
+  const sessionFilter = selSession !== 'all' ? selSession.toLowerCase().replace(/\s+/g,'_') : null;
+
+  // Ratings chips — highlight the selected session if filtered
+  const ratingKeys = Object.keys(ratings).filter(k => ratings[k] != null && ratings[k] > 0);
+  // If session filter active, show that session first
+  const sortedKeys = sessionFilter
+    ? [sessionFilter, ...ratingKeys.filter(k => k !== sessionFilter)].filter(k => ratingKeys.includes(k) || k === sessionFilter)
+    : ratingKeys;
+
+  const ratingsHtml = sortedKeys.map(k => {
+    const val = ratings[k];
+    if (val == null) return '';
+    const isHighlight = sessionFilter && k === sessionFilter;
+    const emoji = EMOJI_MAP[val] || val;
+    return `<div class="rc-rating-chip${isHighlight ? ' highlight' : ''}">
+      <span class="emoji">${emoji}</span>
+      <span class="session-name">${labelKey(k)}</span>
+      <strong>${val}/5</strong>
+    </div>`;
+  }).join('');
+
+  // Shikshak info
+  const shikshakChips = [];
+  if (d.bauddikhTitle)    shikshakChips.push(`<span class="rc-shikshak-chip">Bauddikh: <strong>${d.bauddikhTitle}</strong></span>`);
+  if (d.bauddikhShikshak) shikshakChips.push(`<span class="rc-shikshak-chip">Shikshak: <strong>${d.bauddikhShikshak}</strong></span>`);
+  if (d.shareerikVishay)  shikshakChips.push(`<span class="rc-shikshak-chip">Shareerik: <strong>${d.shareerikVishay}</strong></span>`);
+  if (d.shareerikShikshak)shikshakChips.push(`<span class="rc-shikshak-chip">Shikshak: <strong>${d.shareerikShikshak}</strong></span>`);
+  const shikshakHtml = shikshakChips.length
+    ? `<div class="rc-shikshak-row">${shikshakChips.join('')}</div>`
+    : '';
+
+  // Highlight search term in comment and name
+  const hl = (text) => {
+    if (!search || !text) return escHtml(text || '');
+    const re = new RegExp(`(${escRe(search)})`, 'gi');
+    return escHtml(text).replace(re, '<mark>$1</mark>');
+  };
+
+  const commentHtml = comment
+    ? `<div class="rc-comment">${hl(comment)}</div>`
+    : `<div class="rc-comment empty"></div><span class="no-comment-note">No written comment</span>`;
+
+  const sourceBadge = source ? `<span class="rc-source-badge">${source}</span>` : '';
+
+  return `
+    <div class="review-card">
+      <div class="rc-header">
+        <div class="rc-identity">
+          <div class="rc-name">
+            ${hl(name)}
+            <span class="rc-gana-tag">${gana}</span>
+            ${sourceBadge}
+          </div>
+          <div class="rc-meta">
+            Shakha date: <strong>${dateStr}</strong>
+            · Shakha: <strong>${escHtml(d.shakhaName || '—')}</strong>
+          </div>
+        </div>
+        <div class="rc-timestamp">🕐 ${ts}</div>
+      </div>
+      ${shikshakHtml}
+      <div class="rc-ratings">${ratingsHtml}</div>
+      ${ratingKeys.length > 0 && comment ? '<div class="rc-divider"></div>' : ''}
+      ${commentHtml}
+    </div>`;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escRe(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function resetResults() {
+  allDocs = [];
+  document.getElementById("reviewsWrap").innerHTML = '';
+  document.getElementById("summaryBar").classList.remove("visible");
+  document.getElementById("searchSortBar").classList.remove("visible");
+  document.getElementById("resultsCount").textContent = '';
+  document.getElementById("searchInput").value = '';
+}
+</script>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, doc, getDoc, getDocs, query, where }
+  from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDb4NpYEwtcoY8SgmIHRqAok9qKJF4Ej4k",
+  authDomain: "shakha-feedback.firebaseapp.com",
+  projectId: "shakha-feedback",
+  storageBucket: "shakha-feedback.firebasestorage.app",
+  messagingSenderId: "1046199610177",
+  appId: "1:1046199610177:web:e85f6418fa9aca5dd44fc0",
+  measurementId: "G-PFR8EEQQQF"
+};
+
+const app      = initializeApp(firebaseConfig);
+const db       = getFirestore(app);
+const auth     = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+window.db           = db;
+window.fsCollection = collection;
+window.fsDoc        = doc;
+window.fsGetDoc     = getDoc;
+window.fsGetDocs    = getDocs;
+window.fsQuery      = query;
+window.fsWhere      = where;
+
+window._signIn  = () => signInWithPopup(auth, provider).catch(e => console.error(e));
+window._signOut = () => signOut(auth);
+
+onAuthStateChanged(auth, user => window.onAuthStateChanged(user));
+</script>
+</body>
+</html>
