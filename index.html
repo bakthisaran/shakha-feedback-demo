@@ -176,7 +176,7 @@
   <div class="loading">Loading...</div>
 </div>
 <script>
-const APP_VER = "1.1";
+const APP_VER = "1.2";
 let config = null;
 let step = -1;
 let feedback = {};
@@ -220,7 +220,7 @@ window.loadConfig = async function() {
       shakhaName: "Ramakrishna Parivar Shakha - L SPA",
       date: "2026-04-03",
       ganas: ["Kishore", "Kishori", "Yuva"],
-      sessions: ["Achar Paddhati", "Shareerik", "Bauddikh"],
+      sessions: ["Achar Paddhati", "Subashchit", "Shareerik", "Khel", "Bauddikh", "Prarthana"],
       ganaData: {
         Kishore: { bauddikhTitle: "Hanuman Ji", bauddikhShikshak: "Tanaya Ben" },
         Kishori: { bauddikhTitle: "Hanuman Ji", bauddikhShikshak: "Tanaya Ben" },
@@ -344,15 +344,15 @@ function showSession() {
     metaHtml = `
       <div class="session-meta">
         <strong>${gana}</strong><br>
-        ${gd.bauddikhTitle}<br>
-        <span style="font-size:12px">Shikshak: ${gd.bauddikhShikshak || ""}</span>
+        <span style="font-size:16px;font-weight:600;color:var(--deep)">${gd.bauddikhTitle}</span><br>
+        <span style="font-size:14px;font-weight:600;color:var(--deep)">Shikshak: ${gd.bauddikhShikshak || ""}</span>
       </div>`;
   } else if (sessionLower.includes("shareerik") && gd.shareerikVishay) {
     metaHtml = `
       <div class="session-meta">
         <strong>${gana}</strong><br>
-        ${gd.shareerikVishay}<br>
-        <span style="font-size:12px">Shikshak: ${gd.shareerikShikshak || ""}</span>
+        <span style="font-size:16px;font-weight:600;color:var(--deep)">${gd.shareerikVishay}</span><br>
+        <span style="font-size:14px;font-weight:600;color:var(--deep)">Shikshak: ${gd.shareerikShikshak || ""}</span>
       </div>`;
   }
 
@@ -391,7 +391,7 @@ function showFinal() {
     <div class="divider"></div>
     <div class="step-label">Almost done!</div>
     <input id="name" placeholder="Your name (optional)" />
-    <textarea id="overall" placeholder="Any comments or suggestions? Please be honest 🙏"></textarea>
+    <textarea id="overall" placeholder="Any comments or suggestions or Improvements? Please be honest 🙏"></textarea>
     <button class="btn primary" onclick="submitFinal()">Submit Feedback</button>
   `);
 }
