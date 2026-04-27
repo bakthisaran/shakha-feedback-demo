@@ -135,15 +135,47 @@
     border-radius: var(--radius);
     padding: 16px 24px;
     margin-bottom: 20px;
+    flex-direction: column;
+    gap: 0;
+  }
+  .summary-bar.visible { display: flex; }
+
+  /* Top row: headline stats */
+  .summ-stats-row {
+    display: flex;
     flex-wrap: wrap;
     gap: 24px;
     align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
   }
-  .summary-bar.visible { display: flex; }
   .summ-item { display: flex; flex-direction: column; }
   .summ-value { font-family: 'Noto Serif', serif; font-size: 22px; font-weight: 600; color: var(--saffron); line-height: 1; }
   .summ-label { font-size: 12px; color: var(--muted); margin-top: 3px; }
   .summ-divider { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
+
+  /* Session scores row */
+  .summ-sessions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .summ-sessions-label {
+    font-size: 11px; font-weight: 500; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-right: 4px; white-space: nowrap;
+  }
+  .summ-session-chip {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 11px; border-radius: 20px;
+    background: var(--bg); border: 1px solid var(--border);
+    font-size: 12px; font-weight: 500; color: var(--deep);
+  }
+  .summ-session-chip .chip-name { color: var(--muted); font-weight: 400; }
+  .summ-session-chip .chip-score { color: var(--saffron); font-weight: 600; }
+  .summ-session-chip .chip-emoji { font-size: 13px; }
 
   /* ---- Review cards ---- */
   #reviewsWrap { display: flex; flex-direction: column; gap: 16px; }
@@ -183,23 +215,27 @@
   /* Ratings row */
   .rc-ratings { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
   .rc-rating-chip {
+    display: flex; flex-direction: column; gap: 3px;
+    padding: 7px 12px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .rc-rating-chip-top {
     display: flex; align-items: center; gap: 6px;
-    padding: 5px 11px; border-radius: 8px;
-    background: var(--bg); border: 1px solid var(--border);
-    font-size: 12px; font-weight: 500; color: var(--deep);
   }
-  .rc-rating-chip .session-name { color: var(--muted); font-weight: 400; }
+  .rc-rating-chip .session-name { color: var(--muted); font-weight: 400; font-size: 12px; }
   .rc-rating-chip .emoji { font-size: 15px; }
-  .rc-rating-chip.highlight { background: #fff5ee; border-color: #ffdcc4; }
-
-  /* Shikshak info */
-  .rc-shikshak-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-  .rc-shikshak-chip {
+  .rc-rating-chip .score { font-weight: 600; color: var(--deep); }
+  /* Shikshak line inside chip */
+  .rc-rating-chip .chip-shikshak {
     font-size: 11px; color: var(--muted);
-    background: var(--bg); border: 1px solid var(--border);
-    padding: 3px 10px; border-radius: 6px;
+    padding-top: 3px;
+    border-top: 1px solid var(--border);
+    line-height: 1.5;
   }
-  .rc-shikshak-chip strong { color: var(--deep); }
+  .rc-rating-chip .chip-shikshak strong { color: var(--deep); }
+  .rc-rating-chip.highlight { background: #fff5ee; border-color: #ffdcc4; }
+  .rc-rating-chip.highlight .chip-shikshak { border-top-color: #ffdcc4; }
 
   /* Comment */
   .rc-comment {
@@ -336,25 +372,30 @@
 
   <!-- Summary bar -->
   <div class="summary-bar" id="summaryBar">
-    <div class="summ-item">
-      <div class="summ-value" id="summTotal">—</div>
-      <div class="summ-label">Total responses</div>
+    <!-- Headline stats row -->
+    <div class="summ-stats-row">
+      <div class="summ-item">
+        <div class="summ-value" id="summTotal">—</div>
+        <div class="summ-label">Total responses</div>
+      </div>
+      <div class="summ-divider"></div>
+      <div class="summ-item">
+        <div class="summ-value" id="summWithComment">—</div>
+        <div class="summ-label">With comments</div>
+      </div>
+      <div class="summ-divider"></div>
+      <div class="summ-item">
+        <div class="summ-value" id="summAvg">—</div>
+        <div class="summ-label">Overall avg score</div>
+      </div>
+      <div class="summ-divider"></div>
+      <div class="summ-item">
+        <div class="summ-value" id="summDates">—</div>
+        <div class="summ-label">Shakha dates</div>
+      </div>
     </div>
-    <div class="summ-divider"></div>
-    <div class="summ-item">
-      <div class="summ-value" id="summWithComment">—</div>
-      <div class="summ-label">With comments</div>
-    </div>
-    <div class="summ-divider"></div>
-    <div class="summ-item">
-      <div class="summ-value" id="summAvg">—</div>
-      <div class="summ-label">Overall avg score</div>
-    </div>
-    <div class="summ-divider"></div>
-    <div class="summ-item">
-      <div class="summ-value" id="summDates">—</div>
-      <div class="summ-label">Shakha dates</div>
-    </div>
+    <!-- Session scores row -->
+    <div class="summ-sessions-row" id="summSessionsRow"></div>
   </div>
 
   <!-- Reviews list -->
@@ -376,18 +417,18 @@ window.onAuthStateChanged = function(user) {
     document.getElementById("authGate").style.display = "none";
     document.getElementById("authDenied").style.display = "none";
     document.getElementById("mainContent").style.display = "block";
-    renderNav(user);
+    if (typeof renderNav === 'function') renderNav(user);
     loadNagars();
   } else if (user) {
     document.getElementById("authGate").style.display = "block";
     document.getElementById("authDenied").style.display = "block";
     document.getElementById("mainContent").style.display = "none";
-    destroyNav();
+    if (typeof destroyNav === 'function') destroyNav();
   } else {
     document.getElementById("authGate").style.display = "block";
     document.getElementById("authDenied").style.display = "none";
     document.getElementById("mainContent").style.display = "none";
-    destroyNav();
+    if (typeof destroyNav === 'function') destroyNav();
   }
 };
 
@@ -582,15 +623,53 @@ function tsMs(ts) {
 }
 
 function renderSummary(docs) {
-  if (docs.length===0) { document.getElementById("summaryBar").classList.remove("visible"); document.getElementById("searchSortBar").classList.remove("visible"); return; }
+  if (docs.length===0) {
+    document.getElementById("summaryBar").classList.remove("visible");
+    document.getElementById("searchSortBar").classList.remove("visible");
+    return;
+  }
+
   const withComment = docs.filter(d=>d.overallComment&&d.overallComment.trim()).length;
   const allRatings  = docs.flatMap(d=>Object.values(d.ratings||{}).filter(v=>v!=null&&v>0));
   const avg = allRatings.length ? (allRatings.reduce((a,b)=>a+b,0)/allRatings.length).toFixed(2) : '—';
   const uniqueDates = new Set(docs.map(d=>d._normDate).filter(Boolean));
+
   document.getElementById("summTotal").textContent      = docs.length;
   document.getElementById("summWithComment").textContent= withComment;
   document.getElementById("summAvg").textContent        = avg;
   document.getElementById("summDates").textContent      = uniqueDates.size;
+
+  // ── Per-session avg scores ────────────────────────────────────────────
+  const sessionKeys = new Set();
+  docs.forEach(d => {
+    if (d.ratings) Object.keys(d.ratings).forEach(k => { if (d.ratings[k]!=null && d.ratings[k]>0) sessionKeys.add(k); });
+  });
+
+  const sessionAvgs = [...sessionKeys].sort().map(k => {
+    const vals = docs.map(d=>d.ratings?.[k]).filter(v=>v!=null&&v>0);
+    const mean = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+    return { key: k, label: labelKey(k), avg: mean };
+  }).filter(s=>s.avg!==null);
+
+  // Sort by avg descending so best session appears first
+  sessionAvgs.sort((a,b)=>b.avg-a.avg);
+
+  const sessionsRow = document.getElementById("summSessionsRow");
+  if (sessionAvgs.length > 0) {
+    const chipsHtml = sessionAvgs.map(s => {
+      const emoji = EMOJI_MAP[Math.round(s.avg)] || '';
+      return `<div class="summ-session-chip">
+        <span class="chip-emoji">${emoji}</span>
+        <span class="chip-name">${escHtml(s.label)}</span>
+        <span class="chip-score">${s.avg.toFixed(2)}</span>
+      </div>`;
+    }).join('');
+    sessionsRow.innerHTML = `<span class="summ-sessions-label">Session avgs</span>${chipsHtml}`;
+    sessionsRow.style.display = 'flex';
+  } else {
+    sessionsRow.style.display = 'none';
+  }
+
   document.getElementById("summaryBar").classList.add("visible");
   document.getElementById("searchSortBar").classList.add("visible");
 }
@@ -620,22 +699,33 @@ function buildCard(d, search, selSession) {
     ? [sessionFilter,...ratingKeys.filter(k=>k!==sessionFilter)].filter(k=>ratingKeys.includes(k))
     : ratingKeys;
 
+  // Build a lookup: session key → shikshak line (if any)
+  // Bauddikh: show "Topic · Shikshak" on the second line of the chip
+  // Shareerik: show "Vishay · Shikshak"
+  const shikshakBySession = {};
+  if (d.bauddikhTitle || d.bauddikhShikshak) {
+    const parts = [d.bauddikhTitle, d.bauddikhShikshak ? `Shikshak: ${d.bauddikhShikshak}` : null].filter(Boolean);
+    shikshakBySession['bauddikh'] = parts.join(' · ');
+  }
+  if (d.shareerikVishay || d.shareerikShikshak) {
+    const parts = [d.shareerikVishay, d.shareerikShikshak ? `Shikshak: ${d.shareerikShikshak}` : null].filter(Boolean);
+    shikshakBySession['shareerik'] = parts.join(' · ');
+  }
+
   const ratingsHtml = sortedKeys.map(k => {
-    const val=ratings[k]; if(val==null) return '';
-    const isHighlight=sessionFilter&&k===sessionFilter;
+    const val = ratings[k]; if (val==null) return '';
+    const isHighlight = sessionFilter && k===sessionFilter;
+    const sessKey = k.split('_')[0]; // e.g. "bauddikh" from "bauddikh"
+    const shikshakLine = shikshakBySession[sessKey] || shikshakBySession[k] || null;
+
     return `<div class="rc-rating-chip${isHighlight?' highlight':''}">
-      <span class="emoji">${EMOJI_MAP[val]||val}</span>
-      <span class="session-name">${labelKey(k)}</span>
-      <strong>${val}/5</strong>
+      <div class="rc-rating-chip-top">
+        <span class="emoji">${EMOJI_MAP[val]||val}</span>
+        <span class="session-name">${labelKey(k)}</span>
+        <span class="score">${val}/5</span>
+      </div>${shikshakLine ? `<div class="chip-shikshak">${escHtml(shikshakLine)}</div>` : ''}
     </div>`;
   }).join('');
-
-  const shikshakChips=[];
-  if (d.bauddikhTitle)     shikshakChips.push(`<span class="rc-shikshak-chip">Bauddikh: <strong>${d.bauddikhTitle}</strong></span>`);
-  if (d.bauddikhShikshak)  shikshakChips.push(`<span class="rc-shikshak-chip">Shikshak: <strong>${d.bauddikhShikshak}</strong></span>`);
-  if (d.shareerikVishay)   shikshakChips.push(`<span class="rc-shikshak-chip">Shareerik: <strong>${d.shareerikVishay}</strong></span>`);
-  if (d.shareerikShikshak) shikshakChips.push(`<span class="rc-shikshak-chip">Shikshak: <strong>${d.shareerikShikshak}</strong></span>`);
-  const shikshakHtml = shikshakChips.length ? `<div class="rc-shikshak-row">${shikshakChips.join('')}</div>` : '';
 
   const hl = (text) => {
     if (!search||!text) return escHtml(text||'');
@@ -659,7 +749,6 @@ function buildCard(d, search, selSession) {
         </div>
         <div class="rc-timestamp">🕐 ${ts}</div>
       </div>
-      ${shikshakHtml}
       <div class="rc-ratings">${ratingsHtml}</div>
       ${ratingKeys.length>0&&comment?'<div class="rc-divider"></div>':''}
       ${commentHtml}
